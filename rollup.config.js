@@ -24,6 +24,7 @@ export default {
     {
       file: `umd/index.js`,
       format: "umd",
+      name: "paramVis",
       plugins: [isProd && terser()],
     },
   ],
