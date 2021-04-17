@@ -17,14 +17,14 @@ export default {
   input: "src/index.tsx",
   output: [
     {
-      file: "dist/bundle.js",
-      format: "cjs",
+      file: "es/index.js",
+      format: "es",
+      plugins: [isProd && terser()],
     },
     {
-      file: "dist/bundle.min.js",
-      format: "iife",
-      name: "version",
-      plugins: [terser()],
+      file: `umd/index.js`,
+      format: "umd",
+      plugins: [isProd && terser()],
     },
   ],
   plugins: [
