@@ -27,13 +27,16 @@
           "showExpandedAbbreviation": "always"
         }
       }
-    ]
+    ],
+    "paths": {
+      "@mocks/*": ["./mocks/*"]
+    }
   },
   "exclude": [
     "node_modules"
   ],
   "include": [
     "src",
-    "@types"
-  ]
+    "mocks"
+  ],
 }

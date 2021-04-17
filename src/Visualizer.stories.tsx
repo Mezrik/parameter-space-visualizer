@@ -1,4 +1,5 @@
 import React from "react";
+import { RegionResults01Parsed } from "../mocks";
 
 import Visualizer from "./Visualizer";
 
@@ -7,4 +8,7 @@ export default {
   component: Visualizer,
 };
 
-export const Basic = () => <Visualizer />;
+export const Basic = () => {
+  console.log(RegionResults01Parsed);
+  return <Visualizer />;
+};
