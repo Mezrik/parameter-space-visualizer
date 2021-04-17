@@ -6,8 +6,11 @@ import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import { terser } from "rollup-plugin-terser";
 import replace from "@rollup/plugin-replace";
+import { visualizer } from "rollup-plugin-visualizer";
 
 const isProd = process.env.NODE_ENV === "production";
+const visualizeSpace = process.env.VISUALIZE_SPACE === "true";
+
 const extensions = [".js", ".ts", ".tsx"];
 
 export default {
@@ -47,6 +50,11 @@ export default {
     commonjs({
       include: /node_modules/,
     }),
+    visualizeSpace &&
+      visualizer({
+        open: true,
+        template: "treemap",
+      }),
     !isProd &&
       serve({
         open: true,

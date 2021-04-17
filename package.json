@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "rollup -c -w",
-    "build": "rimraf dist && cross-env NODE_ENV=production rollup -c",
+    "build": "rimraf dist && cross-env NODE_ENV=production VISUALIZE_SPACE=true rollup -c",
     "start": "serve public"
   },
   "author": "",
