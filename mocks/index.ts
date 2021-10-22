@@ -1,4 +1,6 @@
 import RegionResults01 from "./data/regionResults01.csv";
-import { csvToRegionResultsList } from "./helpers/parseRegions";
+import { csvToRegionResultsList, RegionResults } from "./helpers/parseRegions";
 
-export const RegionResults01Parsed = csvToRegionResultsList(RegionResults01);
+export const RegionResults01Parsed:
+  | RegionResults
+  | undefined = csvToRegionResultsList(RegionResults01);
