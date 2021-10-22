@@ -8,7 +8,8 @@ export default {
   component: Visualizer,
 };
 
+const mockData = RegionResults01Parsed ?? [];
+
 export const Basic = () => {
-  console.log(RegionResults01Parsed);
-  return <Visualizer />;
+  return <Visualizer data={mockData} />;
 };
