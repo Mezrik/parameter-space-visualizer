@@ -1,4 +1,4 @@
-import RegionResults01 from "./data/regionResults01.csv";
+import RegionResults01 from "./data/csv/ok-results/test01.csv";
 import { csvToRegionResultsList, RegionResults } from "./helpers/parseRegions";
 
 export const RegionResults01Parsed:
