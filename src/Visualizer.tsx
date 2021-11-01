@@ -59,7 +59,6 @@ const Visualizer = ({ data }: Props) => {
     svgEl.selectAll("*").remove();
 
     const svg = svgEl.append("g");
-    console.log(data);
     svg
       .append("g")
       .selectAll("rect")
