@@ -5,10 +5,12 @@ import { extent } from "d3-array";
 import { scaleLinear } from "d3-scale";
 import { select } from "d3-selection";
 import { axisBottom, axisLeft } from "d3-axis";
+import { checkIfParamsExist } from "./helpers/regionsVisualizerHelpers";
 
 /**
  * TODO:
  *  - Support 1D visualization (one parameter) [1]
+ *  - Error handling
  */
 
 type Props<T extends string> = {
@@ -30,8 +32,8 @@ const Visualizer = <T extends string>({
   const params = useMemo(() => getParams(data), [data]);
 
   const [xParam, yParam] = useMemo(() => {
-    // TODO: Need to check wether displayParams exist in params
-    if (displayParams) return displayParams;
+    if (displayParams && checkIfParamsExist(params, displayParams))
+      return displayParams;
 
     if (params.length === 2) return params;
 
