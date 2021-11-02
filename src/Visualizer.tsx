@@ -1,27 +1,20 @@
 import React, { useEffect, useMemo, useRef } from "react";
-import { RegionResults, RegionResultValue } from "@mocks/helpers/parseRegions";
+import { RegionResults } from "@mocks/helpers/parseRegions";
 import { getParamDomain, getParams } from "./helpers/regionsTransforms";
 import { extent } from "d3-array";
 import { scaleLinear } from "d3-scale";
 import { select } from "d3-selection";
 import { axisBottom, axisLeft } from "d3-axis";
 
-type Props = {
-  data: RegionResults;
+type Props<T extends string> = {
+  data: RegionResults<T>;
+  colorMap: Record<T, string>;
 };
 
 const FIXED_WIDTH = 600;
 const FIXED_HEIGHT = 600;
 
-const COLOR_MAPPING: Record<RegionResultValue, string> = {
-  true: "#f4c941",
-  false: "#b30e17",
-  unknown: "#fde6c4",
-  partially_sat: "#fde6c4",
-  partially_violated: "#fde6c4",
-};
-
-const Visualizer = ({ data }: Props) => {
+const Visualizer = <T extends string>({ data, colorMap }: Props<T>) => {
   const params = useMemo(() => getParams(data), [data]);
 
   const paramsExtent = useMemo(
@@ -66,7 +59,7 @@ const Visualizer = ({ data }: Props) => {
       .selectAll("rect")
       .data(data)
       .join("rect")
-      .attr("fill", (d) => COLOR_MAPPING[d.value])
+      .attr("fill", (d) => colorMap[d.value])
       .attr("x", (d) => xScale(d.params[params[0]].from))
       .attr("y", (d) => yScale(d.params[params[1]].from))
       .attr(

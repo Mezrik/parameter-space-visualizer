@@ -4,13 +4,13 @@ export type RegionResultValue =
   | "unknown"
   | "partially_sat"
   | "partially_violated";
-export interface RegionResult {
-  value: RegionResultValue;
+export interface RegionResult<T> {
+  value: T;
   params: Record<string, { from: number; to: number }>;
 }
 
 export type RegionResultsRaw = Array<Record<string, string>>;
-export type RegionResults = Array<RegionResult>;
+export type RegionResults<T> = Array<RegionResult<T>>;
 
 export const parseFraction = (fract: string) => {
   if (!fract.includes("/")) return parseInt(fract, 10);
@@ -23,7 +23,7 @@ export const parseParam = (param: string) => {
   return { from: parseFraction(spiltted[0]), to: parseFraction(spiltted[2]) };
 };
 
-export const parseValue = (value: string): RegionResult["value"] => {
+export const parseValue = (value: string): RegionResultValue => {
   switch (value) {
     case "AllSat":
       return "true";
@@ -40,13 +40,15 @@ export const parseValue = (value: string): RegionResult["value"] => {
 
 export const csvToRegionResultsList = (
   raw: RegionResultsRaw
-): RegionResults | undefined => {
+): RegionResults<RegionResultValue> | undefined => {
   return raw.map((result) => {
     const value = parseValue(result["value"]);
 
     return {
       value,
-      params: Object.keys(result).reduce<RegionResult["params"]>(
+      params: Object.keys(result).reduce<
+        RegionResult<RegionResultValue>["params"]
+      >(
         (params, param) =>
           param !== "value"
             ? { ...params, [param]: parseParam(result[param]) }
