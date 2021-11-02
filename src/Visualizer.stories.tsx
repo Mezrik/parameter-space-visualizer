@@ -1,5 +1,5 @@
 import React from "react";
-import { RegionResults01Parsed } from "../mocks";
+import { RegionResults03Parsed } from "../mocks";
 
 import Visualizer from "./Visualizer";
 
@@ -8,7 +8,7 @@ export default {
   component: Visualizer,
 };
 
-const mockData = RegionResults01Parsed ?? [];
+const mockData = RegionResults03Parsed ?? [];
 
 export const Basic = () => {
   return <Visualizer data={mockData} />;

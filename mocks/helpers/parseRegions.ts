@@ -1,4 +1,9 @@
-export type RegionResultValue = "true" | "false" | "unknown" | "partially";
+export type RegionResultValue =
+  | "true"
+  | "false"
+  | "unknown"
+  | "partially_sat"
+  | "partially_violated";
 export interface RegionResult {
   value: RegionResultValue;
   params: Record<string, { from: number; to: number }>;
@@ -25,7 +30,9 @@ export const parseValue = (value: string): RegionResult["value"] => {
     case "AllViolated":
       return "false";
     case "ExistsSat":
-      return "partially";
+      return "partially_sat";
+    case "ExistsViolated":
+      return "partially_violated";
     default:
       return "unknown";
   }
@@ -33,7 +40,7 @@ export const parseValue = (value: string): RegionResult["value"] => {
 
 export const csvToRegionResultsList = (
   raw: RegionResultsRaw
-): RegionResults => {
+): RegionResults | undefined => {
   return raw.map((result) => {
     const value = parseValue(result["value"]);
 

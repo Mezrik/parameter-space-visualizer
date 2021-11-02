@@ -17,7 +17,8 @@ const COLOR_MAPPING: Record<RegionResultValue, string> = {
   true: "#f4c941",
   false: "#b30e17",
   unknown: "#fde6c4",
-  partially: "#fde6c4",
+  partially_sat: "#fde6c4",
+  partially_violated: "#fde6c4",
 };
 
 const Visualizer = ({ data }: Props) => {

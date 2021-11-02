@@ -1,6 +1,14 @@
-import RegionResults01 from "./data/csv/ok-results/test01.csv";
-import { csvToRegionResultsList, RegionResults } from "./helpers/parseRegions";
+import RegionResults01 from "./data/csv/regions/ok-results/test01.csv";
+import RegionResults02 from "./data/csv/regions/ok-results/brp01.csv";
+import RegionResults03 from "./data/csv/regions/ok-results/brp02.csv";
+import RegionResults04 from "./data/csv/regions/ok-results/brp03.csv";
 
-export const RegionResults01Parsed:
-  | RegionResults
-  | undefined = csvToRegionResultsList(RegionResults01);
+import { csvToRegionResultsList } from "./helpers/parseRegions";
+
+export const RegionResults01Parsed = csvToRegionResultsList(RegionResults01);
+
+export const RegionResults02Parsed = csvToRegionResultsList(RegionResults02);
+
+export const RegionResults03Parsed = csvToRegionResultsList(RegionResults03);
+
+export const RegionResults04Parsed = csvToRegionResultsList(RegionResults04);
