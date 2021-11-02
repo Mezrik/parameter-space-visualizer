@@ -6,16 +6,39 @@ import { scaleLinear } from "d3-scale";
 import { select } from "d3-selection";
 import { axisBottom, axisLeft } from "d3-axis";
 
+/**
+ * TODO:
+ *  - Support 1D visualization (one parameter) [1]
+ */
+
 type Props<T extends string> = {
   data: RegionResults<T>;
   colorMap: Record<T, string>;
+  displayParams?: [string, string] | string; // [1]
+  fixedParams?: Record<string, number>;
 };
 
 const FIXED_WIDTH = 600;
 const FIXED_HEIGHT = 600;
 
-const Visualizer = <T extends string>({ data, colorMap }: Props<T>) => {
+const Visualizer = <T extends string>({
+  data,
+  colorMap,
+  displayParams,
+  fixedParams,
+}: Props<T>) => {
   const params = useMemo(() => getParams(data), [data]);
+
+  const [xParam, yParam] = useMemo(() => {
+    // TODO: Need to check wether displayParams exist in params
+    if (displayParams) return displayParams;
+
+    if (params.length === 2) return params;
+
+    throw new Error(
+      "If there are more parameters in the input data, you need to specify which ones should display."
+    );
+  }, [params]);
 
   const paramsExtent = useMemo(
     () =>
@@ -33,19 +56,15 @@ const Visualizer = <T extends string>({ data, colorMap }: Props<T>) => {
     [data, params]
   );
 
-  console.log(paramsExtent);
-
   const svgRef = useRef<SVGSVGElement | null>(null);
 
   useEffect(() => {
-    // TEMP: Fixed values for scale
     const xScale = scaleLinear()
-      .domain(paramsExtent[params[0]])
+      .domain(paramsExtent[xParam])
       .range([0, FIXED_WIDTH]);
 
-    // TEMP: Fixed values for scale
     const yScale = scaleLinear()
-      .domain(paramsExtent[params[1]])
+      .domain(paramsExtent[yParam])
       .range([0, FIXED_HEIGHT]);
 
     const svgEl = select(svgRef.current);
