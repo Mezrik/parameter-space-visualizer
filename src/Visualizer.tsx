@@ -5,7 +5,7 @@ import { extent } from "d3-array";
 import { scaleLinear } from "d3-scale";
 import { select } from "d3-selection";
 import { axisBottom, axisLeft } from "d3-axis";
-import { checkIfParamsExist } from "./helpers/regionsVisualizerHelpers";
+import { checkIfParamsExist, reverseExtent } from "./helpers/general";
 
 /**
  * TODO:
@@ -65,7 +65,7 @@ const Visualizer = <T extends string>({
     const xScale = scaleLinear().domain(paramsExtent[xParam]).range([0, width]);
 
     const yScale = scaleLinear()
-      .domain(paramsExtent[yParam])
+      .domain(reverseExtent(paramsExtent[yParam]))
       .range([0, height]);
 
     const svgEl = select(svgRef.current);
@@ -82,15 +82,15 @@ const Visualizer = <T extends string>({
       .data(data)
       .join("rect")
       .attr("fill", (d) => colorMap[d.value])
-      .attr("x", (d) => xScale(d.params[params[0]].from))
-      .attr("y", (d) => yScale(d.params[params[1]].from))
+      .attr("x", (d) => xScale(d.params[xParam].from))
+      .attr("y", (d) => yScale(d.params[yParam].to))
       .attr(
         "width",
-        (d) => xScale(d.params[params[0]].to) - xScale(d.params[params[0]].from)
+        (d) => xScale(d.params[xParam].to) - xScale(d.params[xParam].from)
       )
       .attr(
         "height",
-        (d) => yScale(d.params[params[1]].to) - yScale(d.params[params[1]].from)
+        (d) => yScale(d.params[yParam].from) - yScale(d.params[yParam].to)
       );
 
     const xAxis = axisBottom(xScale).ticks(5).tickSize(-height);
@@ -119,7 +119,7 @@ const Visualizer = <T extends string>({
       .attr("font-size", "0.75rem");
   }, [paramsExtent, params, data]);
 
-  return <svg ref={svgRef} width={width + 42} height={height + 16} />;
+  return <svg ref={svgRef} width={width + 40} height={height + 16} />;
 };
 
 export default Visualizer;
