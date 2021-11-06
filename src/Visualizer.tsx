@@ -73,7 +73,9 @@ const Visualizer = <T extends string>({
     svgEl.selectAll("*").remove();
 
     const svg = svgEl.append("g");
-    console.log(data);
+
+    svg.attr("transform", `translate(32, 0)`);
+
     svg
       .append("g")
       .selectAll("rect")
@@ -107,10 +109,7 @@ const Visualizer = <T extends string>({
 
     const yAxis = axisLeft(yScale).ticks(5).tickSize(-width);
 
-    const yAxisGroup = svg
-      .append("g")
-      .attr("transform", `translate(32, 0)`)
-      .call(yAxis);
+    const yAxisGroup = svg.append("g").call(yAxis);
     yAxisGroup.select(".domain").remove();
     yAxisGroup.selectAll("line").attr("stroke", "rgba(0, 0, 0, 0.2)");
     yAxisGroup
@@ -120,7 +119,7 @@ const Visualizer = <T extends string>({
       .attr("font-size", "0.75rem");
   }, [paramsExtent, params, data]);
 
-  return <svg ref={svgRef} width={width + 16} height={height + 16} />;
+  return <svg ref={svgRef} width={width + 42} height={height + 16} />;
 };
 
 export default Visualizer;
