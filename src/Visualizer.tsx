@@ -18,16 +18,17 @@ type Props<T extends string> = {
   colorMap: Record<T, string>;
   displayParams?: [string, string] | string; // [1]
   fixedParams?: Record<string, number>;
+  width: number;
+  height: number;
 };
-
-const FIXED_WIDTH = 600;
-const FIXED_HEIGHT = 600;
 
 const Visualizer = <T extends string>({
   data,
   colorMap,
   displayParams,
   fixedParams,
+  width,
+  height,
 }: Props<T>) => {
   const params = useMemo(() => getParams(data), [data]);
 
@@ -61,13 +62,11 @@ const Visualizer = <T extends string>({
   const svgRef = useRef<SVGSVGElement | null>(null);
 
   useEffect(() => {
-    const xScale = scaleLinear()
-      .domain(paramsExtent[xParam])
-      .range([0, FIXED_WIDTH]);
+    const xScale = scaleLinear().domain(paramsExtent[xParam]).range([0, width]);
 
     const yScale = scaleLinear()
       .domain(paramsExtent[yParam])
-      .range([0, FIXED_HEIGHT]);
+      .range([0, height]);
 
     const svgEl = select(svgRef.current);
 
@@ -92,10 +91,10 @@ const Visualizer = <T extends string>({
         (d) => yScale(d.params[params[1]].to) - yScale(d.params[params[1]].from)
       );
 
-    const xAxis = axisBottom(xScale).ticks(5).tickSize(-FIXED_HEIGHT);
+    const xAxis = axisBottom(xScale).ticks(5).tickSize(-height);
     const xAxisGroup = svg
       .append("g")
-      .attr("transform", `translate(0, ${FIXED_HEIGHT})`)
+      .attr("transform", `translate(0, ${height})`)
       .call(xAxis);
 
     xAxisGroup.select(".domain").remove();
@@ -106,7 +105,7 @@ const Visualizer = <T extends string>({
       .attr("color", "black")
       .attr("font-size", "0.75rem");
 
-    const yAxis = axisLeft(yScale).ticks(5).tickSize(-FIXED_WIDTH);
+    const yAxis = axisLeft(yScale).ticks(5).tickSize(-width);
 
     const yAxisGroup = svg
       .append("g")
@@ -121,9 +120,7 @@ const Visualizer = <T extends string>({
       .attr("font-size", "0.75rem");
   }, [paramsExtent, params, data]);
 
-  return (
-    <svg ref={svgRef} width={FIXED_WIDTH + 16} height={FIXED_HEIGHT + 16} />
-  );
+  return <svg ref={svgRef} width={width + 16} height={height + 16} />;
 };
 
 export default Visualizer;
