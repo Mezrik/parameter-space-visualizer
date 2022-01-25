@@ -8,5 +8,6 @@ logs
 node_modules
 es
 umd
+iife
 stats.html
 **/large-results
