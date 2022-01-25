@@ -7,14 +7,15 @@ import commonjs from "@rollup/plugin-commonjs";
 import { terser } from "rollup-plugin-terser";
 import replace from "@rollup/plugin-replace";
 import { visualizer } from "rollup-plugin-visualizer";
+import dsv from "@rollup/plugin-dsv";
 
 const isProd = process.env.NODE_ENV === "production";
 const visualizeSpace = process.env.VISUALIZE_SPACE === "true";
 
-const extensions = [".js", ".ts", ".tsx"];
+const extensions = [".js", ".ts"];
 
 export default {
-  input: "src/index.tsx",
+  input: "src/index.ts",
   output: [
     {
       file: "es/index.js",
@@ -26,9 +27,11 @@ export default {
       format: "umd",
       name: "paramVis",
       plugins: [isProd && terser()],
+      sourcemap: true,
     },
   ],
   plugins: [
+    dsv(),
     typescript(),
     resolve({
       extensions,
@@ -59,14 +62,9 @@ export default {
     !isProd &&
       serve({
         open: true,
-        verbose: true,
         contentBase: ["", "public"],
-        host: "localhost",
         port: 9000,
       }),
-    !isProd &&
-      livereload({
-        watch: "dist",
-      }),
+    !isProd && livereload({ watch: ["src", "umd"], port: 9000 }),
   ],
 };

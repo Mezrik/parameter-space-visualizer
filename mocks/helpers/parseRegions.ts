@@ -13,7 +13,7 @@ export type RegionResultsRaw = Array<Record<string, string>>;
 export type RegionResults<T> = Array<RegionResult<T>>;
 
 export const parseFraction = (fract: string) => {
-  if (!fract.includes("/")) return parseInt(fract, 10);
+  if (!fract?.includes("/")) return parseInt(fract, 10);
   const splitted = fract.split("/");
   return parseInt(splitted[0], 10) / parseInt(splitted[1], 10);
 };
