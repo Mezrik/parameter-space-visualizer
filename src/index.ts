@@ -2,6 +2,7 @@ import { RegionResults01Parsed } from "@mocks/./";
 import { RegionResultValue } from "@mocks/helpers/parseRegions";
 
 import Chart from "./Chart";
+import { ChartTypes } from "./types";
 
 if (typeof window !== "undefined") {
   (window as any).Chart = Chart;
@@ -19,8 +20,13 @@ const COLOR_MAPPING: Record<RegionResultValue, string> = {
 };
 
 document.addEventListener("DOMContentLoaded", function (e) {
-  const chart = new Chart(600, 600, RegionResults01Parsed ?? [], COLOR_MAPPING);
-  chart.render("param_sig", "param_block");
+  const canvas = document.createElement("canvas");
+  document.body.appendChild(canvas);
+
+  const chart = new Chart(canvas.getContext("2d")!, {
+    type: ChartTypes.Region,
+    data: RegionResults01Parsed ?? [],
+  });
 });
 
 export default Chart;
