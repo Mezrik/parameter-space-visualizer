@@ -41,15 +41,12 @@ export default {
       "process.env.NODE_ENV": JSON.stringify(
         isProd ? "production" : "development"
       ),
+      preventAssignment: true,
     }),
     babel({
       extensions,
       exclude: /node_modules/,
-      presets: [
-        "@babel/preset-env",
-        "@babel/preset-react",
-        "@babel/preset-typescript",
-      ],
+      presets: ["@babel/preset-env", "@babel/preset-typescript"],
     }),
     commonjs({
       include: /node_modules/,

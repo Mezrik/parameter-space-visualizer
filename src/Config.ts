@@ -16,10 +16,6 @@ class Config<T> {
     return this._config.data;
   }
 
-  get type() {
-    return this._config.type;
-  }
-
   get params(): ParamsTuple | undefined {
     if (!this.data.length) return undefined;
 
@@ -31,6 +27,10 @@ class Config<T> {
     const [x, y] = dataParams;
 
     return [x, y ? y : undefined];
+  }
+
+  get options() {
+    return this._config.options;
   }
 }
 
