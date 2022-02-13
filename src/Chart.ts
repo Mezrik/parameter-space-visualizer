@@ -2,23 +2,29 @@ import Config from "./Config";
 import { ChartConfig } from "./types";
 
 class Chart<T extends string> {
-  private ctx: CanvasRenderingContext2D;
-  private config: Config<T>;
-  private width: number;
-  private height: number;
+  protected ctx: CanvasRenderingContext2D;
+  protected config: Config<T>;
+  private _width: number;
+  private _height: number;
 
   constructor(context: CanvasRenderingContext2D, config: ChartConfig<T>) {
     this.ctx = context;
     this.config = new Config(config);
 
-    const canvas = context.canvas;
-    this.width = canvas.width;
-    this.height = canvas.height;
-
-    this._initialize();
+    const { height, width } = context.canvas;
+    this._height = height;
+    this._width = width;
   }
 
-  private _initialize() {}
+  _init() {}
+
+  get width() {
+    return this._width;
+  }
+
+  get height() {
+    return this._height;
+  }
 }
 
 export default Chart;
