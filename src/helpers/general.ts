@@ -1,4 +1,4 @@
-import { Params, ParamsTuple } from "../types/general";
+import { Margin, Params, ParamsTuple } from "../types/general";
 import {
   isRegionsData,
   getParams as getRegionsParams,

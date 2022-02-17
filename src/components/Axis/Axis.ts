@@ -4,10 +4,7 @@ import { AnyD3Scale, ScaleInput, TickFormatter } from "../../types/scale";
 
 abstract class Axis<Scale extends AnyD3Scale> {
   protected ctx: CanvasRenderingContext2D;
-  protected axisConfig: AxesConfig<ScaleInput<Scale>> & {
-    tickSize: number;
-    tickStrokeColor: string;
-  };
+  protected axisConfig: AxesConfig<ScaleInput<Scale>>;
 
   protected ticks?: ScaleInput<Scale>[];
   protected ticksFormatter?: TickFormatter<ScaleInput<Scale>>;
@@ -19,11 +16,7 @@ abstract class Axis<Scale extends AnyD3Scale> {
   ) {
     this.ctx = ctx;
 
-    this.axisConfig = {
-      ...config,
-      tickSize: config.tickSize ?? 12,
-      tickStrokeColor: config.tickStrokeColor ?? "#000",
-    };
+    this.axisConfig = config;
   }
 
   set scale(scale: Scale) {
@@ -33,7 +26,10 @@ abstract class Axis<Scale extends AnyD3Scale> {
       this.axisConfig.tickFormatter ?? getTicksFormatter(scale);
   }
 
-  abstract draw(extent: [ScaleInput<Scale>, ScaleInput<Scale>]): void;
+  abstract draw(
+    extent: [ScaleInput<Scale>, ScaleInput<Scale>],
+    offset: number /* = 0 */
+  ): void;
 }
 
 export default Axis;

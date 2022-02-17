@@ -1,5 +1,6 @@
 import { BaseType, Selection } from "d3-selection";
-import { RegionDatum, ParamsTuple } from "../types/general";
+import { getScaleRange } from "../helpers/scale";
+import { RegionDatum, ParamsTuple, Margin } from "../types/general";
 import DataController, { DataControllerOptions } from "./DataController";
 
 class RegionsController<Value> extends DataController<RegionDatum<Value>> {
@@ -16,12 +17,12 @@ class RegionsController<Value> extends DataController<RegionDatum<Value>> {
   ) {
     super(opts, params);
 
-    const { width, height } = opts;
+    const { width, height, margin } = opts;
 
-    this._initRegionsBinding(width, height);
+    this._initRegionsBinding(width, height, margin);
   }
 
-  private _initRegionsBinding(w: number, h: number) {
+  private _initRegionsBinding(w: number, h: number, m: Margin) {
     const params = this.params;
     const [xScale, yScale] = this.currentScales;
 
@@ -29,8 +30,8 @@ class RegionsController<Value> extends DataController<RegionDatum<Value>> {
 
     const [xParam, yParam] = params;
 
-    xScale?.scale.range([0, w]);
-    yScale?.scale.range([0, h]);
+    xScale?.scale.range(getScaleRange("x", w, m));
+    yScale?.scale.range(getScaleRange("y", h, m));
 
     // Bind zero for y position and height in case of 1D chart
     this._regionsBinding = this.dataBinding

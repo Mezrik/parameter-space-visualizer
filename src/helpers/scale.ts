@@ -1,3 +1,4 @@
+import { Margin } from "../types/general";
 import { AnyD3Scale, ScaleInput, TickFormatter } from "../types/scale";
 
 export const getTicks = <Scale extends AnyD3Scale>(
@@ -24,4 +25,13 @@ export const getTicksFormatter = <Scale extends AnyD3Scale>(
   if ("tickFormat" in anyScale) return anyScale.tickFormat();
 
   return (d: ScaleInput<Scale>) => d.toString();
+};
+
+export const getScaleRange = (
+  type: "x" | "y",
+  size: number,
+  margin: Margin
+) => {
+  if (type === "x") return [margin.left ?? 0, size - (margin.right ?? 0)];
+  return [size - (margin.bottom ?? 0), margin.top ?? 0];
 };
