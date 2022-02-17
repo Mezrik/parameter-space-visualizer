@@ -4,12 +4,14 @@ import Chart from "./Chart";
 import Axis from "./components/Axis/Axis";
 import AxisBottom from "./components/Axis/AxisBottom";
 import RegionsController from "./controllers/RegionsController";
-import { getParamDomain } from "./helpers/regions";
-import { ChartConfig, RegionDatum } from "./types/general";
+import { getMarginWithAxes, getParamDomain } from "./helpers/regions";
+import { ChartConfig, Margin, RegionDatum } from "./types/general";
 
 class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
   private dataController: RegionsController<Value>;
   private axisBottom: Axis<ScaleLinear<number, number>>;
+
+  private margin: Margin;
 
   constructor(
     ctx: CanvasRenderingContext2D,
@@ -19,27 +21,33 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
 
     const { width, height } = this;
 
+    this.margin = getMarginWithAxes(
+      this.config.options.margin ?? {},
+      this.config.options.axes.x.tickSize
+    );
+
     this.dataController = new RegionsController(
       {
         width,
         height,
         data: this.config.data,
+        margin: this.margin,
       },
       this.config.params
     );
 
-    this.axisBottom = new AxisBottom(ctx, config.options?.axes?.x ?? {});
+    this.axisBottom = new AxisBottom(ctx, this.config.options.axes.x);
   }
 
   public drawAxes() {
-    const { axisBottom, dataController } = this;
+    const { axisBottom, dataController, height, margin } = this;
 
     const [xScale] = dataController.currentScales;
     const [xParam] = dataController.params ?? [];
 
     if (xScale && xParam) {
       axisBottom.scale = xScale.scale;
-      axisBottom.draw(xScale.extent);
+      axisBottom.draw(xScale.extent, height - margin.bottom);
     }
   }
 
@@ -68,9 +76,9 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
       );
       ctx.fill();
       ctx.closePath();
-
-      this.drawAxes();
     });
+
+    this.drawAxes();
   }
 }
 

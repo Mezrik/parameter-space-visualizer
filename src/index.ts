@@ -24,8 +24,8 @@ const color = (d: RegionDatum<RegionResultValue>) => COLOR_MAPPING[d.value];
 
 document.addEventListener("DOMContentLoaded", function (e) {
   const canvas = document.createElement("canvas");
-  canvas.width = 600;
-  canvas.height = 600;
+  canvas.width = 1200;
+  canvas.height = 800;
   document.body.appendChild(canvas);
 
   const chart = new RegionsChart(canvas.getContext("2d")!, {

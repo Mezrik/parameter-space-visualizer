@@ -3,7 +3,7 @@ import {
   getParams,
   getParamsTuple,
 } from "./helpers/general";
-import { ChartConfig, ParamsTuple } from "./types/general";
+import { ChartConfig, Options, ParamsTuple } from "./types/general";
 
 class Config<Datum> {
   private _config: ChartConfig<Datum>;
@@ -29,8 +29,24 @@ class Config<Datum> {
     return [x, y ? y : undefined];
   }
 
-  get options() {
-    return this._config.options;
+  get options(): Options<ChartConfig<Datum>["options"]> {
+    const opts = this._config.options;
+    return {
+      ...(opts ?? {}),
+      margin: {
+        top: opts?.margin?.top ?? 0,
+        right: opts?.margin?.right ?? 0,
+        bottom: opts?.margin?.bottom ?? 0,
+        left: opts?.margin?.left ?? 0,
+      },
+      axes: {
+        x: {
+          tickSize: 12,
+          tickStrokeColor: "#000",
+          tickCount: 10,
+        },
+      },
+    };
   }
 }
 

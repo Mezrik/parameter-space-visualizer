@@ -1,5 +1,5 @@
 import { NumberValue } from "d3-scale";
-import { RegionDatum } from "../types/general";
+import { Margin, RegionDatum } from "../types/general";
 
 export const isRegionsData = <Value>(
   data: unknown[]
@@ -25,3 +25,10 @@ export const getParamDomain = <Value>(
 
     return [...acc, paramRange.from, paramRange.to];
   }, []);
+
+export const getMarginWithAxes = (margin: Margin, tickSize: number): Margin => {
+  return {
+    ...margin,
+    bottom: (margin.bottom ?? 0) + tickSize,
+  };
+};

@@ -8,7 +8,7 @@ import {
   NumberValue,
 } from "d3";
 import { getParamDomain, getParams } from "../helpers/general";
-import { ParamsTuple, ParamType } from "../types/general";
+import { Margin, ParamsTuple, ParamType } from "../types/general";
 
 type ScaleType =
   | {
@@ -21,6 +21,7 @@ export type DataControllerOptions<T> = {
   data: T;
   width: number;
   height: number;
+  margin: Margin;
 };
 
 class DataController<Datum, Data extends Array<Datum> = Array<Datum>> {
