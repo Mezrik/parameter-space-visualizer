@@ -1,12 +1,20 @@
-import { select } from "d3-selection";
+import { select, ScaleLinear, extent } from "d3";
+
 import Chart from "./Chart";
+import Axis from "./components/Axis/Axis";
+import AxisBottom from "./components/Axis/AxisBottom";
 import RegionsController from "./controllers/RegionsController";
-import { ChartConfig } from "./types";
+import { getParamDomain } from "./helpers/regions";
+import { ChartConfig, RegionDatum } from "./types/general";
 
-class RegionsChart extends Chart<string> {
-  private dataController: RegionsController;
+class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
+  private dataController: RegionsController<Value>;
+  private axisBottom: Axis<ScaleLinear<number, number>>;
 
-  constructor(ctx: CanvasRenderingContext2D, config: ChartConfig<string>) {
+  constructor(
+    ctx: CanvasRenderingContext2D,
+    config: ChartConfig<RegionDatum<Value>>
+  ) {
     super(ctx, config);
 
     const { width, height } = this;
@@ -19,6 +27,20 @@ class RegionsChart extends Chart<string> {
       },
       this.config.params
     );
+
+    this.axisBottom = new AxisBottom(ctx, config.options?.axes?.x ?? {});
+  }
+
+  public drawAxes() {
+    const { axisBottom, dataController } = this;
+
+    const [xScale] = dataController.currentScales;
+    const [xParam] = dataController.params ?? [];
+
+    if (xScale && xParam) {
+      axisBottom.scale = xScale.scale;
+      axisBottom.draw(xScale.extent);
+    }
   }
 
   public draw() {
@@ -36,7 +58,7 @@ class RegionsChart extends Chart<string> {
       const node = select(nodes[i]);
 
       ctx.beginPath();
-      ctx.fillStyle = config?.options?.color?.(d.value) ?? "#fff";
+      ctx.fillStyle = config?.options?.color?.(d) ?? "#fff";
 
       ctx.rect(
         parseInt(node.attr("x"), 10),
@@ -46,6 +68,8 @@ class RegionsChart extends Chart<string> {
       );
       ctx.fill();
       ctx.closePath();
+
+      this.drawAxes();
     });
   }
 }

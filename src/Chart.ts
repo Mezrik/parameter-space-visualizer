@@ -1,13 +1,13 @@
 import Config from "./Config";
-import { ChartConfig } from "./types";
+import { ChartConfig } from "./types/general";
 
-class Chart<T extends string> {
+class Chart<Datum> {
   protected ctx: CanvasRenderingContext2D;
-  protected config: Config<T>;
+  protected config: Config<Datum>;
   private _width: number;
   private _height: number;
 
-  constructor(context: CanvasRenderingContext2D, config: ChartConfig<T>) {
+  constructor(context: CanvasRenderingContext2D, config: ChartConfig<Datum>) {
     this.ctx = context;
     this.config = new Config(config);
 

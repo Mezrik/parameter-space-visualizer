@@ -1,18 +1,19 @@
 import { BaseType, Selection } from "d3-selection";
-import { ChartData, ParamsTuple } from "../types";
-import DataController, { Options } from "./DataController";
+import { RegionDatum, ParamsTuple } from "../types/general";
+import DataController, { DataControllerOptions } from "./DataController";
 
-type DataType = ChartData<string>;
-
-class RegionsController extends DataController<DataType, DataType[]> {
+class RegionsController<Value> extends DataController<RegionDatum<Value>> {
   private _regionsBinding?: Selection<
     BaseType,
-    DataType,
+    RegionDatum<Value>,
     HTMLElement,
-    DataType[]
+    RegionDatum<Value>[]
   >;
 
-  constructor(opts: Options<DataType[]>, params?: ParamsTuple) {
+  constructor(
+    opts: DataControllerOptions<RegionDatum<Value>[]>,
+    params?: ParamsTuple
+  ) {
     super(opts, params);
 
     const { width, height } = opts;
@@ -28,22 +29,27 @@ class RegionsController extends DataController<DataType, DataType[]> {
 
     const [xParam, yParam] = params;
 
-    xScale?.range([0, w]);
-    yScale?.range([0, h]);
+    xScale?.scale.range([0, w]);
+    yScale?.scale.range([0, h]);
 
     // Bind zero for y position and height in case of 1D chart
     this._regionsBinding = this.dataBinding
       ?.join("custom")
       .classed(".region", true)
-      .attr("x", (d) => xScale(d.params[xParam].from))
-      .attr("y", (d) => (yParam && yScale ? yScale(d.params[yParam].to) : 0))
+      .attr("x", (d) => xScale.scale(d.params[xParam].from))
+      .attr("y", (d) =>
+        yParam && yScale ? yScale.scale(d.params[yParam].to) : 0
+      )
       .attr(
         "width",
-        (d) => xScale(d.params[xParam].to) - xScale(d.params[xParam].from)
+        (d) =>
+          xScale.scale(d.params[xParam].to) -
+          xScale.scale(d.params[xParam].from)
       )
       .attr("height", (d) =>
         yParam && yScale
-          ? yScale(d.params[yParam].from) - yScale(d.params[yParam].to)
+          ? yScale.scale(d.params[yParam].from) -
+            yScale.scale(d.params[yParam].to)
           : 0
       );
   }
