@@ -5,26 +5,32 @@ import {
   ScaleLinear,
   extent,
   scaleLinear,
+  NumberValue,
 } from "d3";
 import { getParamDomain, getParams } from "../helpers/general";
-import { ChartData, ParamsTuple, ParamType } from "../types";
+import { ParamsTuple, ParamType } from "../types/general";
 
-type ScaleType = ScaleLinear<number, number> | undefined;
+type ScaleType =
+  | {
+      scale: ScaleLinear<number, number>;
+      extent: [NumberValue, NumberValue];
+    }
+  | undefined;
 
-export type Options<T> = {
+export type DataControllerOptions<T> = {
   data: T;
   width: number;
   height: number;
 };
 
-class DataController<Type extends ChartData, Datum extends Array<Type>> {
-  private dataContainer: Selection<HTMLElement, Datum, null, undefined>;
-  protected dataBinding?: Selection<BaseType, Type, HTMLElement, Datum>;
+class DataController<Datum, Data extends Array<Datum> = Array<Datum>> {
+  private dataContainer: Selection<HTMLElement, Data, null, undefined>;
+  protected dataBinding?: Selection<BaseType, Datum, HTMLElement, Data>;
 
   private paramScales: Record<ParamType, ScaleType> = {};
   private _params: ParamsTuple | null = null;
 
-  constructor(opts: Options<Datum>, params?: ParamsTuple) {
+  constructor(opts: DataControllerOptions<Data>, params?: ParamsTuple) {
     const detachedContainer = document.createElement("custom");
     this.dataContainer = select(detachedContainer);
     this._params = params ?? null;
@@ -33,17 +39,20 @@ class DataController<Type extends ChartData, Datum extends Array<Type>> {
     this._initScales(opts);
   }
 
-  private _initDataBinding({ data }: Options<Datum>) {
+  private _initDataBinding({ data }: DataControllerOptions<Data>) {
     this.dataBinding = this.dataContainer.selectAll("custom").data(data);
   }
 
-  private _initScales({ data }: Options<Datum>) {
+  private _initScales({ data }: DataControllerOptions<Data>) {
     const params = getParams(data);
     params.forEach((param) => {
       const [min, max] = extent(getParamDomain(data, param));
 
       if (min && max)
-        this.paramScales[param] = scaleLinear().domain([min, max]);
+        this.paramScales[param] = {
+          scale: scaleLinear().domain([min, max]),
+          extent: [min, max],
+        };
     });
   }
 

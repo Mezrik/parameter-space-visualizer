@@ -1,4 +1,9 @@
-import { ChartData, Params, ParamsTuple } from "../types";
+import { Params, ParamsTuple } from "../types/general";
+import {
+  isRegionsData,
+  getParams as getRegionsParams,
+  getParamDomain as getRegionsParamDomain,
+} from "./regions";
 
 export const checkIfParamsExist = (existing: string[], p: ParamsTuple) =>
   p[1]
@@ -7,22 +12,22 @@ export const checkIfParamsExist = (existing: string[], p: ParamsTuple) =>
 
 export const reverseExtent = ([a, b]: [number, number]) => [b, a];
 
-export const getParams = <T>(data: Array<ChartData<T>>) =>
-  data.length > 0 ? Object.keys(data[0].params) : [];
-
-export const getParamDomain = <T>(data: Array<ChartData<T>>, param: string) =>
-  data.reduce<number[]>((acc, datum) => {
-    const paramRange = datum.params[param];
-
-    if (!paramRange) return acc;
-
-    return [...acc, paramRange.from, paramRange.to];
-  }, []);
-
 export const getParamsTuple = (params?: Params): ParamsTuple | undefined => {
   if (!params) return undefined;
 
   if (typeof params === "string") return [params, undefined];
 
   return [params.x, params.y];
+};
+
+export const getParams = <Datum>(data: Datum[]) => {
+  if (isRegionsData(data)) return getRegionsParams(data);
+
+  return []; // TBD for other charts
+};
+
+export const getParamDomain = <Datum>(data: Datum[], param: string) => {
+  if (isRegionsData(data)) return getRegionsParamDomain(data, param);
+
+  return []; // TBD for other charts
 };

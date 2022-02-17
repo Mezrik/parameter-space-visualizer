@@ -3,12 +3,12 @@ import {
   getParams,
   getParamsTuple,
 } from "./helpers/general";
-import { ChartConfig, ParamsTuple } from "./types";
+import { ChartConfig, ParamsTuple } from "./types/general";
 
-class Config<T> {
-  private _config: ChartConfig<T>;
+class Config<Datum> {
+  private _config: ChartConfig<Datum>;
 
-  constructor(config: ChartConfig<T>) {
+  constructor(config: ChartConfig<Datum>) {
     this._config = config;
   }
 
