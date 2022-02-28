@@ -13,10 +13,11 @@ export type UserMargin = {
 };
 
 export type UserAxesConfig<ScaleInput> = {
-  tickSize?: number;
+  tickFontSize?: number;
   tickCount?: number;
   tickFormatter?: TickFormatter<ScaleInput>;
   tickStrokeColor?: string;
+  tickSize?: number;
 };
 
 export type UserOptions<Datum, XScaleInput, YScaleInput> = {
@@ -34,6 +35,7 @@ export type Margin = {
 };
 
 export type AxesConfig<ScaleInput> = UserAxesConfig<ScaleInput> & {
+  tickFontSize: number;
   tickSize: number;
   tickCount: number;
   tickStrokeColor: string;

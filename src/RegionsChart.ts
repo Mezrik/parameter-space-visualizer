@@ -3,6 +3,7 @@ import { select, ScaleLinear, extent } from "d3";
 import Chart from "./Chart";
 import Axis from "./components/Axis/Axis";
 import AxisBottom from "./components/Axis/AxisBottom";
+import AxisLeft from "./components/Axis/AxisLeft";
 import RegionsController from "./controllers/RegionsController";
 import { getMarginWithAxes, getParamDomain } from "./helpers/regions";
 import { ChartConfig, Margin, RegionDatum } from "./types/general";
@@ -10,6 +11,7 @@ import { ChartConfig, Margin, RegionDatum } from "./types/general";
 class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
   private dataController: RegionsController<Value>;
   private axisBottom: Axis<ScaleLinear<number, number>>;
+  private axisLeft?: Axis<ScaleLinear<number, number>>;
 
   private margin: Margin;
 
@@ -23,6 +25,7 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
 
     this.margin = getMarginWithAxes(
       this.config.options.margin ?? {},
+      this.config.options.axes.x.tickFontSize,
       this.config.options.axes.x.tickSize
     );
 
@@ -37,17 +40,26 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
     );
 
     this.axisBottom = new AxisBottom(ctx, this.config.options.axes.x);
+
+    if (this.config.options.axes.y) {
+      this.axisLeft = new AxisLeft(ctx, this.config.options.axes.y);
+    }
   }
 
   public drawAxes() {
-    const { axisBottom, dataController, height, margin } = this;
+    const { axisBottom, axisLeft, dataController, height, margin } = this;
 
-    const [xScale] = dataController.currentScales;
-    const [xParam] = dataController.params ?? [];
+    const [xScale, yScale] = dataController.currentScales;
+    const [xParam, yParam] = dataController.params ?? [];
 
     if (xScale && xParam) {
       axisBottom.scale = xScale.scale;
       axisBottom.draw(xScale.extent, height - margin.bottom);
+    }
+
+    if (yScale && yParam && axisLeft) {
+      axisLeft.scale = yScale.scale;
+      axisLeft.draw(yScale.extent, margin.left);
     }
   }
 

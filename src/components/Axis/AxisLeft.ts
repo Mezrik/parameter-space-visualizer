@@ -1,10 +1,10 @@
 import { AnyD3Scale, ScaleInput } from "../../types/scale";
 import Axis from "./Axis";
 
-class AxisBottom<Scale extends AnyD3Scale> extends Axis<Scale> {
+class AxisLeft<Scale extends AnyD3Scale> extends Axis<Scale> {
   public draw(
     [start, end]: [ScaleInput<Scale>, ScaleInput<Scale>],
-    y: number = 0
+    x: number = 0
   ) {
     const { ctx, ticks, _scale, axisConfig, ticksFormatter } = this;
     if (!ticks || !_scale || !ticksFormatter) return;
@@ -13,27 +13,32 @@ class AxisBottom<Scale extends AnyD3Scale> extends Axis<Scale> {
 
     ctx.beginPath();
     ticks.forEach((d) => {
-      ctx.moveTo(_scale(d), y);
-      ctx.lineTo(_scale(d), y + axisConfig.tickSize);
+      ctx.moveTo(x, _scale(d));
+      ctx.lineTo(x - axisConfig.tickSize, _scale(d));
     });
     ctx.stroke();
 
+    console.log("here");
     ctx.beginPath();
-    ctx.moveTo(start, y + axisConfig.tickSize);
-    ctx.lineTo(start, y);
-    ctx.lineTo(end, y);
-    ctx.lineTo(end, y + axisConfig.tickSize);
+    ctx.moveTo(x - axisConfig.tickSize, start);
+    ctx.lineTo(x, start);
+    ctx.lineTo(x, end);
+    ctx.lineTo(x - axisConfig.tickSize, end);
     ctx.stroke();
 
-    ctx.textAlign = "center";
-    ctx.textBaseline = "top";
+    ctx.textAlign = "right";
+    ctx.textBaseline = "middle";
     ctx.fillStyle = axisConfig.tickStrokeColor;
     ctx.font = `${axisConfig.tickFontSize}px sans-serif`;
     ticks.forEach((d) => {
       ctx.beginPath();
-      ctx.fillText(ticksFormatter(d) ?? d, _scale(d), y + axisConfig.tickSize);
+      ctx.fillText(
+        ticksFormatter(d) ?? d,
+        x - axisConfig.tickSize - 3,
+        _scale(d)
+      );
     });
   }
 }
 
-export default AxisBottom;
+export default AxisLeft;
