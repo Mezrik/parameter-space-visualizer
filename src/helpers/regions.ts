@@ -26,9 +26,16 @@ export const getParamDomain = <Value>(
     return [...acc, paramRange.from, paramRange.to];
   }, []);
 
-export const getMarginWithAxes = (margin: Margin, tickSize: number): Margin => {
+export const getMarginWithAxes = (
+  margin: Margin,
+  tickFontSize: number,
+  tickSize: number
+): Margin => {
   return {
     ...margin,
-    bottom: (margin.bottom ?? 0) + tickSize,
+    top: (margin.top ?? 0) + tickFontSize + tickSize,
+    bottom: (margin.bottom ?? 0) + tickFontSize + tickSize,
+    right: (margin.right ?? 0) + tickFontSize + tickSize,
+    left: (margin.left ?? 0) + tickFontSize + tickSize,
   };
 };

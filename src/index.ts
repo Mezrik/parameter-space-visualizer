@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", function (e) {
   document.body.appendChild(canvas);
 
   const chart = new RegionsChart(canvas.getContext("2d")!, {
-    options: { color },
+    options: { color, margin: { left: 20 } },
     data: RegionResults01Parsed!,
   });
 

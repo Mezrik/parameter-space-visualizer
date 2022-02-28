@@ -41,9 +41,16 @@ class Config<Datum> {
       },
       axes: {
         x: {
-          tickSize: 12,
-          tickStrokeColor: "#000",
-          tickCount: 10,
+          tickFontSize: opts?.axes?.x.tickFontSize ?? 10,
+          tickStrokeColor: opts?.axes?.x.tickStrokeColor ?? "#000",
+          tickCount: opts?.axes?.x.tickCount ?? 10,
+          tickSize: opts?.axes?.x.tickSize ?? 6,
+        },
+        y: {
+          tickFontSize: opts?.axes?.x.tickFontSize ?? 10,
+          tickStrokeColor: opts?.axes?.x.tickStrokeColor ?? "#000",
+          tickCount: opts?.axes?.x.tickCount ?? 10,
+          tickSize: opts?.axes?.x.tickSize ?? 6,
         },
       },
     };
