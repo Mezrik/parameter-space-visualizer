@@ -38,6 +38,14 @@ class QuadTree<Datum extends {}> {
     const { x, y, w, h } = this;
     this.root.insert(d, { x: x(d), y: y(d), width: w(d), height: h(d) });
   }
+
+  public insertAll(data: Datum[]) {
+    data.forEach((d) => this.insert(d));
+  }
+
+  public find(x: number, y: number, w = 0, h = 0) {
+    return this.root.find(x, y, w, h);
+  }
 }
 
 class Node<Datum extends {}> {
@@ -136,6 +144,32 @@ class Node<Datum extends {}> {
     if (this._data.length > MAX_DATA_IN_LEAF) {
       this.split();
     }
+  }
+
+  public find(x: number, y: number, w: number, h: number): Datum[] {
+    // When the node is a quad node
+    if (this.quads?.length) {
+      const regions = this.getRegions(this.quads, {
+        x,
+        y,
+        width: w,
+        height: h,
+      });
+
+      return Array.from(
+        new Set(
+          regions.reduce<Datum[]>(
+            (data, region) => [
+              ...data,
+              ...(this.quads?.[region].find(x, y, w, h) ?? []),
+            ],
+            []
+          )
+        )
+      );
+    }
+
+    return Array.from(new Set(this.data?.map(([d, _]) => d))) ?? [];
   }
 
   get quads() {
