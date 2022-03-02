@@ -6,22 +6,24 @@ import AxisBottom from "./components/Axis/AxisBottom";
 import AxisLeft from "./components/Axis/AxisLeft";
 import RegionsController from "./controllers/RegionsController";
 import { getMarginWithAxes, getParamDomain } from "./helpers/regions";
-import { ChartConfig, Margin, RegionDatum } from "./types/general";
+import {
+  ChartConfig,
+  Margin,
+  MountElement,
+  RegionDatum,
+} from "./types/general";
 
 class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
   private dataController: RegionsController<Value>;
-  private axisBottom: Axis<ScaleLinear<number, number>>;
+  private axisBottom?: Axis<ScaleLinear<number, number>>;
   private axisLeft?: Axis<ScaleLinear<number, number>>;
 
   private margin: Margin;
 
-  constructor(
-    ctx: CanvasRenderingContext2D,
-    config: ChartConfig<RegionDatum<Value>>
-  ) {
-    super(ctx, config);
+  constructor(element: MountElement, config: ChartConfig<RegionDatum<Value>>) {
+    super(element, config);
 
-    const { width, height } = this;
+    const { width, height, chartArea } = this;
 
     this.margin = getMarginWithAxes(
       this.config.options.margin ?? {},
@@ -39,10 +41,15 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
       this.config.params
     );
 
-    this.axisBottom = new AxisBottom(ctx, this.config.options.axes.x);
+    // TODO: Rework axes to svg
+    const ctx = chartArea?.context;
 
-    if (this.config.options.axes.y) {
-      this.axisLeft = new AxisLeft(ctx, this.config.options.axes.y);
+    if (ctx) {
+      this.axisBottom = new AxisBottom(ctx, this.config.options.axes.x);
+
+      if (this.config.options.axes.y) {
+        this.axisLeft = new AxisLeft(ctx, this.config.options.axes.y);
+      }
     }
   }
 
@@ -52,7 +59,7 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
     const [xScale, yScale] = dataController.currentScales;
     const [xParam, yParam] = dataController.params ?? [];
 
-    if (xScale && xParam) {
+    if (xScale && xParam && axisBottom) {
       axisBottom.scale = xScale.scale;
       axisBottom.draw(xScale.extent, height - margin.bottom);
     }
@@ -65,10 +72,14 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
 
   public draw() {
     const {
-      ctx,
+      chartArea,
       dataController: { regionsBinding },
       config,
     } = this;
+
+    const ctx = this.chartArea?.context;
+
+    if (!ctx) return;
 
     ctx.fillStyle = "#fff";
     ctx.rect(0, 0, this.width, this.height);

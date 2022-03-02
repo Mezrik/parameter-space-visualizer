@@ -1,22 +1,35 @@
+import { select, Selection } from "d3";
+import ChartArea from "./components/ChartArea";
 import Config from "./Config";
-import { ChartConfig } from "./types/general";
+import { ChartConfig, MountElement } from "./types/general";
 
 class Chart<Datum> {
-  protected ctx: CanvasRenderingContext2D;
+  protected chartArea?: ChartArea<Datum>;
+  protected el?: Selection<HTMLElement, unknown, null, undefined>;
   protected config: Config<Datum>;
   private _width: number;
   private _height: number;
 
-  constructor(context: CanvasRenderingContext2D, config: ChartConfig<Datum>) {
-    this.ctx = context;
+  constructor(element: MountElement, config: ChartConfig<Datum>) {
     this.config = new Config(config);
 
-    const { height, width } = context.canvas;
-    this._height = height;
-    this._width = width;
+    this._height = config.height;
+    this._width = config.width;
+
+    this._init(element);
   }
 
-  _init() {}
+  _init(element: MountElement) {
+    if (typeof element === "string") {
+      const domEl: HTMLElement | null = document.querySelector(element);
+      domEl && (this.el = select<HTMLElement, unknown>(domEl));
+    } else {
+      this.el = select<HTMLElement, unknown>(element);
+    }
+
+    if (this.el)
+      this.chartArea = new ChartArea(this.el, this._width, this._height);
+  }
 
   get width() {
     return this._width;
