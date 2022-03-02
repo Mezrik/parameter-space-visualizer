@@ -1,4 +1,4 @@
-import { NumberValue } from "d3-scale";
+import { NumberValue } from "d3";
 import { TickFormatter } from "./scale";
 
 export type ParamType = string;
@@ -64,4 +64,8 @@ export interface RegionDatum<Value = unknown> {
 export type ChartConfig<Datum> = {
   options?: UserOptions<Datum, NumberValue, NumberValue>;
   data: Array<Datum>;
+  width: number;
+  height: number;
 };
+
+export type MountElement = string | HTMLElement;
