@@ -8,6 +8,7 @@ import RegionsController from "./controllers/RegionsController";
 import { getMarginWithAxes, getParamDomain } from "./helpers/regions";
 import {
   ChartConfig,
+  DatumRect,
   Margin,
   MountElement,
   RegionDatum,
@@ -56,7 +57,10 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
     // TODO: Rework axes to svg
     const ctx = chartArea?.context;
 
-    chartArea?.on("mousemove", (d) => console.log(d));
+    chartArea?.on("mousemove", (d) => {
+      this.draw();
+      d.forEach((rect) => this.highlightRect(rect));
+    });
 
     if (ctx) {
       this.axisBottom = new AxisBottom(ctx, this.config.options.axes.x);
@@ -84,6 +88,17 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
     }
   }
 
+  public highlightRect({ x, y, width, height }: DatumRect<RegionDatum<Value>>) {
+    const { chartArea, config } = this;
+    const ctx = chartArea?.context;
+
+    if (!ctx) return;
+
+    ctx.strokeStyle = "#000";
+    ctx.rect(x, y, width, height);
+    ctx.stroke();
+  }
+
   public draw() {
     const {
       chartArea,
@@ -91,7 +106,7 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
       config,
     } = this;
 
-    const ctx = this.chartArea?.context;
+    const ctx = chartArea?.context;
 
     if (!ctx) return;
 
