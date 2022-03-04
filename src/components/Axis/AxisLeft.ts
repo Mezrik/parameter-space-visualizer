@@ -18,7 +18,6 @@ class AxisLeft<Scale extends AnyD3Scale> extends Axis<Scale> {
     });
     ctx.stroke();
 
-    console.log("here");
     ctx.beginPath();
     ctx.moveTo(x - axisConfig.tickSize, start);
     ctx.lineTo(x, start);

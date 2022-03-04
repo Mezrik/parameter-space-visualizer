@@ -1,10 +1,10 @@
 import { select, Selection } from "d3";
 import ChartArea from "./components/ChartArea";
 import Config from "./Config";
-import { ChartConfig, MountElement } from "./types/general";
+import { ChartConfig, DatumRect, MountElement } from "./types/general";
 
 class Chart<Datum> {
-  protected chartArea?: ChartArea<Datum>;
+  protected chartArea?: ChartArea<DatumRect<Datum>>;
   protected el?: Selection<HTMLElement, unknown, null, undefined>;
   protected config: Config<Datum>;
   private _width: number;
@@ -27,8 +27,9 @@ class Chart<Datum> {
       this.el = select<HTMLElement, unknown>(element);
     }
 
-    if (this.el)
+    if (this.el) {
       this.chartArea = new ChartArea(this.el, this._width, this._height);
+    }
   }
 
   get width() {

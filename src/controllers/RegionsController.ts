@@ -1,4 +1,5 @@
 import { BaseType, Selection } from "d3-selection";
+import { UNDEFINED_CHART_VALUE } from "../constants/common";
 import { getScaleRange } from "../helpers/scale";
 import { RegionDatum, ParamsTuple, Margin } from "../types/general";
 import DataController, { DataControllerOptions } from "./DataController";
@@ -22,13 +23,42 @@ class RegionsController<Value> extends DataController<RegionDatum<Value>> {
     this._initRegionsBinding(width, height, margin);
   }
 
+  public x = (d: RegionDatum<Value>) => {
+    const [xScale] = this.currentScales;
+
+    return this.params && xScale
+      ? xScale.scale(d.params[this.params[0]].from)
+      : UNDEFINED_CHART_VALUE;
+  };
+
+  public y = (d: RegionDatum<Value>) => {
+    const [, yScale] = this.currentScales;
+
+    return this.params && this.params[1] && yScale
+      ? yScale.scale(d.params[this.params[1]].to)
+      : UNDEFINED_CHART_VALUE;
+  };
+
+  public w = (d: RegionDatum<Value>) => {
+    const [xScale] = this.currentScales;
+
+    return this.params && xScale
+      ? xScale.scale(d.params[this.params[0]].to) -
+          xScale.scale(d.params[this.params[0]].from)
+      : UNDEFINED_CHART_VALUE;
+  };
+
+  public h = (d: RegionDatum<Value>) => {
+    const [, yScale] = this.currentScales;
+
+    return this.params && this.params[1] && yScale
+      ? yScale.scale(d.params[this.params[1]].from) -
+          yScale.scale(d.params[this.params[1]].to)
+      : UNDEFINED_CHART_VALUE;
+  };
+
   private _initRegionsBinding(w: number, h: number, m: Margin) {
-    const params = this.params;
     const [xScale, yScale] = this.currentScales;
-
-    if (!params || !xScale) return;
-
-    const [xParam, yParam] = params;
 
     xScale?.scale.range(getScaleRange("x", w, m));
     yScale?.scale.range(getScaleRange("y", h, m));
@@ -37,22 +67,10 @@ class RegionsController<Value> extends DataController<RegionDatum<Value>> {
     this._regionsBinding = this.dataBinding
       ?.join("custom")
       .classed(".region", true)
-      .attr("x", (d) => xScale.scale(d.params[xParam].from))
-      .attr("y", (d) =>
-        yParam && yScale ? yScale.scale(d.params[yParam].to) : 0
-      )
-      .attr(
-        "width",
-        (d) =>
-          xScale.scale(d.params[xParam].to) -
-          xScale.scale(d.params[xParam].from)
-      )
-      .attr("height", (d) =>
-        yParam && yScale
-          ? yScale.scale(d.params[yParam].from) -
-            yScale.scale(d.params[yParam].to)
-          : 0
-      );
+      .attr("x", this.x)
+      .attr("y", this.y)
+      .attr("width", this.w)
+      .attr("height", this.h);
   }
 
   get regionsBinding() {

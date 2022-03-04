@@ -17,9 +17,9 @@ enum Region {
   Northeast,
 }
 
-type Accessor<Datum extends {}> = (d: Datum) => number;
+export type Accessor<Datum extends {}> = (d: Datum) => number;
 
-// Regions quadtree
+// Regions quadtree WIP
 class QuadTree<Datum extends {}> {
   private root: Node<Datum>;
   private x: Accessor<Datum> = (d: unknown) => (<{ x: number }>d).x;
@@ -29,9 +29,19 @@ class QuadTree<Datum extends {}> {
   private w: Accessor<Datum> = () => 0;
   private h: Accessor<Datum> = () => 0;
 
-  constructor(extent: Extent) {
+  constructor(
+    extent: Extent,
+    x?: Accessor<Datum>,
+    y?: Accessor<Datum>,
+    w?: Accessor<Datum>,
+    h?: Accessor<Datum>
+  ) {
     // Initialize root as leaf
     this.root = new Node(extent);
+    if (x) this.x = x;
+    if (y) this.y = y;
+    if (w) this.w = w;
+    if (h) this.h = h;
   }
 
   public insert(d: Datum) {
@@ -110,8 +120,9 @@ class Node<Datum extends {}> {
 
   // Check wheter the rect is a part of node (is touching or contained in node)
   private isPartOfNode(rect: Rect, node?: Node<Datum>) {
+    if (!node) return false;
+
     return (
-      !!node &&
       node.x + node.width <= rect.x &&
       node.y + node.height <= rect.y &&
       node.x >= rect.x + rect.width &&
@@ -120,9 +131,36 @@ class Node<Datum extends {}> {
   }
 
   private getRegions(qs: Node<Datum>["quads"], rect: Rect) {
-    return Object.values(Region).filter((r, i): r is Region =>
-      this.isPartOfNode(rect, qs?.[i])
-    );
+    var indexes = [],
+      verticalMidpoint = this.x + this.width / 2,
+      horizontalMidpoint = this.y + this.height / 2;
+
+    var startIsNorth = rect.y < horizontalMidpoint,
+      startIsWest = rect.x < verticalMidpoint,
+      endIsEast = rect.x + rect.width > verticalMidpoint,
+      endIsSouth = rect.y + rect.height > horizontalMidpoint;
+
+    //top-right quad
+    if (startIsNorth && endIsEast) {
+      indexes.push(0);
+    }
+
+    //top-left quad
+    if (startIsWest && startIsNorth) {
+      indexes.push(1);
+    }
+
+    //bottom-left quad
+    if (startIsWest && endIsSouth) {
+      indexes.push(2);
+    }
+
+    //bottom-right quad
+    if (endIsEast && endIsSouth) {
+      indexes.push(3);
+    }
+
+    return indexes;
   }
 
   public insert(d: Datum, dRect: Rect) {

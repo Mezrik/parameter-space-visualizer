@@ -1,3 +1,4 @@
+import { Rect } from "@timohausmann/quadtree-js";
 import { NumberValue } from "d3";
 import { TickFormatter } from "./scale";
 
@@ -69,3 +70,5 @@ export type ChartConfig<Datum> = {
 };
 
 export type MountElement = string | HTMLElement;
+
+export type DatumRect<Datum> = Datum & Rect;
