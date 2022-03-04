@@ -2,6 +2,7 @@ import { Selection, pointer } from "d3";
 
 // import QuadTree, { Accessor } from "../lib/QuadTree";
 import QuadTree, { Rect } from "@timohausmann/quadtree-js";
+import { rectsOverlapping } from "../helpers/canvas";
 
 export type ChartAreaMouseEvents = "mousemove" | "mouseover" | "mouseout";
 export type ChartAreaMouseEventCb<Datum extends {}> = (data: Datum[]) => void;
@@ -28,12 +29,16 @@ class ChartArea<Datum extends Rect> {
     const canvas = this.canvas.node();
 
     if (canvas)
-      this._data = new QuadTree({
-        x: 0,
-        y: 0,
-        width: canvas.width,
-        height: canvas.height,
-      });
+      this._data = new QuadTree(
+        {
+          x: 0,
+          y: 0,
+          width: canvas.width,
+          height: canvas.height,
+        },
+        4,
+        200
+      );
 
     value.forEach((d) => this._data?.insert(d));
   }
@@ -44,12 +49,17 @@ class ChartArea<Datum extends Rect> {
   ) {
     const eventHandler = (ev: MouseEvent) => {
       const [x, y] = pointer(ev);
-      const data: Datum[] | undefined = this._data?.retrieve({
+      const pointerRect = {
         x,
         y,
         width: 0,
         height: 0,
-      });
+      };
+
+      const data: Datum[] | undefined = this._data
+        ?.retrieve(pointerRect)
+        .filter((d) => rectsOverlapping(d, pointerRect)) as Datum[];
+
       callback(data ?? []);
     };
     this.canvas.on(name, eventHandler);
