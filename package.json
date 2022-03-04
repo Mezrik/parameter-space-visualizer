@@ -48,6 +48,7 @@
     "typescript": "^4.2.4"
   },
   "dependencies": {
+    "@timohausmann/quadtree-js": "^1.2.5",
     "d3": "^6.7.0"
   }
 }

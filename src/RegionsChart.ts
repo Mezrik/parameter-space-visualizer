@@ -41,8 +41,22 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
       this.config.params
     );
 
+    const { x, y, w, h } = this.dataController;
+
+    this.chartArea?.data(
+      this.config.data.map((d) => ({
+        ...d,
+        x: x(d),
+        y: y(d),
+        width: w(d),
+        height: h(d),
+      }))
+    );
+
     // TODO: Rework axes to svg
     const ctx = chartArea?.context;
+
+    chartArea?.on("mousemove", (d) => console.log(d));
 
     if (ctx) {
       this.axisBottom = new AxisBottom(ctx, this.config.options.axes.x);

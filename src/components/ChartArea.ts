@@ -1,15 +1,16 @@
 import { Selection, pointer } from "d3";
 
-import QuadTree from "../lib/QuadTree";
+// import QuadTree, { Accessor } from "../lib/QuadTree";
+import QuadTree, { Rect } from "@timohausmann/quadtree-js";
 
 export type ChartAreaMouseEvents = "mousemove" | "mouseover" | "mouseout";
 export type ChartAreaMouseEventCb<Datum extends {}> = (data: Datum[]) => void;
 
-class ChartArea<Datum extends {}> {
+class ChartArea<Datum extends Rect> {
   private container: Selection<HTMLDivElement, unknown, null, undefined>;
   private canvas: Selection<HTMLCanvasElement, unknown, null, undefined>;
 
-  private _data?: QuadTree<Datum>;
+  private _data?: QuadTree;
 
   constructor(
     root: Selection<HTMLElement, unknown, null, undefined>,
@@ -27,12 +28,14 @@ class ChartArea<Datum extends {}> {
     const canvas = this.canvas.node();
 
     if (canvas)
-      this._data = new QuadTree([
-        [0, 0],
-        [canvas.width, canvas.height],
-      ]);
+      this._data = new QuadTree({
+        x: 0,
+        y: 0,
+        width: canvas.width,
+        height: canvas.height,
+      });
 
-    this._data?.insertAll(value);
+    value.forEach((d) => this._data?.insert(d));
   }
 
   public on(
@@ -41,7 +44,12 @@ class ChartArea<Datum extends {}> {
   ) {
     const eventHandler = (ev: MouseEvent) => {
       const [x, y] = pointer(ev);
-      const data = this._data?.find(x, y);
+      const data: Datum[] | undefined = this._data?.retrieve({
+        x,
+        y,
+        width: 0,
+        height: 0,
+      });
       callback(data ?? []);
     };
     this.canvas.on(name, eventHandler);

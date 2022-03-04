@@ -1,7 +1,4 @@
 import { select, Selection } from "d3";
-
-import { getCanvasMouseCoords } from "../helpers/canvas";
-
 class Tooltip {
   private canvas: HTMLCanvasElement;
   private el: Selection<HTMLDivElement, unknown, HTMLElement, undefined>;
@@ -12,9 +9,7 @@ class Tooltip {
     ctx.canvas.addEventListener("mouseover", this.mouseOver);
   }
 
-  private mouseOver(ev: MouseEvent) {
-    const coords = getCanvasMouseCoords(this.canvas, ev);
-  }
+  private mouseOver(ev: MouseEvent) {}
 }
 
 export default Tooltip;
