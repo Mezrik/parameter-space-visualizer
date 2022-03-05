@@ -31,9 +31,3 @@ export const getParamDomain = <Datum>(data: Datum[], param: string) => {
 
   return []; // TBD for other charts
 };
-
-export const applyMargin = (
-  w: number,
-  h: number,
-  m: Margin
-): [number, number] => [w - m.bottom - m.left, h - m.bottom - m.top];
