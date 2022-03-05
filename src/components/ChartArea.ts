@@ -1,7 +1,7 @@
 import { Selection, pointer } from "d3";
+import QuadTree, { Rect } from "@timohausmann/quadtree-js";
 
 // import QuadTree, { Accessor } from "../lib/QuadTree";
-import QuadTree, { Rect } from "@timohausmann/quadtree-js";
 import { rectsOverlapping } from "../helpers/canvas";
 
 export type ChartAreaMouseEvents = "mousemove" | "mouseover" | "mouseout";
@@ -10,19 +10,32 @@ export type ChartAreaMouseEventCb<Datum extends {}> = (data: Datum[]) => void;
 class ChartArea<Datum extends Rect> {
   private container: Selection<HTMLDivElement, unknown, null, undefined>;
   private canvas: Selection<HTMLCanvasElement, unknown, null, undefined>;
+  private _svg: Selection<SVGSVGElement, unknown, null, undefined>;
 
   private _data?: QuadTree;
 
   constructor(
-    root: Selection<HTMLElement, unknown, null, undefined>,
+    root: Selection<HTMLDivElement, unknown, null, undefined>,
     w: number,
     h: number
   ) {
-    this.container = root.append("div").classed("chart-area", true);
+    this.container = root
+      .append("div")
+      .classed("chart-area", true)
+      .style("position", "absolute");
+
     this.canvas = this.container
       .append("canvas")
       .attr("width", w)
-      .attr("height", h);
+      .attr("height", h)
+      .style("position", "absolute");
+
+    this._svg = this.container.append("svg");
+    this._svg
+      .attr("width", w)
+      .attr("height", h)
+      .style("position", "absolute")
+      .style("pointer-events", "none");
   }
 
   public data(value: Datum[]) {
@@ -67,6 +80,10 @@ class ChartArea<Datum extends Rect> {
 
   get context() {
     return this.canvas.node()?.getContext("2d");
+  }
+
+  get svg() {
+    return this._svg;
   }
 }
 

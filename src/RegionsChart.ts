@@ -1,11 +1,9 @@
-import { select, ScaleLinear, extent } from "d3";
+import { select, Selection } from "d3";
 
 import Chart from "./Chart";
-import Axis from "./components/Axis/Axis";
-import AxisBottom from "./components/Axis/AxisBottom";
-import AxisLeft from "./components/Axis/AxisLeft";
+import { ZERO_MARGIN } from "./constants/common";
 import RegionsController from "./controllers/RegionsController";
-import { getMarginWithAxes, getParamDomain } from "./helpers/regions";
+import { xAxisFactory, yAxisFactory } from "./helpers/axis";
 import {
   ChartConfig,
   DatumRect,
@@ -16,21 +14,15 @@ import {
 
 class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
   private dataController: RegionsController<Value>;
-  private axisBottom?: Axis<ScaleLinear<number, number>>;
-  private axisLeft?: Axis<ScaleLinear<number, number>>;
+  private highlight?: Selection<SVGRectElement, unknown, null, undefined>;
 
-  private margin: Margin;
+  private margin: Margin = ZERO_MARGIN;
 
   constructor(element: MountElement, config: ChartConfig<RegionDatum<Value>>) {
     super(element, config);
 
     const { width, height, chartArea } = this;
-
-    this.margin = getMarginWithAxes(
-      this.config.options.margin ?? {},
-      this.config.options.axes.x.tickFontSize,
-      this.config.options.axes.x.tickSize
-    );
+    this.margin = this.config.options?.margin ?? this.margin;
 
     this.dataController = new RegionsController(
       {
@@ -54,52 +46,56 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
       }))
     );
 
-    // TODO: Rework axes to svg
-    const ctx = chartArea?.context;
-
     chartArea?.on("mousemove", (d) => {
-      this.draw();
+      this.redraw();
       d.forEach((rect) => this.highlightRect(rect));
     });
 
-    if (ctx) {
-      this.axisBottom = new AxisBottom(ctx, this.config.options.axes.x);
+    this.initAxes();
+    this.initHighlightLayer();
 
-      if (this.config.options.axes.y) {
-        this.axisLeft = new AxisLeft(ctx, this.config.options.axes.y);
-      }
-    }
-  }
-
-  public drawAxes() {
-    const { axisBottom, axisLeft, dataController, height, margin } = this;
-
-    const [xScale, yScale] = dataController.currentScales;
-    const [xParam, yParam] = dataController.params ?? [];
-
-    if (xScale && xParam && axisBottom) {
-      axisBottom.scale = xScale.scale;
-      axisBottom.draw(xScale.extent, height - margin.bottom);
-    }
-
-    if (yScale && yParam && axisLeft) {
-      axisLeft.scale = yScale.scale;
-      axisLeft.draw(yScale.extent, margin.left);
-    }
+    this.redraw();
   }
 
   public highlightRect({ x, y, width, height }: DatumRect<RegionDatum<Value>>) {
-    const { chartArea, config } = this;
-    const ctx = chartArea?.context;
+    const { highlight } = this;
 
-    if (!ctx) return;
+    if (!highlight) return;
 
-    ctx.strokeStyle = "#000";
-    ctx.rect(x, y, width, height);
-    ctx.stroke();
+    highlight
+      .attr("x", x)
+      .attr("y", y)
+      .attr("width", width)
+      .attr("height", height);
   }
 
-  public draw() {
+  private initAxes() {
+    const { svg, height, margin } = this;
+    const [xScale, yScale] = this.dataController.currentScales;
+
+    // X scale should be always defined, if not, something went wrong
+    if (!xScale) return;
+
+    svg?.append("g").call(xAxisFactory(height, margin, xScale.scale));
+
+    // Y scale is not guaranteed, since the chart supports 1D chart
+    if (yScale) svg?.append("g").call(yAxisFactory(margin, yScale.scale));
+  }
+
+  private initHighlightLayer() {
+    this.highlight = this.chartArea?.svg
+      ?.append("g")
+      .attr("width", this.width)
+      .attr("height", this.height)
+      .append("rect");
+
+    this.highlight
+      ?.attr("fill", "transparent")
+      .attr("stroke", "#000")
+      .attr("stroke-width", 2);
+  }
+
+  private redraw() {
     const {
       chartArea,
       dataController: { regionsBinding },
@@ -109,10 +105,6 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
     const ctx = chartArea?.context;
 
     if (!ctx) return;
-
-    ctx.fillStyle = "#fff";
-    ctx.rect(0, 0, this.width, this.height);
-    ctx.fill();
 
     regionsBinding?.each((d, i, nodes) => {
       const node = select(nodes[i]);
@@ -129,8 +121,6 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
       ctx.fill();
       ctx.closePath();
     });
-
-    this.drawAxes();
   }
 }
 

@@ -24,13 +24,11 @@ const color = (d: RegionDatum<RegionResultValue>) => COLOR_MAPPING[d.value];
 
 document.addEventListener("DOMContentLoaded", function (e) {
   const chart = new RegionsChart(document.body, {
-    options: { color, margin: { left: 20 } },
+    options: { color, margin: { top: 20, right: 30, bottom: 30, left: 40 } },
     data: RegionResults01Parsed!,
     width: 1200,
     height: 800,
   });
-
-  chart.draw();
 });
 
 export default Chart;
