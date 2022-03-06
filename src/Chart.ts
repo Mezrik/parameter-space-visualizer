@@ -2,12 +2,13 @@ import { select, Selection } from "d3";
 import ChartArea from "./components/ChartArea";
 import Config from "./Config";
 import { ChartConfig, DatumRect, MountElement } from "./types/general";
+import { SimpleSelection } from "./types/selection";
 
 class Chart<Datum> {
-  protected el?: Selection<HTMLDivElement, unknown, null, undefined>;
+  protected el?: SimpleSelection<HTMLDivElement>;
   protected config: Config<Datum>;
   protected chartArea?: ChartArea<DatumRect<Datum>>;
-  protected svg?: Selection<SVGSVGElement, unknown, null, undefined>;
+  protected svg?: SimpleSelection<SVGSVGElement>;
 
   private _width: number;
   private _height: number;
@@ -36,9 +37,7 @@ class Chart<Datum> {
     return this;
   }
 
-  private initSVG(
-    element: Selection<HTMLDivElement, unknown, null, undefined>
-  ) {
+  private initSVG(element: SimpleSelection<HTMLDivElement>) {
     const { width, height } = this;
 
     this.svg = element.append("svg");
@@ -50,9 +49,7 @@ class Chart<Datum> {
     return this;
   }
 
-  private initChartArea(
-    element: Selection<HTMLDivElement, unknown, null, undefined>
-  ) {
+  private initChartArea(element: SimpleSelection<HTMLDivElement>) {
     const { width, height, config } = this;
     this.chartArea = new ChartArea(element, width, height);
 

@@ -11,10 +11,13 @@ import {
   MountElement,
   RegionDatum,
 } from "./types/general";
+import { SimpleSelection } from "./types/selection";
 
 class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
   private dataController: RegionsController<Value>;
-  private highlight?: Selection<SVGRectElement, unknown, null, undefined>;
+  private highlight?: SimpleSelection<SVGRectElement>;
+  private gx?: SimpleSelection<SVGGElement>;
+  private gy?: SimpleSelection<SVGGElement>;
 
   private margin: Margin = ZERO_MARGIN;
 
@@ -76,10 +79,11 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
     // X scale should be always defined, if not, something went wrong
     if (!xScale) return;
 
-    svg?.append("g").call(xAxisFactory(height, margin, xScale.scale));
+    this.gx = svg?.append("g").call(xAxisFactory(height, margin, xScale.scale));
 
     // Y scale is not guaranteed, since the chart supports 1D chart
-    if (yScale) svg?.append("g").call(yAxisFactory(margin, yScale.scale));
+    if (yScale)
+      this.gy = svg?.append("g").call(yAxisFactory(margin, yScale.scale));
   }
 
   private initHighlightLayer() {

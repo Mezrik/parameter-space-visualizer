@@ -3,22 +3,19 @@ import QuadTree, { Rect } from "@timohausmann/quadtree-js";
 
 // import QuadTree, { Accessor } from "../lib/QuadTree";
 import { rectsOverlapping } from "../helpers/canvas";
+import { SimpleSelection } from "../types/selection";
 
 export type ChartAreaMouseEvents = "mousemove" | "mouseover" | "mouseout";
 export type ChartAreaMouseEventCb<Datum extends {}> = (data: Datum[]) => void;
 
 class ChartArea<Datum extends Rect> {
-  private container: Selection<HTMLDivElement, unknown, null, undefined>;
-  private canvas: Selection<HTMLCanvasElement, unknown, null, undefined>;
-  private _svg: Selection<SVGSVGElement, unknown, null, undefined>;
+  private container: SimpleSelection<HTMLDivElement>;
+  private canvas: SimpleSelection<HTMLCanvasElement>;
+  private _svg: SimpleSelection<SVGSVGElement>;
 
   private _data?: QuadTree;
 
-  constructor(
-    root: Selection<HTMLDivElement, unknown, null, undefined>,
-    w: number,
-    h: number
-  ) {
+  constructor(root: SimpleSelection<HTMLDivElement>, w: number, h: number) {
     this.container = root
       .append("div")
       .classed("chart-area", true)
