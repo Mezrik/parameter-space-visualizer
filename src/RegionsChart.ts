@@ -1,4 +1,10 @@
-import { ScaleLinear, select, Selection } from "d3";
+import {
+  ScaleLinear,
+  select,
+  Selection,
+  zoomIdentity,
+  ZoomTransform,
+} from "d3";
 
 import Chart from "./Chart";
 import { ZERO_MARGIN } from "./constants/common";
@@ -12,6 +18,7 @@ import {
   MountElement,
   RegionDatum,
 } from "./types/general";
+import { AnyD3Scale } from "./types/scale";
 import { SimpleSelection } from "./types/selection";
 
 class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
@@ -19,11 +26,7 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
   private highlight?: SimpleSelection<SVGRectElement>;
   private gx?: SimpleSelection<SVGGElement>;
   private gy?: SimpleSelection<SVGGElement>;
-  private zoom?: Zoom<
-    HTMLCanvasElement,
-    ScaleLinear<number, number, never>,
-    ScaleLinear<number, number, never>
-  >;
+  private zoom?: Zoom<HTMLCanvasElement>;
 
   private margin: Margin = ZERO_MARGIN;
 
@@ -56,7 +59,6 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
     );
 
     chartArea?.on("mousemove", (d) => {
-      this.redraw();
       d.forEach((rect) => this.highlightRect(rect));
     });
 
@@ -80,24 +82,34 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
   }
 
   private initZoom() {
-    const [xScale, yScale] = this.dataController.currentScales;
+    const [xScale] = this.dataController.currentScales;
     if (xScale) {
-      this.zoom = new Zoom(xScale.scale, yScale?.scale, [1, 10]);
+      this.zoom = new Zoom([1, 10]);
       this.chartArea?.canvas.call(this.zoom?.zoom);
 
       this.zoom.onChange(this.redrawAxes);
+      this.zoom.onChange(this.redraw);
     }
   }
 
-  private redrawAxes = (
-    xScale: ScaleLinear<number, number>,
-    yScale?: ScaleLinear<number, number>
-  ) => {
+  private redrawAxes = (transform: ZoomTransform) => {
     const { height, margin } = this;
+    const [xScale, yScale] = this.dataController.currentScales;
 
-    this.gx?.call(xAxisFactory(height, margin, xScale));
+    if (!xScale) return;
 
-    if (yScale) this.gy?.call(yAxisFactory(margin, yScale));
+    this.gx?.call(
+      xAxisFactory(
+        height,
+        margin,
+        transform.rescaleX(xScale.scale) as AnyD3Scale
+      )
+    );
+
+    if (yScale)
+      this.gy?.call(
+        yAxisFactory(margin, transform.rescaleY(yScale.scale) as AnyD3Scale)
+      );
   };
 
   private initAxes() {
@@ -127,16 +139,21 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
       .attr("stroke-width", 2);
   }
 
-  private redraw() {
+  private redraw = (transform: ZoomTransform = zoomIdentity) => {
     const {
       chartArea,
       dataController: { regionsBinding },
       config,
+      width,
+      height,
     } = this;
 
     const ctx = chartArea?.context;
 
     if (!ctx) return;
+
+    ctx.save();
+    ctx.clearRect(0, 0, width, height);
 
     regionsBinding?.each((d, i, nodes) => {
       const node = select(nodes[i]);
@@ -144,16 +161,23 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
       ctx.beginPath();
       ctx.fillStyle = config?.options?.color?.(d) ?? "#fff";
 
-      ctx.rect(
+      const [x, y] = transform.apply([
         parseInt(node.attr("x"), 10),
         parseInt(node.attr("y"), 10),
-        parseInt(node.attr("width"), 10),
-        parseInt(node.attr("height"), 10)
+      ]);
+
+      ctx.rect(
+        x,
+        y,
+        parseInt(node.attr("width"), 10) * transform.k,
+        parseInt(node.attr("height"), 10) * transform.k
       );
+
       ctx.fill();
       ctx.closePath();
+      ctx.restore();
     });
-  }
+  };
 }
 
 export default RegionsChart;
