@@ -7,14 +7,12 @@ import {
 } from "d3";
 
 import Chart from "./Chart";
-import { ZERO_MARGIN } from "./constants/common";
 import RegionsController from "./controllers/RegionsController";
 import Zoom from "./controllers/Zoom";
 import { xAxisFactory, yAxisFactory } from "./helpers/axis";
 import {
   ChartConfig,
   DatumRect,
-  Margin,
   MountElement,
   RegionDatum,
 } from "./types/general";
@@ -28,13 +26,10 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
   private gy?: SimpleSelection<SVGGElement>;
   private zoom?: Zoom<HTMLCanvasElement>;
 
-  private margin: Margin = ZERO_MARGIN;
-
   constructor(element: MountElement, config: ChartConfig<RegionDatum<Value>>) {
     super(element, config);
 
     const { width, height, chartArea } = this;
-    this.margin = this.config.options?.margin ?? this.margin;
 
     this.dataController = new RegionsController(
       {
