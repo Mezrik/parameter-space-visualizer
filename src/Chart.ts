@@ -1,7 +1,8 @@
 import { select, Selection } from "d3";
 import ChartArea from "./components/ChartArea";
 import Config from "./Config";
-import { ChartConfig, DatumRect, MountElement } from "./types/general";
+import { ZERO_MARGIN } from "./constants/common";
+import { ChartConfig, DatumRect, Margin, MountElement } from "./types/general";
 import { SimpleSelection } from "./types/selection";
 
 class Chart<Datum> {
@@ -9,12 +10,15 @@ class Chart<Datum> {
   protected config: Config<Datum>;
   protected chartArea?: ChartArea<DatumRect<Datum>>;
   protected svg?: SimpleSelection<SVGSVGElement>;
+  protected margin: Margin = ZERO_MARGIN;
 
   private _width: number;
   private _height: number;
 
   constructor(element: MountElement, config: ChartConfig<Datum>) {
     this.config = new Config(config);
+
+    this.margin = this.config.options?.margin ?? this.margin;
 
     this._height = config.height;
     this._width = config.width;
