@@ -10,7 +10,7 @@ export type ChartAreaMouseEventCb<Datum extends {}> = (data: Datum[]) => void;
 
 class ChartArea<Datum extends Rect> {
   private container: SimpleSelection<HTMLDivElement>;
-  private canvas: SimpleSelection<HTMLCanvasElement>;
+  private _canvas: SimpleSelection<HTMLCanvasElement>;
   private _svg: SimpleSelection<SVGSVGElement>;
 
   private _data?: QuadTree;
@@ -19,9 +19,10 @@ class ChartArea<Datum extends Rect> {
     this.container = root
       .append("div")
       .classed("chart-area", true)
-      .style("position", "absolute");
+      .style("position", "absolute")
+      .style("transform", "translate(1px, 1px)"); // TODO: should reflect axis stroke-width
 
-    this.canvas = this.container
+    this._canvas = this.container
       .append("canvas")
       .attr("width", w)
       .attr("height", h)
@@ -36,15 +37,15 @@ class ChartArea<Datum extends Rect> {
   }
 
   public data(value: Datum[]) {
-    const canvas = this.canvas.node();
+    const _canvas = this._canvas.node();
 
-    if (canvas)
+    if (_canvas)
       this._data = new QuadTree(
         {
           x: 0,
           y: 0,
-          width: canvas.width,
-          height: canvas.height,
+          width: _canvas.width,
+          height: _canvas.height,
         },
         4,
         200
@@ -72,11 +73,15 @@ class ChartArea<Datum extends Rect> {
 
       callback(data ?? []);
     };
-    this.canvas.on(name, eventHandler);
+    this._canvas.on(name, eventHandler);
+  }
+
+  get canvas() {
+    return this._canvas;
   }
 
   get context() {
-    return this.canvas.node()?.getContext("2d");
+    return this._canvas.node()?.getContext("2d");
   }
 
   get svg() {
