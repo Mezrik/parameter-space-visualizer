@@ -1,8 +1,9 @@
-import { select, Selection } from "d3";
+import { ScaleLinear, select, Selection } from "d3";
 
 import Chart from "./Chart";
 import { ZERO_MARGIN } from "./constants/common";
 import RegionsController from "./controllers/RegionsController";
+import Zoom from "./controllers/Zoom";
 import { xAxisFactory, yAxisFactory } from "./helpers/axis";
 import {
   ChartConfig,
@@ -18,6 +19,11 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
   private highlight?: SimpleSelection<SVGRectElement>;
   private gx?: SimpleSelection<SVGGElement>;
   private gy?: SimpleSelection<SVGGElement>;
+  private zoom?: Zoom<
+    HTMLCanvasElement,
+    ScaleLinear<number, number, never>,
+    ScaleLinear<number, number, never>
+  >;
 
   private margin: Margin = ZERO_MARGIN;
 
@@ -56,6 +62,7 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
 
     this.initAxes();
     this.initHighlightLayer();
+    this.initZoom();
 
     this.redraw();
   }
@@ -71,6 +78,27 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
       .attr("width", width)
       .attr("height", height);
   }
+
+  private initZoom() {
+    const [xScale, yScale] = this.dataController.currentScales;
+    if (xScale) {
+      this.zoom = new Zoom(xScale.scale, yScale?.scale, [1, 10]);
+      this.chartArea?.canvas.call(this.zoom?.zoom);
+
+      this.zoom.onChange(this.redrawAxes);
+    }
+  }
+
+  private redrawAxes = (
+    xScale: ScaleLinear<number, number>,
+    yScale?: ScaleLinear<number, number>
+  ) => {
+    const { height, margin } = this;
+
+    this.gx?.call(xAxisFactory(height, margin, xScale));
+
+    if (yScale) this.gy?.call(yAxisFactory(margin, yScale));
+  };
 
   private initAxes() {
     const { svg, height, margin } = this;
