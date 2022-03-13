@@ -131,8 +131,8 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
 
     this.highlight
       ?.attr("fill", "transparent")
-      .attr("stroke", "#000")
-      .attr("stroke-width", 2);
+      .attr("stroke", "#9b9b9b")
+      .attr("stroke-width", 3);
   }
 
   private redraw = (transform: ZoomTransform = zoomIdentity) => {
