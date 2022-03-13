@@ -70,9 +70,17 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
   }
 
   private initZoom() {
+    const { xMax, yMax } = this;
+
     const [xScale] = this.dataController.currentScales;
     if (xScale) {
-      this.zoom = new Zoom([1, 10]);
+      this.zoom = new Zoom(
+        [1, 10],
+        [
+          [0, 0],
+          [xMax, yMax],
+        ]
+      );
       this.chartArea?.canvas.call(this.zoom?.zoom);
 
       this.zoom.onChange(this.redrawAxes);

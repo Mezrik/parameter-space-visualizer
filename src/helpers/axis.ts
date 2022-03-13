@@ -1,5 +1,4 @@
 import { axisBottom, axisLeft } from "d3";
-import { Margin } from "../types/general";
 import { AnyD3Scale } from "../types/scale";
 import { SimpleSelection } from "../types/selection";
 

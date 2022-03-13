@@ -8,8 +8,14 @@ class Zoom<ZoomRefElement extends ZoomedElementBaseType> {
   // Zoom behaviour, this should be attached to the zoom base (svg, canvas, etc.)
   public zoom = zoom<ZoomRefElement, unknown>();
 
-  constructor(scaleExtent?: [number, number]) {
+  constructor(
+    scaleExtent?: [number, number],
+    translateExtent?: [[number, number], [number, number]]
+  ) {
     if (scaleExtent) this.zoom.scaleExtent(scaleExtent);
+
+    if (translateExtent) this.zoom.translateExtent(translateExtent);
+
     this.zoom.on("zoom", this.handleZoom);
   }
 
