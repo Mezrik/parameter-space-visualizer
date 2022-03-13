@@ -21,7 +21,6 @@ export type DataControllerOptions<T> = {
   data: T;
   width: number;
   height: number;
-  margin: Margin;
 };
 
 class DataController<Datum, Data extends Array<Datum> = Array<Datum>> {

@@ -4,6 +4,7 @@ import QuadTree, { Rect } from "@timohausmann/quadtree-js";
 // import QuadTree, { Accessor } from "../lib/QuadTree";
 import { rectsOverlapping } from "../helpers/canvas";
 import { SimpleSelection } from "../types/selection";
+import { Margin } from "../types/general";
 
 export type ChartAreaMouseEvents = "mousemove" | "mouseover" | "mouseout";
 export type ChartAreaMouseEventCb<Datum extends {}> = (data: Datum[]) => void;
@@ -15,12 +16,17 @@ class ChartArea<Datum extends Rect> {
 
   private _data?: QuadTree;
 
-  constructor(root: SimpleSelection<HTMLDivElement>, w: number, h: number) {
+  constructor(
+    root: SimpleSelection<HTMLDivElement>,
+    w: number,
+    h: number,
+    m: Margin
+  ) {
     this.container = root
       .append("div")
       .classed("chart-area", true)
       .style("position", "absolute")
-      .style("transform", "translate(1px, 1px)"); // TODO: should reflect axis stroke-width
+      .style("transform", "translate(" + m.left + "px,  " + m.top + "px)");
 
     this._canvas = this.container
       .append("canvas")
