@@ -63,6 +63,7 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
     if (!highlight) return;
 
     highlight
+      .style("display", "initial")
       .attr("x", x)
       .attr("y", y)
       .attr("width", width)
@@ -85,6 +86,10 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
 
       this.zoom.onChange(this.redrawAxes);
       this.zoom.onChange(this.redraw);
+      this.zoom.onChange((t) => {
+        if (this.chartArea) this.chartArea.transform = t;
+        this.highlight?.style("display", "none");
+      });
     }
   }
 
