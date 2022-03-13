@@ -1,4 +1,4 @@
-import { Selection, pointer } from "d3";
+import { Selection, pointer, zoomIdentity, ZoomTransform } from "d3";
 import QuadTree, { Rect } from "@timohausmann/quadtree-js";
 
 // import QuadTree, { Accessor } from "../lib/QuadTree";
@@ -15,6 +15,7 @@ class ChartArea<Datum extends Rect> {
   private _svg: SimpleSelection<SVGSVGElement>;
 
   private _data?: QuadTree;
+  private _transfrom = zoomIdentity;
 
   constructor(
     root: SimpleSelection<HTMLDivElement>,
@@ -65,7 +66,8 @@ class ChartArea<Datum extends Rect> {
     callback: ChartAreaMouseEventCb<Datum>
   ) {
     const eventHandler = (ev: MouseEvent) => {
-      const [x, y] = pointer(ev);
+      const { _transfrom } = this;
+      const [x, y] = _transfrom.invert(pointer(ev));
       const pointerRect = {
         x,
         y,
@@ -77,9 +79,22 @@ class ChartArea<Datum extends Rect> {
         ?.retrieve(pointerRect)
         .filter((d) => rectsOverlapping(d, pointerRect)) as Datum[];
 
-      callback(data ?? []);
+      callback(
+        (data?.map(({ x, y, width, height, ...rest }) => ({
+          ...rest,
+          x: _transfrom.applyX(x),
+          y: _transfrom.applyY(y),
+          width: _transfrom.k * width,
+          height: _transfrom.k * height,
+        })) as Datum[]) ?? []
+      );
     };
+
     this._canvas.on(name, eventHandler);
+  }
+
+  set transform(transform: ZoomTransform) {
+    this._transfrom = transform;
   }
 
   get canvas() {
