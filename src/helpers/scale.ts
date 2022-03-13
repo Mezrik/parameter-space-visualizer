@@ -26,12 +26,3 @@ export const getTicksFormatter = <Scale extends AnyD3Scale>(
 
   return (d: ScaleInput<Scale>) => d.toString();
 };
-
-export const getScaleRange = (
-  type: "x" | "y",
-  size: number,
-  margin: Margin
-) => {
-  if (type === "x") return [margin.left ?? 0, size - (margin.right ?? 0)];
-  return [size - (margin.bottom ?? 0), margin.top ?? 0];
-};

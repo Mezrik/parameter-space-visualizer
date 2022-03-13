@@ -1,10 +1,4 @@
-import {
-  ScaleLinear,
-  select,
-  Selection,
-  zoomIdentity,
-  ZoomTransform,
-} from "d3";
+import { select, zoomIdentity, ZoomTransform } from "d3";
 
 import Chart from "./Chart";
 import RegionsController from "./controllers/RegionsController";
@@ -29,14 +23,13 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
   constructor(element: MountElement, config: ChartConfig<RegionDatum<Value>>) {
     super(element, config);
 
-    const { width, height, chartArea } = this;
+    const { xMax, yMax, chartArea } = this;
 
     this.dataController = new RegionsController(
       {
-        width,
-        height,
+        width: xMax,
+        height: yMax,
         data: this.config.data,
-        margin: this.margin,
       },
       this.config.params
     );
@@ -88,37 +81,32 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
   }
 
   private redrawAxes = (transform: ZoomTransform) => {
-    const { height, margin } = this;
+    const { yMax } = this;
     const [xScale, yScale] = this.dataController.currentScales;
 
     if (!xScale) return;
 
     this.gx?.call(
-      xAxisFactory(
-        height,
-        margin,
-        transform.rescaleX(xScale.scale) as AnyD3Scale
-      )
+      xAxisFactory(yMax, transform.rescaleX(xScale.scale) as AnyD3Scale)
     );
 
     if (yScale)
       this.gy?.call(
-        yAxisFactory(margin, transform.rescaleY(yScale.scale) as AnyD3Scale)
+        yAxisFactory(transform.rescaleY(yScale.scale) as AnyD3Scale)
       );
   };
 
   private initAxes() {
-    const { svg, height, margin } = this;
+    const { svg, yMax } = this;
     const [xScale, yScale] = this.dataController.currentScales;
 
     // X scale should be always defined, if not, something went wrong
     if (!xScale) return;
 
-    this.gx = svg?.append("g").call(xAxisFactory(height, margin, xScale.scale));
+    this.gx = svg?.append("g").call(xAxisFactory(yMax, xScale.scale));
 
     // Y scale is not guaranteed, since the chart supports 1D chart
-    if (yScale)
-      this.gy = svg?.append("g").call(yAxisFactory(margin, yScale.scale));
+    if (yScale) this.gy = svg?.append("g").call(yAxisFactory(yScale.scale));
   }
 
   private initHighlightLayer() {

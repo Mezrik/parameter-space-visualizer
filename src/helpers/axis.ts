@@ -1,15 +1,17 @@
-import { axisBottom, axisLeft, Selection } from "d3";
+import { axisBottom, axisLeft } from "d3";
 import { Margin } from "../types/general";
 import { AnyD3Scale } from "../types/scale";
 import { SimpleSelection } from "../types/selection";
 
 export const xAxisFactory =
-  (height: number, margin: Margin, xScale: AnyD3Scale) =>
+  (height: number, xScale: AnyD3Scale, stroke = 1) =>
   (g: SimpleSelection<SVGGElement>) =>
     g
-      .attr("transform", `translate(0,${height - margin.bottom})`)
-      .call(axisBottom(xScale));
+      .attr("transform", `translate(0,${height})`)
+      .call(axisBottom(xScale))
+      .attr("stroke-width", stroke);
 
 export const yAxisFactory =
-  (margin: Margin, yScale: AnyD3Scale) => (g: SimpleSelection<SVGGElement>) =>
-    g.attr("transform", `translate(${margin.left},0)`).call(axisLeft(yScale));
+  (yScale: AnyD3Scale, stroke = 1) =>
+  (g: SimpleSelection<SVGGElement>) =>
+    g.call(axisLeft(yScale)).attr("stroke-width", stroke);
