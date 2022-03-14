@@ -7,7 +7,10 @@ import { SimpleSelection } from "../types/selection";
 import { Margin } from "../types/general";
 
 export type ChartAreaMouseEvents = "mousemove" | "mouseover" | "mouseout";
-export type ChartAreaMouseEventCb<Datum extends {}> = (data: Datum[]) => void;
+export type ChartAreaMouseEventCb<Datum extends {}> = (
+  data: Datum[],
+  pointer: [number, number]
+) => void;
 
 class ChartArea<Datum extends Rect> {
   private container: SimpleSelection<HTMLDivElement>;
@@ -86,7 +89,8 @@ class ChartArea<Datum extends Rect> {
           y: _transfrom.applyY(y),
           width: _transfrom.k * width,
           height: _transfrom.k * height,
-        })) as Datum[]) ?? []
+        })) as Datum[]) ?? [],
+        [x, y]
       );
     };
 

@@ -1,6 +1,7 @@
 import { select, zoomIdentity, ZoomTransform } from "d3";
 
 import Chart from "./Chart";
+import Tooltip from "./components/Tooltip";
 import RegionsController from "./controllers/RegionsController";
 import Zoom from "./controllers/Zoom";
 import { xAxisFactory, yAxisFactory } from "./helpers/axis";
@@ -15,6 +16,7 @@ import { SimpleSelection } from "./types/selection";
 
 class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
   private dataController: RegionsController<Value>;
+  private g?: SimpleSelection<SVGGElement>;
   private highlight?: SimpleSelection<SVGRectElement>;
   private gx?: SimpleSelection<SVGGElement>;
   private gy?: SimpleSelection<SVGGElement>;
@@ -46,8 +48,39 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
       }))
     );
 
-    chartArea?.on("mousemove", (d) => {
-      d.forEach((rect) => this.highlightRect(rect));
+    this.g = this.chartArea?.svg
+      ?.append("g")
+      .attr("width", this.width)
+      .attr("height", this.height);
+
+    let tooltip: Tooltip<RegionDatum<Value>>;
+    if (this.g) {
+      const [xParam, yParam] = this.dataController.params ?? [];
+      const [xScale, yScale] = this.dataController.currentScales;
+
+      tooltip = new Tooltip(
+        this.g,
+        (d) => `
+        value: ${d.value}</br>
+        x-from: ${
+          xParam && xScale ? xScale.scale(d.params[xParam].from) : ""
+        }</br>
+        x-to: ${xParam && xScale ? xScale.scale(d.params[xParam].to) : ""}</br>
+        y-from: ${
+          yParam && yScale ? yScale.scale(d.params[yParam].from) : ""
+        }</br>
+        y-to: ${yParam && yScale ? yScale.scale(d.params[yParam].to) : ""}
+      `
+      );
+    }
+
+    chartArea?.on("mousemove", (d, [x, y]) => {
+      const lastRect = d[d.length - 1];
+      if (!lastRect) return;
+
+      this.highlightRect(lastRect);
+
+      tooltip?.showTooltip({ ...lastRect, width: 0, height: 0, x, y });
     });
 
     this.initAxes();
@@ -123,11 +156,7 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
   }
 
   private initHighlightLayer() {
-    this.highlight = this.chartArea?.svg
-      ?.append("g")
-      .attr("width", this.width)
-      .attr("height", this.height)
-      .append("rect");
+    this.highlight = this.g?.append("rect");
 
     this.highlight
       ?.attr("fill", "transparent")
