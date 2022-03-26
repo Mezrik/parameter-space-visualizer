@@ -3,24 +3,18 @@ import { select, zoomIdentity, ZoomTransform } from "d3";
 import Chart from "./Chart";
 import Tooltip from "./components/Tooltip";
 import RegionsController from "./controllers/RegionsController";
-import Zoom from "./controllers/Zoom";
-import { xAxisFactory, yAxisFactory } from "./helpers/axis";
 import {
   ChartConfig,
   DatumRect,
   MountElement,
   RegionDatum,
 } from "./types/general";
-import { AnyD3Scale } from "./types/scale";
 import { SimpleSelection } from "./types/selection";
 
 class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
   private dataController: RegionsController<Value>;
   private g?: SimpleSelection<SVGGElement>;
   private highlight?: SimpleSelection<SVGRectElement>;
-  private gx?: SimpleSelection<SVGGElement>;
-  private gy?: SimpleSelection<SVGGElement>;
-  private zoom?: Zoom<HTMLCanvasElement>;
 
   constructor(element: MountElement, config: ChartConfig<RegionDatum<Value>>) {
     super(element, config);
@@ -83,10 +77,14 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
       tooltip?.showTooltip({ ...lastRect, width: 0, height: 0, x, y });
     });
 
-    this.initAxes();
-    this.initHighlightLayer();
-    this.initZoom();
+    this.zoom?.onChange(this.redraw);
+    this.zoom?.onChange(() => {
+      this.highlight?.style("display", "none");
+    });
 
+    this.addAxes(this.dataController.currentScales);
+
+    this.initHighlightLayer();
     this.redraw();
   }
 
@@ -101,58 +99,6 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
       .attr("y", y)
       .attr("width", width)
       .attr("height", height);
-  }
-
-  private initZoom() {
-    const { xMax, yMax } = this;
-
-    const [xScale] = this.dataController.currentScales;
-    if (xScale) {
-      this.zoom = new Zoom(
-        [1, 10],
-        [
-          [0, 0],
-          [xMax, yMax],
-        ]
-      );
-      this.chartArea?.canvas.call(this.zoom?.zoom);
-
-      this.zoom.onChange(this.redrawAxes);
-      this.zoom.onChange(this.redraw);
-      this.zoom.onChange((t) => {
-        if (this.chartArea) this.chartArea.transform = t;
-        this.highlight?.style("display", "none");
-      });
-    }
-  }
-
-  private redrawAxes = (transform: ZoomTransform = zoomIdentity) => {
-    const { yMax } = this;
-    const [xScale, yScale] = this.dataController.currentScales;
-
-    if (!xScale) return;
-
-    this.gx?.call(
-      xAxisFactory(yMax, transform.rescaleX(xScale.scale) as AnyD3Scale)
-    );
-
-    if (yScale)
-      this.gy?.call(
-        yAxisFactory(transform.rescaleY(yScale.scale) as AnyD3Scale)
-      );
-  };
-
-  private initAxes() {
-    const { svg, yMax } = this;
-    const [xScale, yScale] = this.dataController.currentScales;
-
-    // X scale should be always defined, if not, something went wrong
-    if (!xScale) return;
-
-    this.gx = svg?.append("g").call(xAxisFactory(yMax, xScale.scale));
-
-    // Y scale is not guaranteed, since the chart supports 1D chart
-    if (yScale) this.gy = svg?.append("g").call(yAxisFactory(yScale.scale));
   }
 
   private initHighlightLayer() {
@@ -211,7 +157,8 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
     this.dataController.bindRegions(xMax, yMax);
 
     this.redraw();
-    this.redrawAxes();
+
+    this.axes?.redrawAxes(yMax, this.dataController.currentScales);
   }
 
   /**

@@ -19,15 +19,19 @@ class Zoom<ZoomRefElement extends ZoomedElementBaseType> {
     this.zoom.on("zoom", this.handleZoom);
   }
 
-  public onChange(listener: ZoomListener) {
-    this.zoomListeners.push(listener);
-  }
-
   private handleZoom = (event: any) => {
     const transform: ZoomTransform = event.transform;
 
     this.zoomListeners.forEach((cb) => cb(transform));
   };
+
+  public onChange(listener: ZoomListener) {
+    this.zoomListeners.push(listener);
+  }
+
+  public removeListeners() {
+    this.zoomListeners = [];
+  }
 }
 
 export default Zoom;

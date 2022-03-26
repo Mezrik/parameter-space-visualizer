@@ -11,6 +11,7 @@ import {
   ScaleThreshold,
   ScaleOrdinal,
   ScalePoint,
+  NumberValue,
 } from "d3";
 
 type ValueOf<Scale> = Scale[keyof Scale];
@@ -39,3 +40,15 @@ export type TickFormatter<T> = (value: T) => string | undefined;
  * A catch-all type for all D3 scales.
  */
 export declare type AnyD3Scale = ValueOf<AnyD3Scales>;
+
+export type DataControllerScaleType =
+  | {
+      scale: ScaleLinear<number, number>;
+      extent: [NumberValue, NumberValue];
+    }
+  | undefined;
+
+export type DataControllerScaleTuple = [
+  DataControllerScaleType,
+  DataControllerScaleType
+];
