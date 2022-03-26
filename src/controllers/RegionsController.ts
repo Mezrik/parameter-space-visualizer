@@ -19,7 +19,7 @@ class RegionsController<Value> extends DataController<RegionDatum<Value>> {
 
     const { width, height } = opts;
 
-    this._initRegionsBinding(width, height);
+    this.bindRegions(width, height);
   }
 
   public x = (d: RegionDatum<Value>) => {
@@ -56,7 +56,7 @@ class RegionsController<Value> extends DataController<RegionDatum<Value>> {
       : UNDEFINED_CHART_VALUE;
   };
 
-  private _initRegionsBinding(w: number, h: number) {
+  public bindRegions(w: number, h: number) {
     const [xScale, yScale] = this.currentScales;
 
     if (!xScale) return;

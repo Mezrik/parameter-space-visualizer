@@ -25,7 +25,7 @@ export type DataControllerOptions<T> = {
 
 class DataController<Datum, Data extends Array<Datum> = Array<Datum>> {
   private dataContainer: Selection<HTMLElement, Data, null, undefined>;
-  protected dataBinding?: Selection<BaseType, Datum, HTMLElement, Data>;
+  protected dataBinding: Selection<BaseType, Datum, HTMLElement, Data>;
 
   private paramScales: Record<ParamType, ScaleType> = {};
   private _params: ParamsTuple | null = null;
@@ -35,15 +35,11 @@ class DataController<Datum, Data extends Array<Datum> = Array<Datum>> {
     this.dataContainer = select(detachedContainer);
     this._params = params ?? null;
 
-    this._initDataBinding(opts);
-    this._initScales(opts);
+    this.dataBinding = this.dataContainer.selectAll("custom").data(opts.data);
+    this.initScales(opts);
   }
 
-  private _initDataBinding({ data }: DataControllerOptions<Data>) {
-    this.dataBinding = this.dataContainer.selectAll("custom").data(data);
-  }
-
-  private _initScales({ data }: DataControllerOptions<Data>) {
+  private initScales({ data }: DataControllerOptions<Data>) {
     const params = getParams(data);
     params.forEach((param) => {
       const [min, max] = extent(getParamDomain(data, param));
