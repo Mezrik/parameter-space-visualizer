@@ -24,8 +24,8 @@ class Config<Datum> {
 
     if (userParams && checkIfParamsExist(dataParams, userParams))
       return userParams;
-    const [x, y] = dataParams;
 
+    const [x, y] = dataParams;
     return [x, y ? y : undefined];
   }
 

@@ -126,7 +126,7 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
     }
   }
 
-  private redrawAxes = (transform: ZoomTransform) => {
+  private redrawAxes = (transform: ZoomTransform = zoomIdentity) => {
     const { yMax } = this;
     const [xScale, yScale] = this.dataController.currentScales;
 
@@ -203,6 +203,38 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
       ctx.restore();
     });
   };
+
+  private reset() {
+    const { xMax, yMax } = this;
+
+    // Re-bind the regions, this will reset scales to current params scales
+    this.dataController.bindRegions(xMax, yMax);
+
+    this.redraw();
+    this.redrawAxes();
+  }
+
+  /**
+   * Change param displayed on axis x
+   * @param param
+   */
+  public x(param: string) {
+    const { params } = this.dataController;
+    this.dataController.params = [param, params?.[1]];
+    this.reset();
+  }
+
+  /**
+   * Change param displayed on axis y
+   * @param param
+   */
+  public y(param?: string) {
+    const { params } = this.dataController;
+    if (params) {
+      this.dataController.params = [params?.[0], param];
+      this.reset();
+    }
+  }
 }
 
 export default RegionsChart;

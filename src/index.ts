@@ -29,6 +29,9 @@ document.addEventListener("DOMContentLoaded", function (e) {
     width: 1200,
     height: 800,
   });
+
+  chart.x("param_block");
+  chart.y("param_sig");
 });
 
 export default Chart;
