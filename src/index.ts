@@ -32,6 +32,20 @@ document.addEventListener("DOMContentLoaded", function (e) {
 
   chart.x("param_block");
   chart.y("param_sig");
+
+  const right = document.createElement("div");
+  right.style.position = "absolute";
+  right.style.right = "0px";
+  right.style.width = "300px";
+
+  document.body.appendChild(right);
+
+  const chart2 = new RegionsChart(right, {
+    options: { color, margin: { top: 20, right: 30, bottom: 30, left: 40 } },
+    data: RegionResults01Parsed!,
+    width: 300,
+    height: 200,
+  });
 });
 
 export default Chart;

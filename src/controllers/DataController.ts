@@ -1,21 +1,10 @@
-import {
-  select,
-  Selection,
-  BaseType,
-  ScaleLinear,
-  extent,
-  scaleLinear,
-  NumberValue,
-} from "d3";
+import { select, Selection, BaseType, extent, scaleLinear } from "d3";
 import { getParamDomain, getParams } from "../helpers/general";
-import { Margin, ParamsTuple, ParamType } from "../types/general";
-
-type ScaleType =
-  | {
-      scale: ScaleLinear<number, number>;
-      extent: [NumberValue, NumberValue];
-    }
-  | undefined;
+import { ParamsTuple, ParamType } from "../types/general";
+import {
+  DataControllerScaleTuple,
+  DataControllerScaleType,
+} from "../types/scale";
 
 export type DataControllerOptions<T> = {
   data: T;
@@ -27,7 +16,7 @@ class DataController<Datum, Data extends Array<Datum> = Array<Datum>> {
   private dataContainer: Selection<HTMLElement, Data, null, undefined>;
   protected dataBinding: Selection<BaseType, Datum, HTMLElement, Data>;
 
-  private paramScales: Record<ParamType, ScaleType> = {};
+  private paramScales: Record<ParamType, DataControllerScaleType> = {};
   private _params: ParamsTuple | null = null;
 
   constructor(opts: DataControllerOptions<Data>, params?: ParamsTuple) {
@@ -60,7 +49,7 @@ class DataController<Datum, Data extends Array<Datum> = Array<Datum>> {
     return this._params;
   }
 
-  get currentScales(): [ScaleType, ScaleType] {
+  get currentScales(): DataControllerScaleTuple {
     if (!this._params) return [undefined, undefined];
 
     const [x, y] = this._params;
