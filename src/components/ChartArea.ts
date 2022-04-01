@@ -90,7 +90,7 @@ class ChartArea<Datum extends Rect> {
           width: _transfrom.k * width,
           height: _transfrom.k * height,
         })) as Datum[]) ?? [],
-        [x, y]
+        [_transfrom.applyX(x), _transfrom.applyY(y)]
       );
     };
 
