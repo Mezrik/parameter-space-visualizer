@@ -158,7 +158,8 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
 
     this.redraw();
 
-    this.axes?.redrawAxes(yMax, this.dataController.currentScales);
+    this.axes?.updateScales(this.dataController.currentScales);
+    this.axes?.redrawAxes();
   }
 
   /**

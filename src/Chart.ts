@@ -73,9 +73,9 @@ class Chart<Datum> {
   protected addAxes(scales: DataControllerScaleTuple) {
     if (this.svg) {
       const axes = new Axes(this.svg, this.yMax, scales);
-      this.zoom?.onChange((transform) =>
-        axes.redrawAxes(this.yMax, scales, transform)
-      );
+      this.zoom?.onChange((transform) => {
+        axes.redrawAxes(transform);
+      });
       this.axes = axes;
     }
   }
