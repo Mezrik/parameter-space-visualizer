@@ -8,12 +8,17 @@ class Axes {
   private gx?: SimpleSelection<SVGGElement>;
   private gy?: SimpleSelection<SVGGElement>;
 
+  private height: number;
+  private scales: DataControllerScaleTuple;
+
   constructor(
     el: SimpleSelection<SVGGElement>,
     height: number,
     scales: DataControllerScaleTuple
   ) {
     const [xScale, yScale] = scales;
+    this.height = height;
+    this.scales = scales;
 
     // X scale should be always defined, if not, something went wrong
     if (!xScale) return;
@@ -24,11 +29,8 @@ class Axes {
     if (yScale) this.gy = el.append("g").call(yAxisFactory(yScale.scale));
   }
 
-  public redrawAxes = (
-    height: number,
-    scales: DataControllerScaleTuple,
-    transform: ZoomTransform = zoomIdentity
-  ) => {
+  public redrawAxes = (transform: ZoomTransform = zoomIdentity) => {
+    const { height, scales } = this;
     const [xScale, yScale] = scales;
 
     if (!xScale) return;
@@ -41,6 +43,10 @@ class Axes {
       this.gy?.call(
         yAxisFactory(transform.rescaleY(yScale.scale) as AnyD3Scale)
       );
+  };
+
+  public updateScales = (scales: DataControllerScaleTuple) => {
+    this.scales = scales;
   };
 }
 
