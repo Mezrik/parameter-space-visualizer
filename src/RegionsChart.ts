@@ -160,6 +160,18 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
 
     this.axes?.updateScales(this.dataController.currentScales);
     this.axes?.redrawAxes();
+
+    const { x, y, w, h } = this.dataController;
+
+    this.chartArea?.data(
+      this.config.data.map((d) => ({
+        ...d,
+        x: x(d),
+        y: y(d),
+        width: w(d),
+        height: h(d),
+      }))
+    );
   }
 
   /**
