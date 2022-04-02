@@ -50,7 +50,8 @@ document.addEventListener("DOMContentLoaded", function (e) {
 
   const under = document.createElement("div");
   under.style.position = "absolute";
-  under.style.width = "1200px";
+  under.style.top = "1200px";
+  under.style.width = "800px";
 
   document.body.appendChild(under);
 
@@ -62,11 +63,11 @@ document.addEventListener("DOMContentLoaded", function (e) {
     expression:
       "(-1 * (pK^10*pL^10+(-120)*pK^7*pL^7+(-10)*pK^9*pL^9+45*pK^8*pL^8+210*pK^6*pL^6+(-250)*pK^5*pL^5+(-100)*pK^3*pL^3+25*pK^2*pL^2+200*pK^4*pL^4+(-1)))/(1)",
     intervals: [
-      { name: "pL", start: 0, end: 1 },
-      { name: "pK", start: 0, end: 1 },
+      { name: "pL", start: 0.1, end: 0.9 },
+      { name: "pK", start: 0.1, end: 0.9 },
     ],
-    width: 300,
-    height: 200,
+    width: 800,
+    height: 800,
   });
 });
 

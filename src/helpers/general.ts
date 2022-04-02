@@ -5,6 +5,12 @@ import {
   getParamDomain as getRegionsParamDomain,
 } from "./regions";
 
+import {
+  isVariableIntervalData,
+  getParams as getVariableIntervalParams,
+  getParamDomain as getVariableIntervalParamDomain,
+} from "./expression";
+
 export const checkIfParamsExist = (existing: string[], p: ParamsTuple) =>
   p[1]
     ? existing.includes(p[0]) && existing.includes(p[1])
@@ -23,11 +29,16 @@ export const getParamsTuple = (params?: Params): ParamsTuple | undefined => {
 export const getParams = <Datum>(data: Datum[]) => {
   if (isRegionsData(data)) return getRegionsParams(data);
 
-  return []; // TBD for other charts
+  if (isVariableIntervalData(data)) return getVariableIntervalParams(data);
+
+  return [];
 };
 
 export const getParamDomain = <Datum>(data: Datum[], param: string) => {
   if (isRegionsData(data)) return getRegionsParamDomain(data, param);
 
-  return []; // TBD for other charts
+  if (isVariableIntervalData(data))
+    return getVariableIntervalParamDomain(data, param);
+
+  return [];
 };
