@@ -1,5 +1,6 @@
 import { Rect } from "@timohausmann/quadtree-js";
 import { NumberValue } from "d3";
+import { VariableInterval } from "./expression";
 import { TickFormatter } from "./scale";
 
 export type ParamType = string;
@@ -65,6 +66,14 @@ export interface RegionDatum<Value = unknown> {
 export type ChartConfig<Datum> = {
   options?: UserOptions<Datum, NumberValue, NumberValue>;
   data: Array<Datum>;
+  width: number;
+  height: number;
+};
+
+export type ChartConfigDynamic<Datum> = {
+  options?: UserOptions<Datum, NumberValue, NumberValue>;
+  expression: string;
+  intervals: VariableInterval[];
   width: number;
   height: number;
 };
