@@ -17,8 +17,6 @@ class Config<Datum> {
   }
 
   get params(): ParamsTuple | undefined {
-    if (!this.data.length) return undefined;
-
     const dataParams = getParams(this.data);
     const userParams = getParamsTuple(this._config.options?.params);
 

@@ -4,13 +4,7 @@ import { RegionDatum, ParamsTuple, Margin } from "../types/general";
 import DataController, { DataControllerOptions } from "./DataController";
 
 class RegionsController<Value> extends DataController<RegionDatum<Value>> {
-  private dataContainer: Selection<
-    HTMLElement,
-    RegionDatum<Value>[],
-    null,
-    undefined
-  >;
-  private _regionsBinding?: Selection<
+  private _regionsBinding: Selection<
     BaseType,
     RegionDatum<Value>,
     HTMLElement,
@@ -23,9 +17,11 @@ class RegionsController<Value> extends DataController<RegionDatum<Value>> {
   ) {
     super(opts, params);
 
-    this.dataContainer = select(document.createElement("custom"));
+    const detachedContainer = select<HTMLElement, RegionDatum<Value>[]>(
+      document.createElement("custom")
+    );
 
-    this._regionsBinding = this.dataContainer
+    this._regionsBinding = detachedContainer
       .selectAll("custom")
       .data(opts.data);
 
@@ -69,7 +65,7 @@ class RegionsController<Value> extends DataController<RegionDatum<Value>> {
   public bindRegions() {
     // Bind zero for y position and height in case of 1D chart
     this._regionsBinding = this._regionsBinding
-      ?.join("custom")
+      .join("custom")
       .classed(".region", true)
       .attr("x", this.x)
       .attr("y", this.y)

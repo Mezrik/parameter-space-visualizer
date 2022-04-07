@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", function (e) {
 
   const under = document.createElement("div");
   under.style.position = "absolute";
-  under.style.top = "1200px";
+  under.style.top = "1000px";
   under.style.width = "800px";
 
   document.body.appendChild(under);
