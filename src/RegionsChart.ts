@@ -154,7 +154,8 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
     const { xMax, yMax } = this;
 
     // Re-bind the regions, this will reset scales to current params scales
-    this.dataController.bindRegions(xMax, yMax);
+    this.dataController.bindCurrentScalesRange(xMax, yMax);
+    this.dataController.bindRegions();
 
     this.redraw();
 

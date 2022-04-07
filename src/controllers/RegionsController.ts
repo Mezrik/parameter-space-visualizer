@@ -23,15 +23,13 @@ class RegionsController<Value> extends DataController<RegionDatum<Value>> {
   ) {
     super(opts, params);
 
-    const { width, height } = opts;
-
     this.dataContainer = select(document.createElement("custom"));
 
     this._regionsBinding = this.dataContainer
       .selectAll("custom")
       .data(opts.data);
 
-    this.bindRegions(width, height);
+    this.bindRegions();
   }
 
   public x = (d: RegionDatum<Value>) => {
@@ -68,14 +66,7 @@ class RegionsController<Value> extends DataController<RegionDatum<Value>> {
       : UNDEFINED_CHART_VALUE;
   };
 
-  public bindRegions(w: number, h: number) {
-    const [xScale, yScale] = this.currentScales;
-
-    if (!xScale) return;
-
-    xScale?.scale.range([0, w]);
-    yScale?.scale.range([h, 0]);
-
+  public bindRegions() {
     // Bind zero for y position and height in case of 1D chart
     this._regionsBinding = this._regionsBinding
       ?.join("custom")

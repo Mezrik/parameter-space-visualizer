@@ -22,7 +22,7 @@ class DataController<Datum, Data extends Array<Datum> = Array<Datum>> {
     this.initScales(opts);
   }
 
-  private initScales({ data }: DataControllerOptions<Data>) {
+  private initScales({ data, width, height }: DataControllerOptions<Data>) {
     const params = getParams(data);
     params.forEach((param) => {
       const [min, max] = extent(getParamDomain(data, param));
@@ -33,6 +33,14 @@ class DataController<Datum, Data extends Array<Datum> = Array<Datum>> {
           extent: [min, max],
         };
     });
+
+    this.bindCurrentScalesRange(width, height);
+  }
+
+  public bindCurrentScalesRange(w: number, h: number) {
+    const [xScale, yScale] = this.currentScales;
+    xScale?.scale.range([0, w]);
+    yScale?.scale.range([h, 0]);
   }
 
   set params(params: ParamsTuple | null) {
