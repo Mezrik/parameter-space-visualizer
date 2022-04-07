@@ -13,18 +13,12 @@ export type DataControllerOptions<T> = {
 };
 
 class DataController<Datum, Data extends Array<Datum> = Array<Datum>> {
-  private dataContainer: Selection<HTMLElement, Data, null, undefined>;
-  protected dataBinding: Selection<BaseType, Datum, HTMLElement, Data>;
-
   private paramScales: Record<ParamType, DataControllerScaleType> = {};
   private _params: ParamsTuple | null = null;
 
   constructor(opts: DataControllerOptions<Data>, params?: ParamsTuple) {
-    const detachedContainer = document.createElement("custom");
-    this.dataContainer = select(detachedContainer);
     this._params = params ?? null;
 
-    this.dataBinding = this.dataContainer.selectAll("custom").data(opts.data);
     this.initScales(opts);
   }
 
