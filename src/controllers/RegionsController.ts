@@ -1,9 +1,15 @@
-import { BaseType, Selection } from "d3-selection";
+import { BaseType, select, Selection } from "d3-selection";
 import { UNDEFINED_CHART_VALUE } from "../constants/common";
 import { RegionDatum, ParamsTuple, Margin } from "../types/general";
 import DataController, { DataControllerOptions } from "./DataController";
 
 class RegionsController<Value> extends DataController<RegionDatum<Value>> {
+  private dataContainer: Selection<
+    HTMLElement,
+    RegionDatum<Value>[],
+    null,
+    undefined
+  >;
   private _regionsBinding?: Selection<
     BaseType,
     RegionDatum<Value>,
@@ -18,6 +24,12 @@ class RegionsController<Value> extends DataController<RegionDatum<Value>> {
     super(opts, params);
 
     const { width, height } = opts;
+
+    this.dataContainer = select(document.createElement("custom"));
+
+    this._regionsBinding = this.dataContainer
+      .selectAll("custom")
+      .data(opts.data);
 
     this.bindRegions(width, height);
   }
@@ -65,7 +77,7 @@ class RegionsController<Value> extends DataController<RegionDatum<Value>> {
     yScale?.scale.range([h, 0]);
 
     // Bind zero for y position and height in case of 1D chart
-    this._regionsBinding = this.dataBinding
+    this._regionsBinding = this._regionsBinding
       ?.join("custom")
       .classed(".region", true)
       .attr("x", this.x)
