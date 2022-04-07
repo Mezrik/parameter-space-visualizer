@@ -1,4 +1,4 @@
-import { Token, VariableInterval } from "../types/expression";
+import { ProbabilityDatum, Token, VariableInterval } from "../types/expression";
 
 export const createVariableTokens = (variable: string): Token => {
   return {
@@ -22,13 +22,33 @@ export const isVariableIntervalData = (
   );
 };
 
-export const getParams = (data: VariableInterval[]) =>
+export const isProbabilityData = (
+  data: unknown[]
+): data is ProbabilityDatum[] => {
+  const d = data[0] as unknown as ProbabilityDatum;
+
+  return (
+    !!data.length && typeof d.value === "number" && typeof d.name === "string"
+  );
+};
+
+export const getParams = (data: (VariableInterval | ProbabilityDatum)[]) =>
   data.map(({ name }) => name);
 
-export const getParamDomain = (data: VariableInterval[], param: string) => {
-  const interval = data.find((d) => d.name === param);
+export const getParamDomain = (
+  data: (VariableInterval | ProbabilityDatum)[],
+  param: string
+) => {
+  const d = data.find((d) => d.name === param);
 
-  if (!interval) return [];
+  if (!d) return [];
 
-  return [interval.start, interval.end];
+  return [
+    (d as Partial<VariableInterval>).start ?? 0,
+    (d as Partial<VariableInterval>).end ?? 0,
+  ];
+};
+
+export const createStubProbabilityData = (intervals: VariableInterval[]) => {
+  return intervals.map(({ name }) => ({ name, value: 0 }));
 };

@@ -3,19 +3,20 @@ import { VariableInterval } from "../types/expression";
 import { ParamsTuple } from "../types/general";
 import DataController from "./DataController";
 
-class ScatterController extends DataController<any> {
+class ScatterController extends DataController<VariableInterval> {
   private _scatterBinding: Selection<BaseType, any, HTMLElement, []>;
   private distributionScales: [
     ScaleLinear<number, number>,
     ScaleLinear<number, number>
   ];
   private density: number;
+  private dimensions: { width: number; height: number };
 
   constructor(
     dimensions: { width: number; height: number },
     intervals: VariableInterval[],
     params?: ParamsTuple,
-    density = 10
+    density = 20
   ) {
     super({ ...dimensions, data: intervals }, params);
 
@@ -28,11 +29,14 @@ class ScatterController extends DataController<any> {
       .data(new Array(density * density));
 
     const distDom = [0, density - 1];
+
     this.distributionScales = [
       scaleLinear().domain(distDom).range([0, dimensions.width]),
       scaleLinear().domain(distDom).range([0, dimensions.height]),
     ];
+
     this.density = density;
+    this.dimensions = dimensions;
 
     this.bindScatter();
   }
@@ -48,6 +52,20 @@ class ScatterController extends DataController<any> {
 
   get binding() {
     return this._scatterBinding;
+  }
+
+  get coordsScales(): [
+    ScaleLinear<number, number>,
+    ScaleLinear<number, number>
+  ] {
+    return [
+      scaleLinear()
+        .domain([0, this.dimensions.width])
+        .range((this.currentScales[0]?.extent as [number, number]) ?? []),
+      scaleLinear()
+        .domain([0, this.dimensions.height])
+        .range((this.currentScales[1]?.extent as [number, number]) ?? []),
+    ];
   }
 }
 

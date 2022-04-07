@@ -4,6 +4,11 @@ export type VariableInterval = {
   end: number;
 };
 
+export type ProbabilityDatum = {
+  name: string;
+  value: number;
+};
+
 export type Token = {
   token: string;
   type: number;
