@@ -9,6 +9,7 @@ import {
   isVariableIntervalData,
   getParams as getVariableIntervalParams,
   getParamDomain as getVariableIntervalParamDomain,
+  isProbabilityData,
 } from "./expression";
 
 export const checkIfParamsExist = (existing: string[], p: ParamsTuple) =>
@@ -29,7 +30,8 @@ export const getParamsTuple = (params?: Params): ParamsTuple | undefined => {
 export const getParams = <Datum>(data: Datum[]) => {
   if (isRegionsData(data)) return getRegionsParams(data);
 
-  if (isVariableIntervalData(data)) return getVariableIntervalParams(data);
+  if (isVariableIntervalData(data) || isProbabilityData(data))
+    return getVariableIntervalParams(data);
 
   return [];
 };
@@ -37,7 +39,7 @@ export const getParams = <Datum>(data: Datum[]) => {
 export const getParamDomain = <Datum>(data: Datum[], param: string) => {
   if (isRegionsData(data)) return getRegionsParamDomain(data, param);
 
-  if (isVariableIntervalData(data))
+  if (isVariableIntervalData(data) || isProbabilityData(data))
     return getVariableIntervalParamDomain(data, param);
 
   return [];

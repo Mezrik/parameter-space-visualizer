@@ -20,7 +20,6 @@ class Axes {
     this.height = height;
     this.scales = scales;
 
-    console.log(scales);
     // X scale should be always defined, if not, something went wrong
     if (!xScale) return;
 
