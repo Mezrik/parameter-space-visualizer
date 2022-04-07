@@ -13,8 +13,9 @@ export const isVariableIntervalData = (
   data: unknown[]
 ): data is VariableInterval[] => {
   const interval = data[0] as unknown as VariableInterval;
+
   return (
-    !data.length &&
+    !!data.length &&
     typeof interval.end === "number" &&
     typeof interval.start === "number" &&
     typeof interval.name === "string"

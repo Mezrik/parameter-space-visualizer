@@ -24,10 +24,10 @@ class DataController<Datum, Data extends Array<Datum> = Array<Datum>> {
 
   private initScales({ data, width, height }: DataControllerOptions<Data>) {
     const params = getParams(data);
+
     params.forEach((param) => {
       const [min, max] = extent(getParamDomain(data, param));
-
-      if (min && max)
+      if (typeof min === "number" && typeof max === "number")
         this.paramScales[param] = {
           scale: scaleLinear().domain([min, max]),
           extent: [min, max],
