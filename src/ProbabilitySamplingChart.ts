@@ -23,12 +23,11 @@ class ProbabilitySamplingChart extends Chart<ProbabilityDatum> {
     element: MountElement,
     config: ChartConfigDynamic<ProbabilityDatum>
   ) {
-    super(element, {
-      ...config,
-      data: createStubProbabilityData(config.intervals),
-    });
+    super(element, config);
 
-    const { xMax, yMax } = this;
+    const {
+      config: { xMax, yMax },
+    } = this;
 
     this.expression = (pair) =>
       m.eval(
@@ -37,11 +36,7 @@ class ProbabilitySamplingChart extends Chart<ProbabilityDatum> {
         pair
       );
 
-    this.dataController = new ScatterController(
-      { width: xMax, height: yMax },
-      config.intervals,
-      this.config.params
-    );
+    this.dataController = new ScatterController(this.config);
 
     this.redraw();
     this.addAxes(this.dataController.currentScales);

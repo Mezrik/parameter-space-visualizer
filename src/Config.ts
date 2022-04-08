@@ -1,4 +1,5 @@
 import { extent } from "d3-array";
+import { ZERO_MARGIN } from "./constants/common";
 import {
   checkIfParamsExist,
   getParams,
@@ -8,6 +9,8 @@ import {
 import { getParamDomain } from "./helpers/general";
 import {
   ChartConfig,
+  ChartConfigDynamic,
+  Margin,
   Options,
   ParamsFixation,
   ParamsTuple,
@@ -15,18 +18,28 @@ import {
 } from "./types/general";
 
 class Config<Datum> {
-  private _config: ChartConfig<Datum>;
-  private allParams: ParamType[];
-  private paramsExtents: Record<ParamType, [number, number]>;
+  private _config: ChartConfig<Datum> | ChartConfigDynamic<Datum>;
+  private _margin: Margin = ZERO_MARGIN;
+
+  private _allParams: ParamType[];
+  private _paramsExtents: Record<ParamType, [number, number]>;
 
   private _userFixations: ParamsFixation;
 
-  constructor(config: ChartConfig<Datum>) {
+  constructor(config: ChartConfig<Datum> | ChartConfigDynamic<Datum>) {
     this._config = config;
 
-    this.allParams = getParams(this.data);
+    const m = config.options?.margin;
+    this._margin = {
+      top: m?.top ?? ZERO_MARGIN.top,
+      right: m?.right ?? ZERO_MARGIN.right,
+      bottom: m?.bottom ?? ZERO_MARGIN.bottom,
+      left: m?.left ?? ZERO_MARGIN.left,
+    };
 
-    this.paramsExtents = this.allParams.reduce(
+    this._allParams = getParams(this.data);
+
+    this._paramsExtents = this._allParams.reduce(
       (acc, param) => ({
         ...acc,
         [param]: extent(getParamDomain(this.data, param)),
@@ -34,15 +47,20 @@ class Config<Datum> {
       {}
     );
 
+    console.log(this._paramsExtents);
+
     this._userFixations = this._config.options?.paramsFixation ?? {};
   }
 
   get data() {
-    return this._config.data;
+    return (
+      (this._config as ChartConfig<Datum>).data ??
+      (this._config as ChartConfigDynamic<Datum>).intervals
+    );
   }
 
   get params(): ParamsTuple | undefined {
-    const dataParams = this.allParams;
+    const dataParams = this._allParams;
     const userParams = getParamsTuple(this._config.options?.params);
 
     if (userParams && checkIfParamsExist(dataParams, userParams))
@@ -57,8 +75,8 @@ class Config<Datum> {
 
     return getParamsToBeFixed(
       this.params,
-      this.allParams,
-      this.paramsExtents,
+      this._allParams,
+      this._paramsExtents,
       this._userFixations
     );
   }
@@ -92,6 +110,36 @@ class Config<Datum> {
         },
       },
     };
+  }
+
+  get margin() {
+    return this._margin;
+  }
+
+  get allParams() {
+    return this._allParams;
+  }
+
+  get paramsExtents() {
+    return this._paramsExtents;
+  }
+
+  get width() {
+    return this._config.width;
+  }
+
+  get height() {
+    return this._config.height;
+  }
+
+  get xMax() {
+    const { margin, width } = this;
+    return width - margin.left - margin.right;
+  }
+
+  get yMax() {
+    const { margin, height } = this;
+    return height - margin.top - margin.bottom;
   }
 }
 

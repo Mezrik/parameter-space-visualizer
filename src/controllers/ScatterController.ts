@@ -1,9 +1,10 @@
 import { select, Selection, BaseType, ScaleLinear, scaleLinear } from "d3";
-import { VariableInterval } from "../types/expression";
+import Config from "../Config";
+import { ProbabilityDatum } from "../types/expression";
 import { ParamsTuple } from "../types/general";
 import DataController from "./DataController";
 
-class ScatterController extends DataController<VariableInterval> {
+class ScatterController extends DataController<ProbabilityDatum> {
   private _scatterBinding: Selection<BaseType, any, HTMLElement, []>;
   private distributionScales: [
     ScaleLinear<number, number>,
@@ -12,13 +13,8 @@ class ScatterController extends DataController<VariableInterval> {
   private density: number;
   private dimensions: { width: number; height: number };
 
-  constructor(
-    dimensions: { width: number; height: number },
-    intervals: VariableInterval[],
-    params?: ParamsTuple,
-    density = 20
-  ) {
-    super({ ...dimensions, data: intervals }, params);
+  constructor(config: Config<ProbabilityDatum>, density = 20) {
+    super(config);
 
     const detachedContainer = select<HTMLElement, []>(
       document.createElement("custom")
@@ -31,12 +27,12 @@ class ScatterController extends DataController<VariableInterval> {
     const distDom = [0, density - 1];
 
     this.distributionScales = [
-      scaleLinear().domain(distDom).range([0, dimensions.width]),
-      scaleLinear().domain(distDom).range([0, dimensions.height]),
+      scaleLinear().domain(distDom).range([0, config.xMax]),
+      scaleLinear().domain(distDom).range([0, config.yMax]),
     ];
 
     this.density = density;
-    this.dimensions = dimensions;
+    this.dimensions = { width: config.xMax, height: config.yMax };
 
     this.bindScatter();
   }
