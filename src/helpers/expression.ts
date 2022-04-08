@@ -28,7 +28,7 @@ export const isProbabilityData = (
   const d = data[0] as unknown as ProbabilityDatum;
 
   return (
-    !!data.length && typeof d.value === "number" && typeof d.name === "string"
+    !!data.length && typeof d.value === "string" && typeof d.name === "string"
   );
 };
 
@@ -50,5 +50,5 @@ export const getParamDomain = (
 };
 
 export const createStubProbabilityData = (intervals: VariableInterval[]) => {
-  return intervals.map(({ name }) => ({ name, value: 0 }));
+  return intervals.map(({ name }) => ({ name, value: "0" }));
 };

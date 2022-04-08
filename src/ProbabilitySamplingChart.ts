@@ -27,13 +27,10 @@ class ProbabilitySamplingChart extends Chart<ProbabilityDatum> {
     const { xMax, yMax } = this;
 
     this.expression = (pair) =>
-      parseInt(
-        m.eval(
-          config.expression,
-          config.intervals.map(({ name }) => createVariableTokens(name)),
-          pair
-        ),
-        10
+      m.eval(
+        config.expression,
+        config.intervals.map(({ name }) => createVariableTokens(name)),
+        pair
       );
 
     this.dataController = new ScatterController(
@@ -41,8 +38,6 @@ class ProbabilitySamplingChart extends Chart<ProbabilityDatum> {
       config.intervals,
       this.config.params
     );
-
-    console.log(this.expression({ pK: 1, pL: 1 }));
 
     this.redraw();
     this.addAxes(this.dataController.currentScales);
@@ -75,9 +70,13 @@ class ProbabilitySamplingChart extends Chart<ProbabilityDatum> {
       const x = parseInt(node.attr("x"), 10);
       const y = parseInt(node.attr("y"), 10);
 
-      const pair: Record<string, number> = { [xParam]: xCoordScale(x) };
+      const pair: Record<string, number> = {
+        [xParam]: xCoordScale(x),
+        r: 2 / 10,
+      };
       if (yParam) pair[yParam] = yCoordScale(y);
-      console.log(this.expression(pair), pair);
+
+      console.log(pair);
 
       ctx.beginPath();
       ctx.fillStyle =
