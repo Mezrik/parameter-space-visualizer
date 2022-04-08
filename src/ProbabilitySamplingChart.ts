@@ -65,6 +65,8 @@ class ProbabilitySamplingChart extends Chart<ProbabilityDatum> {
 
     const [xParam, yParam] = this.config.params;
 
+    console.log(this.config.paramsFixation);
+
     binding.each((d, i, nodes) => {
       const node = select(nodes[i]);
       const x = parseInt(node.attr("x"), 10);
@@ -75,8 +77,6 @@ class ProbabilitySamplingChart extends Chart<ProbabilityDatum> {
         r: 2 / 10,
       };
       if (yParam) pair[yParam] = yCoordScale(y);
-
-      console.log(pair);
 
       ctx.beginPath();
       ctx.fillStyle =

@@ -58,7 +58,6 @@ document.addEventListener("DOMContentLoaded", function (e) {
   new ProbabilitySamplingChart(under, {
     options: {
       color: ({ value }) => {
-        console.log(typeof value === "number", value);
         return value > 0.5 ? "#f4c941" : "#b30e17";
       },
       margin: { top: 20, right: 30, bottom: 30, left: 40 },

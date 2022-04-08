@@ -9,6 +9,7 @@ import {
   isVariableIntervalData,
   getParams as getVariableIntervalParams,
   getParamDomain as getVariableIntervalParamDomain,
+  getParamDomainFromProbabData,
   isProbabilityData,
 } from "./expression";
 
@@ -39,8 +40,10 @@ export const getParams = <Datum>(data: Datum[]) => {
 export const getParamDomain = <Datum>(data: Datum[], param: string) => {
   if (isRegionsData(data)) return getRegionsParamDomain(data, param);
 
-  if (isVariableIntervalData(data) || isProbabilityData(data))
+  if (isVariableIntervalData(data))
     return getVariableIntervalParamDomain(data, param);
+
+  if (isProbabilityData(data)) return getParamDomainFromProbabData(data, param);
 
   return [];
 };
