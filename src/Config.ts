@@ -2,6 +2,7 @@ import { extent } from "d3-array";
 import {
   checkIfParamsExist,
   getParams,
+  getParamsToBeFixed,
   getParamsTuple,
 } from "./helpers/general";
 import { getParamDomain } from "./helpers/general";
@@ -44,25 +45,12 @@ class Config<Datum> {
   get paramsFixation() {
     if (!this.params) return undefined;
 
-    const [xParam, yParam] = this.params;
-    const userFixations = this._config.options?.paramsFixation;
-
-    const toBeFixed = this.allParams.filter(
-      (param) =>
-        param !== xParam &&
-        param !== yParam &&
-        !Object.keys(userFixations ?? {}).find((name) => name === param)
+    return getParamsToBeFixed(
+      this.params,
+      this.allParams,
+      this.paramsExtents,
+      this._config.options?.paramsFixation
     );
-
-    console.log(toBeFixed, xParam, yParam, userFixations, this.allParams);
-
-    return {
-      ...(userFixations ?? {}),
-      ...toBeFixed.reduce(
-        (acc, param) => ({ ...acc, [param]: this.paramsExtents[param][0] }),
-        {}
-      ),
-    };
   }
 
   get options(): Options<ChartConfig<Datum>["options"]> {

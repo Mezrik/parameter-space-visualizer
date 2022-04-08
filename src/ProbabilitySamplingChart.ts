@@ -65,17 +65,18 @@ class ProbabilitySamplingChart extends Chart<ProbabilityDatum> {
 
     const [xParam, yParam] = this.config.params;
 
-    console.log(this.config.paramsFixation);
+    const fixedParams = this.config.paramsFixation;
 
     binding.each((d, i, nodes) => {
       const node = select(nodes[i]);
       const x = parseInt(node.attr("x"), 10);
       const y = parseInt(node.attr("y"), 10);
 
-      const pair: Record<string, number> = {
+      const pair: Record<string, number | string> = {
         [xParam]: xCoordScale(x),
-        r: 2 / 10,
+        ...fixedParams,
       };
+
       if (yParam) pair[yParam] = yCoordScale(y);
 
       ctx.beginPath();
