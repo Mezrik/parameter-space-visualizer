@@ -1,4 +1,5 @@
 import { select } from "d3-selection";
+import { zoomIdentity } from "d3-zoom";
 import m from "math-expression-evaluator";
 import Chart from "./Chart";
 import ScatterController from "./controllers/ScatterController";
@@ -40,9 +41,11 @@ class ProbabilitySamplingChart extends Chart<ProbabilityDatum> {
 
     this.redraw();
     this.addAxes(this.dataController.currentScales);
+
+    this.zoom?.onChange(this.redraw);
   }
 
-  public redraw() {
+  public redraw = (transform = zoomIdentity) => {
     const {
       chartArea,
       dataController: { binding },
@@ -70,13 +73,16 @@ class ProbabilitySamplingChart extends Chart<ProbabilityDatum> {
       const node = select(nodes[i]);
       const x = parseInt(node.attr("x"), 10);
       const y = parseInt(node.attr("y"), 10);
+      const [xT, yT] = transform.apply([x, y]);
+
+      console.log(xT, yT);
 
       const pair: Record<string, number | string> = {
-        [xParam]: xCoordScale(x),
+        [xParam]: xCoordScale(xT),
         ...fixedParams,
       };
 
-      if (yParam) pair[yParam] = yCoordScale(y);
+      if (yParam) pair[yParam] = yCoordScale(yT);
 
       ctx.beginPath();
       ctx.fillStyle =
@@ -90,7 +96,7 @@ class ProbabilitySamplingChart extends Chart<ProbabilityDatum> {
       ctx.closePath();
       ctx.restore();
     });
-  }
+  };
 
   public fixate(fixations: ParamsFixation) {
     this.config.userFixations = fixations;

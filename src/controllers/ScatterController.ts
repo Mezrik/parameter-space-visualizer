@@ -13,7 +13,7 @@ class ScatterController extends DataController<ProbabilityDatum> {
   private density: number;
   private dimensions: { width: number; height: number };
 
-  constructor(config: Config<ProbabilityDatum>, density = 20) {
+  constructor(config: Config<ProbabilityDatum>, density = 30) {
     super(config);
 
     const detachedContainer = select<HTMLElement, []>(

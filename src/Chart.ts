@@ -69,7 +69,7 @@ class Chart<Datum> {
       // Initialize general zoom
       // there is still need to bind the zoom to each draw method
       this.zoom = new Zoom(
-        [1, 10],
+        [1, 100],
         [
           [0, 0],
           [xMax, yMax],
