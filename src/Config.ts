@@ -6,12 +6,20 @@ import {
   getParamsTuple,
 } from "./helpers/general";
 import { getParamDomain } from "./helpers/general";
-import { ChartConfig, Options, ParamsTuple, ParamType } from "./types/general";
+import {
+  ChartConfig,
+  Options,
+  ParamsFixation,
+  ParamsTuple,
+  ParamType,
+} from "./types/general";
 
 class Config<Datum> {
   private _config: ChartConfig<Datum>;
   private allParams: ParamType[];
   private paramsExtents: Record<ParamType, [number, number]>;
+
+  private _userFixations: ParamsFixation;
 
   constructor(config: ChartConfig<Datum>) {
     this._config = config;
@@ -25,6 +33,8 @@ class Config<Datum> {
       }),
       {}
     );
+
+    this._userFixations = this._config.options?.paramsFixation ?? {};
   }
 
   get data() {
@@ -49,8 +59,12 @@ class Config<Datum> {
       this.params,
       this.allParams,
       this.paramsExtents,
-      this._config.options?.paramsFixation
+      this._userFixations
     );
+  }
+
+  set userFixations(fixations: ParamsFixation) {
+    this._userFixations = fixations;
   }
 
   get options(): Options<ChartConfig<Datum>["options"]> {

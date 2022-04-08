@@ -7,7 +7,11 @@ import {
   createVariableTokens,
 } from "./helpers/expression";
 import { EvalFunction, ProbabilityDatum } from "./types/expression";
-import { ChartConfigDynamic, MountElement } from "./types/general";
+import {
+  ChartConfigDynamic,
+  MountElement,
+  ParamsFixation,
+} from "./types/general";
 
 const POINT_RADIUS = 5;
 
@@ -91,6 +95,10 @@ class ProbabilitySamplingChart extends Chart<ProbabilityDatum> {
       ctx.closePath();
       ctx.restore();
     });
+  }
+
+  public fixate(fixations: ParamsFixation) {
+    this.config.userFixations = fixations;
   }
 }
 
