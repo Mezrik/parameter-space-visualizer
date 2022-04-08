@@ -47,8 +47,6 @@ class Config<Datum> {
       {}
     );
 
-    console.log(this._paramsExtents);
-
     this._userFixations = this._config.options?.paramsFixation ?? {};
   }
 

@@ -18,6 +18,9 @@ import {
   getParamDomainFromProbabData,
   isProbabilityData,
 } from "./expression";
+import { scaleLinear } from "d3-scale";
+import { hcl, HCLColor } from "d3-color";
+import { interpolateHcl } from "d3-interpolate";
 
 export const checkIfParamsExist = (existing: string[], p: ParamsTuple) =>
   p[1]
@@ -98,4 +101,11 @@ export const checkParamFixationInExtent = (
     }),
     {}
   );
+};
+
+export const createProabilityColorScale = (colors: [string, string]) => {
+  return scaleLinear<HCLColor, HCLColor>()
+    .domain([0, 1])
+    .interpolate(interpolateHcl)
+    .range([hcl(colors[0]), hcl(colors[1])]);
 };

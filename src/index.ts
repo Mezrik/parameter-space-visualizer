@@ -1,7 +1,9 @@
 import { RegionResults01Parsed } from "@mocks/./";
 import { RegionResultValue } from "@mocks/helpers/parseRegions";
+import { scaleLinear, interpolateHcl, hcl, HCLColor } from "d3";
 
 import Chart from "./Chart";
+import { createProabilityColorScale } from "./helpers/general";
 import ProbabilitySamplingChart from "./ProbabilitySamplingChart";
 import RegionsChart from "./RegionsChart";
 import { RegionDatum } from "./types/general";
@@ -55,10 +57,12 @@ document.addEventListener("DOMContentLoaded", function (e) {
 
   document.body.appendChild(under);
 
+  const colorScale = createProabilityColorScale(["#b30e17", "#f4c941"]);
+
   new ProbabilitySamplingChart(under, {
     options: {
       color: ({ value }) => {
-        return value > 0.5 ? "#f4c941" : "#b30e17";
+        return typeof value === "number" ? colorScale(value) : "#fde6c4";
       },
       margin: { top: 20, right: 30, bottom: 30, left: 40 },
     },
