@@ -1,7 +1,8 @@
 import { BaseType, select, Selection } from "d3-selection";
+import Config from "../Config";
 import { UNDEFINED_CHART_VALUE } from "../constants/common";
 import { RegionDatum, ParamsTuple, Margin } from "../types/general";
-import DataController, { DataControllerOptions } from "./DataController";
+import DataController from "./DataController";
 
 class RegionsController<Value> extends DataController<RegionDatum<Value>> {
   private _regionsBinding: Selection<
@@ -11,11 +12,8 @@ class RegionsController<Value> extends DataController<RegionDatum<Value>> {
     RegionDatum<Value>[]
   >;
 
-  constructor(
-    opts: DataControllerOptions<RegionDatum<Value>[]>,
-    params?: ParamsTuple
-  ) {
-    super(opts, params);
+  constructor(opts: Config<RegionDatum<Value>>) {
+    super(opts);
 
     const detachedContainer = select<HTMLElement, RegionDatum<Value>[]>(
       document.createElement("custom")

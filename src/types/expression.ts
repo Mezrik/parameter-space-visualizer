@@ -6,7 +6,7 @@ export type VariableInterval = {
 
 export type ProbabilityDatum = {
   name: string;
-  value: number;
+  value: string | number;
 };
 
 export type Token = {
@@ -17,4 +17,4 @@ export type Token = {
   preced?: number | undefined;
 };
 
-export type EvalFunction = (pair: object) => number;
+export type EvalFunction = (pair: object) => string | number;

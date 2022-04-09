@@ -28,17 +28,16 @@ export const isProbabilityData = (
   const d = data[0] as unknown as ProbabilityDatum;
 
   return (
-    !!data.length && typeof d.value === "number" && typeof d.name === "string"
+    !!data.length &&
+    (typeof d.value === "string" || typeof d.value === "number") &&
+    typeof d.name === "string"
   );
 };
 
 export const getParams = (data: (VariableInterval | ProbabilityDatum)[]) =>
   data.map(({ name }) => name);
 
-export const getParamDomain = (
-  data: (VariableInterval | ProbabilityDatum)[],
-  param: string
-) => {
+export const getParamDomain = (data: VariableInterval[], param: string) => {
   const d = data.find((d) => d.name === param);
 
   if (!d) return [];
@@ -49,6 +48,18 @@ export const getParamDomain = (
   ];
 };
 
+export const getParamDomainFromProbabData = (
+  data: ProbabilityDatum[],
+  param: string
+) => {
+  const d = data.find((d) => d.name === param);
+
+  if (!d) return [];
+
+  const val = (d as Partial<ProbabilityDatum>).value;
+  return [typeof val === "number" ? val : 0];
+};
+
 export const createStubProbabilityData = (intervals: VariableInterval[]) => {
-  return intervals.map(({ name }) => ({ name, value: 0 }));
+  return intervals.map(({ name, start }) => ({ name, value: start }));
 };

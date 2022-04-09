@@ -5,7 +5,13 @@ import Config from "./Config";
 import { ZERO_MARGIN } from "./constants/common";
 import DataController from "./controllers/DataController";
 import Zoom from "./controllers/Zoom";
-import { ChartConfig, DatumRect, Margin, MountElement } from "./types/general";
+import {
+  ChartConfig,
+  ChartConfigDynamic,
+  DatumRect,
+  Margin,
+  MountElement,
+} from "./types/general";
 import { DataControllerScaleTuple } from "./types/scale";
 import { SimpleSelection } from "./types/selection";
 
@@ -15,16 +21,16 @@ class Chart<Datum> {
   protected chartArea?: ChartArea<DatumRect<Datum>>;
   protected axes?: Axes;
   protected svg?: SimpleSelection<SVGGElement>;
-  protected margin: Margin = ZERO_MARGIN;
   protected zoom?: Zoom<HTMLCanvasElement>;
 
   private _width: number;
   private _height: number;
 
-  constructor(element: MountElement, config: ChartConfig<Datum>) {
+  constructor(
+    element: MountElement,
+    config: ChartConfig<Datum> | ChartConfigDynamic<Datum>
+  ) {
     this.config = new Config(config);
-
-    this.margin = this.config.options?.margin ?? this.margin;
 
     this._height = config.height;
     this._width = config.width;
@@ -37,7 +43,12 @@ class Chart<Datum> {
     }
 
     if (this.el) {
-      const { width, height, xMax, yMax, margin, el } = this;
+      const {
+        width,
+        height,
+        config: { xMax, yMax, margin },
+        el,
+      } = this;
 
       // Initialize the SVG element which contains axis, highlights etc.
       this.svg = el
@@ -58,7 +69,7 @@ class Chart<Datum> {
       // Initialize general zoom
       // there is still need to bind the zoom to each draw method
       this.zoom = new Zoom(
-        [1, 10],
+        [1, 100],
         [
           [0, 0],
           [xMax, yMax],
@@ -72,7 +83,7 @@ class Chart<Datum> {
 
   protected addAxes(scales: DataControllerScaleTuple) {
     if (this.svg) {
-      const axes = new Axes(this.svg, this.yMax, scales);
+      const axes = new Axes(this.svg, this.config.yMax, scales);
       this.zoom?.onChange((transform) => {
         axes.redrawAxes(transform);
       });
@@ -86,16 +97,6 @@ class Chart<Datum> {
 
   get height() {
     return this._height;
-  }
-
-  get xMax() {
-    const { margin } = this;
-    return this._width - margin.left - margin.right;
-  }
-
-  get yMax() {
-    const { margin } = this;
-    return this._height - margin.top - margin.bottom;
   }
 }
 

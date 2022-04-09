@@ -1,4 +1,5 @@
 import { select } from "d3-selection";
+import { zoomIdentity } from "d3-zoom";
 import m from "math-expression-evaluator";
 import Chart from "./Chart";
 import ScatterController from "./controllers/ScatterController";
@@ -7,7 +8,11 @@ import {
   createVariableTokens,
 } from "./helpers/expression";
 import { EvalFunction, ProbabilityDatum } from "./types/expression";
-import { ChartConfigDynamic, MountElement } from "./types/general";
+import {
+  ChartConfigDynamic,
+  MountElement,
+  ParamsFixation,
+} from "./types/general";
 
 const POINT_RADIUS = 5;
 
@@ -19,36 +24,28 @@ class ProbabilitySamplingChart extends Chart<ProbabilityDatum> {
     element: MountElement,
     config: ChartConfigDynamic<ProbabilityDatum>
   ) {
-    super(element, {
-      ...config,
-      data: createStubProbabilityData(config.intervals),
-    });
+    super(element, config);
 
-    const { xMax, yMax } = this;
+    const {
+      config: { xMax, yMax },
+    } = this;
 
     this.expression = (pair) =>
-      parseInt(
-        m.eval(
-          config.expression,
-          config.intervals.map(({ name }) => createVariableTokens(name)),
-          pair
-        ),
-        10
+      m.eval(
+        config.expression,
+        config.intervals.map(({ name }) => createVariableTokens(name)),
+        pair
       );
 
-    this.dataController = new ScatterController(
-      { width: xMax, height: yMax },
-      config.intervals,
-      this.config.params
-    );
-
-    console.log(this.expression({ pK: 1, pL: 1 }));
+    this.dataController = new ScatterController(this.config);
 
     this.redraw();
     this.addAxes(this.dataController.currentScales);
+
+    this.zoom?.onChange(this.redraw);
   }
 
-  public redraw() {
+  public redraw = (transform = zoomIdentity) => {
     const {
       chartArea,
       dataController: { binding },
@@ -70,14 +67,22 @@ class ProbabilitySamplingChart extends Chart<ProbabilityDatum> {
 
     const [xParam, yParam] = this.config.params;
 
+    const fixedParams = this.config.paramsFixation;
+
     binding.each((d, i, nodes) => {
       const node = select(nodes[i]);
       const x = parseInt(node.attr("x"), 10);
       const y = parseInt(node.attr("y"), 10);
+      const [xT, yT] = transform.apply([x, y]);
 
-      const pair: Record<string, number> = { [xParam]: xCoordScale(x) };
-      if (yParam) pair[yParam] = yCoordScale(y);
-      console.log(this.expression(pair), pair);
+      console.log(xT, yT);
+
+      const pair: Record<string, number | string> = {
+        [xParam]: xCoordScale(xT),
+        ...fixedParams,
+      };
+
+      if (yParam) pair[yParam] = yCoordScale(yT);
 
       ctx.beginPath();
       ctx.fillStyle =
@@ -91,6 +96,10 @@ class ProbabilitySamplingChart extends Chart<ProbabilityDatum> {
       ctx.closePath();
       ctx.restore();
     });
+  };
+
+  public fixate(fixations: ParamsFixation) {
+    this.config.userFixations = fixations;
   }
 }
 

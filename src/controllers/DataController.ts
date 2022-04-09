@@ -1,32 +1,25 @@
-import { select, Selection, BaseType, extent, scaleLinear } from "d3";
-import { getParamDomain, getParams } from "../helpers/general";
+import { scaleLinear } from "d3";
+import Config from "../Config";
 import { ParamsTuple, ParamType } from "../types/general";
 import {
   DataControllerScaleTuple,
   DataControllerScaleType,
 } from "../types/scale";
-
-export type DataControllerOptions<T> = {
-  data: T;
-  width: number;
-  height: number;
-};
-
-class DataController<Datum, Data extends Array<Datum> = Array<Datum>> {
+class DataController<Datum> {
   private paramScales: Record<ParamType, DataControllerScaleType> = {};
   private _params: ParamsTuple | null = null;
 
-  constructor(opts: DataControllerOptions<Data>, params?: ParamsTuple) {
-    this._params = params ?? null;
+  constructor(config: Config<Datum>) {
+    this._params = config.params ?? null;
 
-    this.initScales(opts);
+    this.initScales(config);
   }
 
-  private initScales({ data, width, height }: DataControllerOptions<Data>) {
-    const params = getParams(data);
+  private initScales(config: Config<Datum>) {
+    const { allParams, paramsExtents, xMax, yMax } = config;
 
-    params.forEach((param) => {
-      const [min, max] = extent(getParamDomain(data, param));
+    allParams.forEach((param) => {
+      const [min, max] = paramsExtents[param];
       if (typeof min === "number" && typeof max === "number")
         this.paramScales[param] = {
           scale: scaleLinear().domain([min, max]),
@@ -34,7 +27,7 @@ class DataController<Datum, Data extends Array<Datum> = Array<Datum>> {
         };
     });
 
-    this.bindCurrentScalesRange(width, height);
+    this.bindCurrentScalesRange(xMax, yMax);
   }
 
   public bindCurrentScalesRange(w: number, h: number) {

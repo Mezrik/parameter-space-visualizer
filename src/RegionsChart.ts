@@ -19,16 +19,12 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
   constructor(element: MountElement, config: ChartConfig<RegionDatum<Value>>) {
     super(element, config);
 
-    const { xMax, yMax, chartArea } = this;
+    const {
+      config: { xMax, yMax },
+      chartArea,
+    } = this;
 
-    this.dataController = new RegionsController(
-      {
-        width: xMax,
-        height: yMax,
-        data: this.config.data,
-      },
-      this.config.params
-    );
+    this.dataController = new RegionsController(this.config);
 
     const { x, y, w, h } = this.dataController;
 
@@ -151,7 +147,9 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
   };
 
   private reset() {
-    const { xMax, yMax } = this;
+    const {
+      config: { xMax, yMax },
+    } = this;
 
     // Re-bind the regions, this will reset scales to current params scales
     this.dataController.bindCurrentScalesRange(xMax, yMax);
