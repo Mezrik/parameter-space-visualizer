@@ -30,7 +30,10 @@ class ChartArea<Datum extends Rect> {
       .append("div")
       .classed("chart-area", true)
       .style("position", "absolute")
-      .style("transform", "translate(" + m.left + "px,  " + m.top + "px)");
+      .style(
+        "transform",
+        "translate(" + (m.left + 1) + "px,  " + m.top + "px)"
+      );
 
     this._canvas = this.container
       .append("canvas")

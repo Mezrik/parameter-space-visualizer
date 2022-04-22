@@ -46,6 +46,26 @@ export const getParams = <Datum>(data: Datum[]) => {
   return [];
 };
 
+export const getDifParams = (
+  params: string[],
+  newP: ParamsTuple,
+  oldP: ParamsTuple | null
+): ParamsTuple => {
+  if (!oldP)
+    return newP[0] === newP[1]
+      ? [newP[0], params.find((p) => p !== newP[1])]
+      : newP;
+
+  const changedX = oldP[0] !== newP[0];
+  const [p1, p2] = changedX ? [newP[0], newP[1]] : [newP[1], newP[0]];
+
+  if (p1 === p2) {
+    const n = params.find((p) => p !== p2);
+    return changedX ? [p1!, n] : [n!, p1];
+  }
+  return newP;
+};
+
 export const getParamDomain = <Datum>(data: Datum[], param: string) => {
   if (isRegionsData(data)) return getRegionsParamDomain(data, param);
 

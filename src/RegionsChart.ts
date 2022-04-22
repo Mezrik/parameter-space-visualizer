@@ -177,23 +177,23 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
    * Change param displayed on axis x
    * @param param
    */
-  public x(param: string) {
+  public x = (param: string) => {
     const { params } = this.dataController;
     this.dataController.params = [param, params?.[1]];
     this.reset();
-  }
+  };
 
   /**
    * Change param displayed on axis y
    * @param param
    */
-  public y(param?: string) {
+  public y = (param?: string) => {
     const { params } = this.dataController;
     if (params) {
       this.dataController.params = [params?.[0], param];
       this.reset();
     }
-  }
+  };
 }
 
 export default RegionsChart;
