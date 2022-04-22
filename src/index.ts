@@ -4,6 +4,8 @@ import { scaleLinear, interpolateHcl, hcl, HCLColor } from "d3";
 
 import Chart from "./Chart";
 import { createProabilityColorScale } from "./helpers/general";
+import { addStyle, applyStyles } from "./lib/ui/general";
+import { appendParamsSelects, findParam } from "./lib/ui/paramsSelects";
 import ProbabilitySamplingChart from "./ProbabilitySamplingChart";
 import RegionsChart from "./RegionsChart";
 import { ParamsChangeHandler, RegionDatum } from "./types/general";
@@ -25,84 +27,21 @@ const COLOR_MAPPING: Record<RegionResultValue, string> = {
 
 const color = (d: RegionDatum<RegionResultValue>) => COLOR_MAPPING[d.value];
 
-type ParamSetCb = (v: string) => void;
-
-const findParam = (
-  params: string[],
-  param?: string
-): [number, string | undefined] => {
-  const i = params.findIndex((p) => p === param);
-  return [i, i >= 0 ? params[i] : undefined];
-};
-
-const createParamsSelectOptions = (params: string[], defaultParam?: string) =>
-  params.map((param) => {
-    const opt = document.createElement("option");
-    opt.value = param;
-    opt.innerHTML = param;
-    opt.selected = param === defaultParam;
-    return opt;
-  });
-
-const createParamsSelect = (
-  params: string[],
-  label: string,
-  defaultParam?: string
-): [HTMLDivElement, HTMLSelectElement] => {
-  const container = document.createElement("div");
-  container.style.display = "flex";
-
-  const l = document.createElement("label");
-  l.innerHTML = label;
-  l.style.fontWeight = "500";
-  l.style.marginBottom = "0.25rem";
-  container.appendChild(l);
-
-  const select = document.createElement("select");
-  createParamsSelectOptions(params, defaultParam).forEach((option) =>
-    select.options.add(option)
-  );
-  container.appendChild(select);
-
-  return [container, select];
-};
-
-const appendParamsSelects = (
-  el: HTMLElement,
-  params: string[],
-  x: ParamSetCb,
-  defaultX?: string,
-  y?: ParamSetCb,
-  defaultY?: string
-) => {
-  const container = document.createElement("div");
-  container.style.display = "flex";
-  el.appendChild(container);
-
-  const [xCont, xSelect] = createParamsSelect(params, "x-axis", defaultX);
-  container.appendChild(xCont);
-
-  let yCont: HTMLElement | undefined;
-  let ySelect: HTMLSelectElement | undefined;
-  if (params.length > 1) {
-    [yCont, ySelect] = createParamsSelect(params, "y-axis", defaultY);
-    container.appendChild(yCont);
-  }
-
-  xSelect.addEventListener("change", (ev) => {
-    ev.target && x((ev.target as HTMLInputElement).value);
-  });
-
-  ySelect?.addEventListener("change", (ev) => {
-    ev.target && y && y((ev.target as HTMLInputElement).value);
-  });
-
-  return [xSelect, ySelect];
-};
-
 const createRegionsChart = () => {
   const container = document.createElement("div");
   document.body.appendChild(container);
+  container.classList.add("regions-chart");
+
+  addStyle(
+    `
+    .regions-chart {
+      display: flex;
+      flex-direction: column-reverse;
+      padding: 1rem;
+    }
+  `,
+    "regions-chart-styles"
+  );
 
   const params = ["param_sig", "param_block"];
 
@@ -119,10 +58,12 @@ const createRegionsChart = () => {
     if (ySelect) ySelect.selectedIndex = yi;
   };
 
-  const chart = new RegionsChart(document.body, {
+  const leftMargin = 40;
+
+  const chart = new RegionsChart(container, {
     options: {
       color,
-      margin: { top: 20, right: 30, bottom: 30, left: 40 },
+      margin: { top: 20, right: 30, bottom: 30, left: leftMargin },
       params: { x: params[0], y: params[1] },
       handleParamsChange,
     },
@@ -131,17 +72,36 @@ const createRegionsChart = () => {
     height: 800,
   });
 
+  const controls = document.createElement("div");
+  controls.classList.add("chart-controls");
+  applyStyles(controls, { marginLeft: `${leftMargin}px` });
+
   [xSelect, ySelect] = appendParamsSelects(
-    container,
+    controls,
     params,
     chart.x,
     params[0],
     chart.y,
     params[1]
   );
+
+  container.appendChild(controls);
 };
 
 document.addEventListener("DOMContentLoaded", function (e) {
+  addStyle(
+    `
+    body {
+      --doc-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
+      'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+      margin: 0;
+      font-family: var(--doc-font-family);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+  `,
+    "main"
+  );
   createRegionsChart();
 
   // const right = document.createElement("div");
