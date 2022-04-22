@@ -38,6 +38,8 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
       }))
     );
 
+    this.addGrid(this.dataController.currentScales);
+
     this.g = this.chartArea?.svg
       ?.append("g")
       .attr("width", this.width)

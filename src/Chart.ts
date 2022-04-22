@@ -1,6 +1,7 @@
 import { select, Selection } from "d3";
 import Axes from "./components/Axes";
 import ChartArea from "./components/ChartArea";
+import Grid from "./components/Grid";
 import Config from "./Config";
 import { ZERO_MARGIN } from "./constants/common";
 import DataController from "./controllers/DataController";
@@ -20,6 +21,7 @@ class Chart<Datum> {
   protected config: Config<Datum>;
   protected chartArea?: ChartArea<DatumRect<Datum>>;
   protected axes?: Axes;
+  protected grid?: Grid;
   protected svg?: SimpleSelection<SVGGElement>;
   protected zoom?: Zoom<HTMLCanvasElement>;
 
@@ -90,6 +92,23 @@ class Chart<Datum> {
         axes.redrawAxes(transform);
       });
       this.axes = axes;
+    }
+  }
+
+  protected addGrid(scales: DataControllerScaleTuple) {
+    if (this.chartArea?.svg) {
+      const grid = new Grid(
+        this.chartArea?.svg.append("g"),
+        this.config.yMax,
+        this.config.xMax,
+        scales
+      );
+
+      this.zoom?.onChange((transform) => {
+        grid.redrawGrid(transform);
+      });
+
+      this.grid = grid;
     }
   }
 
