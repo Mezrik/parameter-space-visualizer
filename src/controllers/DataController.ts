@@ -1,5 +1,6 @@
 import { scaleLinear } from "d3";
 import Config from "../Config";
+import { getDifParams } from "../helpers/general";
 import { ParamsTuple, ParamType } from "../types/general";
 import {
   DataControllerScaleTuple,
@@ -8,9 +9,11 @@ import {
 class DataController<Datum> {
   private paramScales: Record<ParamType, DataControllerScaleType> = {};
   private _params: ParamsTuple | null = null;
+  private config: Config<Datum>;
 
   constructor(config: Config<Datum>) {
     this._params = config.params ?? null;
+    this.config = config;
 
     this.initScales(config);
   }
@@ -37,7 +40,14 @@ class DataController<Datum> {
   }
 
   set params(params: ParamsTuple | null) {
-    this._params = params;
+    let result: ParamsTuple | null = null;
+    if (params)
+      result = getDifParams(this.config.allParams, params, this.params);
+
+    this.config.options.handleParamsChange?.(result);
+
+    console.log(params);
+    this._params = result;
   }
 
   get params(): ParamsTuple | null {

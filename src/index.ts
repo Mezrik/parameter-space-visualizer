@@ -6,7 +6,7 @@ import Chart from "./Chart";
 import { createProabilityColorScale } from "./helpers/general";
 import ProbabilitySamplingChart from "./ProbabilitySamplingChart";
 import RegionsChart from "./RegionsChart";
-import { RegionDatum } from "./types/general";
+import { ParamsChangeHandler, RegionDatum } from "./types/general";
 
 if (typeof window !== "undefined") {
   (window as any).Chart = Chart;
@@ -27,15 +27,28 @@ const color = (d: RegionDatum<RegionResultValue>) => COLOR_MAPPING[d.value];
 
 type ParamSetCb = (v: string) => void;
 
-const createParamsSelectOptions = (params: string[]) =>
+const findParam = (
+  params: string[],
+  param?: string
+): [number, string | undefined] => {
+  const i = params.findIndex((p) => p === param);
+  return [i, i >= 0 ? params[i] : undefined];
+};
+
+const createParamsSelectOptions = (params: string[], defaultParam?: string) =>
   params.map((param) => {
     const opt = document.createElement("option");
     opt.value = param;
     opt.innerHTML = param;
+    opt.selected = param === defaultParam;
     return opt;
   });
 
-const createParamsSelect = (params: string[], label: string) => {
+const createParamsSelect = (
+  params: string[],
+  label: string,
+  defaultParam?: string
+): [HTMLDivElement, HTMLSelectElement] => {
   const container = document.createElement("div");
   container.style.display = "flex";
 
@@ -46,58 +59,85 @@ const createParamsSelect = (params: string[], label: string) => {
   container.appendChild(l);
 
   const select = document.createElement("select");
-  createParamsSelectOptions(params).forEach((option) =>
+  createParamsSelectOptions(params, defaultParam).forEach((option) =>
     select.options.add(option)
   );
   container.appendChild(select);
 
-  return container;
+  return [container, select];
 };
 
 const appendParamsSelects = (
   el: HTMLElement,
   params: string[],
   x: ParamSetCb,
-  y?: ParamSetCb
+  defaultX?: string,
+  y?: ParamSetCb,
+  defaultY?: string
 ) => {
   const container = document.createElement("div");
   container.style.display = "flex";
   el.appendChild(container);
 
-  const xSelect = createParamsSelect(params, "x-axis");
-  container.appendChild(xSelect);
+  const [xCont, xSelect] = createParamsSelect(params, "x-axis", defaultX);
+  container.appendChild(xCont);
 
-  let ySelect: HTMLElement | undefined;
+  let yCont: HTMLElement | undefined;
+  let ySelect: HTMLSelectElement | undefined;
   if (params.length > 1) {
-    ySelect = createParamsSelect(params, "y-axis");
-    container.appendChild(ySelect);
+    [yCont, ySelect] = createParamsSelect(params, "y-axis", defaultY);
+    container.appendChild(yCont);
   }
 
-  xSelect.addEventListener("change", () => {
-    xSelect.nodeValue && x(xSelect.nodeValue);
-    console.log(xSelect.nodeValue);
+  xSelect.addEventListener("change", (ev) => {
+    ev.target && x((ev.target as HTMLInputElement).value);
   });
-  ySelect?.addEventListener("change", () => {
-    ySelect?.nodeValue && y && y(ySelect.nodeValue);
+
+  ySelect?.addEventListener("change", (ev) => {
+    ev.target && y && y((ev.target as HTMLInputElement).value);
   });
+
+  return [xSelect, ySelect];
 };
 
 const createRegionsChart = () => {
   const container = document.createElement("div");
   document.body.appendChild(container);
 
+  const params = ["param_sig", "param_block"];
+
+  let xSelect: HTMLSelectElement | undefined,
+    ySelect: HTMLSelectElement | undefined;
+
+  const handleParamsChange: ParamsChangeHandler = (newParams) => {
+    if (!newParams) return;
+
+    const [xi] = findParam(params, newParams[0]);
+    const [yi] = findParam(params, newParams[1]);
+
+    if (xSelect) xSelect.selectedIndex = xi;
+    if (ySelect) ySelect.selectedIndex = yi;
+  };
+
   const chart = new RegionsChart(document.body, {
-    options: { color, margin: { top: 20, right: 30, bottom: 30, left: 40 } },
+    options: {
+      color,
+      margin: { top: 20, right: 30, bottom: 30, left: 40 },
+      params: { x: params[0], y: params[1] },
+      handleParamsChange,
+    },
     data: RegionResults01Parsed!,
-    width: 1200,
+    width: 800,
     height: 800,
   });
 
-  appendParamsSelects(
+  [xSelect, ySelect] = appendParamsSelects(
     container,
-    ["param_block", "param_sig"],
+    params,
     chart.x,
-    chart.y
+    params[0],
+    chart.y,
+    params[1]
   );
 };
 
