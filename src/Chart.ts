@@ -50,6 +50,8 @@ class Chart<Datum> {
         el,
       } = this;
 
+      el.style("width", width + "px").style("height", height + "px");
+
       // Initialize the SVG element which contains axis, highlights etc.
       this.svg = el
         .append("svg")
