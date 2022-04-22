@@ -18,11 +18,11 @@ if (typeof window !== "undefined") {
  * TEMP: For demo purposes
  */
 const COLOR_MAPPING: Record<RegionResultValue, string> = {
-  true: "#f4c941",
-  false: "#b30e17",
-  unknown: "#fde6c4",
-  partially_sat: "#fde6c4",
-  partially_violated: "#fde6c4",
+  true: "#f0c928",
+  false: "#ab0d0c",
+  unknown: "#fbe6c2",
+  partially_sat: "#fbe6c2",
+  partially_violated: "#fbe6c2",
 };
 
 const color = (d: RegionDatum<RegionResultValue>) => COLOR_MAPPING[d.value];
