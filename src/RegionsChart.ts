@@ -45,23 +45,20 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
       .attr("width", this.width)
       .attr("height", this.height);
 
+    this.initHighlightLayer();
+
     let tooltip: Tooltip<RegionDatum<Value>>;
     if (this.g) {
       const [xParam, yParam] = this.dataController.params ?? [];
-      const [xScale, yScale] = this.dataController.currentScales;
 
       tooltip = new Tooltip(
         this.g,
         (d) => `
         value: ${d.value}</br>
-        x-from: ${
-          xParam && xScale ? xScale.scale(d.params[xParam].from) : ""
-        }</br>
-        x-to: ${xParam && xScale ? xScale.scale(d.params[xParam].to) : ""}</br>
-        y-from: ${
-          yParam && yScale ? yScale.scale(d.params[yParam].from) : ""
-        }</br>
-        y-to: ${yParam && yScale ? yScale.scale(d.params[yParam].to) : ""}
+        x-from: ${xParam ? d.params[xParam].from : ""}</br>
+        x-to: ${xParam ? d.params[xParam].to : ""}</br>
+        y-from: ${yParam ? d.params[yParam].from : ""}</br>
+        y-to: ${yParam ? d.params[yParam].to : ""}
       `
       );
     }
@@ -82,7 +79,6 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
 
     this.addAxes(this.dataController.currentScales);
 
-    this.initHighlightLayer();
     this.redraw();
   }
 
@@ -104,8 +100,8 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
 
     this.highlight
       ?.attr("fill", "transparent")
-      .attr("stroke", "#9b9b9b")
-      .attr("stroke-width", 3);
+      .attr("stroke", "#c7c7c7")
+      .attr("stroke-width", 2);
   }
 
   private redraw = (transform: ZoomTransform = zoomIdentity) => {

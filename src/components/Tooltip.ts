@@ -8,6 +8,7 @@ export type TooltipValueAccessor<Datum> = (d: Datum) => string;
 class Tooltip<Datum> {
   private fo: TooltipFO;
   private tooltip: TooltipSelection;
+  private inner: TooltipSelection;
 
   private valueAccessor: TooltipValueAccessor<Datum>;
 
@@ -24,18 +25,26 @@ class Tooltip<Datum> {
       .attr("height", 100);
 
     this.tooltip = this.fo.append("xhtml:div");
+    this.inner = this.tooltip.append("div");
 
+    Tooltip.styleTooltipInner(this.inner);
     Tooltip.styleTooltip(this.tooltip);
     Tooltip.hideTooltip(this.fo);
   }
 
-  public static styleTooltip(tooltip: TooltipSelection) {
+  public static styleTooltipInner(tooltip: TooltipSelection) {
     tooltip
-      .style("background", "rgb(119, 119, 119, 0.5)")
+      .style("background", "#ffffff")
       .style("padding", "8px 14px")
-      .style("color", "#fff")
+      .style("color", "#868686")
       .style("border-radius", "4px")
-      .style("font-family", "sans-serif");
+      .style("font-family", "sans-serif")
+      .style("box-sizing", "border-box")
+      .style("box-shadow", "0px 0px 10px 3px rgba(0,0,0,0.1)");
+  }
+
+  public static styleTooltip(tooltip: TooltipSelection) {
+    tooltip.style("padding", "14px");
   }
 
   public static hideTooltip(tooltip: TooltipFO) {
@@ -47,8 +56,8 @@ class Tooltip<Datum> {
   }
 
   public showTooltip({ x, y, width, height, ...d }: DatumRect<Datum>) {
-    const { fo, tooltip } = this;
-    tooltip.html(this.valueAccessor(d as unknown as Datum));
+    const { fo, tooltip, inner } = this;
+    inner.html(this.valueAccessor(d as unknown as Datum));
 
     fo.attr("height", tooltip.node()!.getBoundingClientRect().height);
 
