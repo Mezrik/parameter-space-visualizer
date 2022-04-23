@@ -3,6 +3,7 @@ import { select, zoomIdentity, ZoomTransform } from "d3";
 import Chart from "./Chart";
 import Tooltip from "./components/Tooltip";
 import RegionsController from "./controllers/RegionsController";
+import { applyParamsFixations } from "./helpers/regions";
 import {
   ChartConfig,
   DatumRect,
@@ -18,6 +19,8 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
 
   constructor(element: MountElement, config: ChartConfig<RegionDatum<Value>>) {
     super(element, config);
+
+    this.config.dataTransform = applyParamsFixations;
 
     const {
       config: { xMax, yMax },
@@ -100,8 +103,8 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
 
     this.highlight
       ?.attr("fill", "transparent")
-      .attr("stroke", "#c7c7c7")
-      .attr("stroke-width", 2);
+      .attr("stroke", "#9b9b9b")
+      .attr("stroke-width", 3);
   }
 
   private redraw = (transform: ZoomTransform = zoomIdentity) => {
@@ -146,12 +149,12 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
 
   private reset() {
     const {
-      config: { xMax, yMax },
+      config: { xMax, yMax, data },
     } = this;
 
     // Re-bind the regions, this will reset scales to current params scales
     this.dataController.bindCurrentScalesRange(xMax, yMax);
-    this.dataController.bindRegions();
+    this.dataController.bindRegions(data);
 
     this.redraw();
 

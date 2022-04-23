@@ -8,11 +8,9 @@ import {
 } from "../types/scale";
 class DataController<Datum> {
   private paramScales: Record<ParamType, DataControllerScaleType> = {};
-  private _params: ParamsTuple | null = null;
   private config: Config<Datum>;
 
   constructor(config: Config<Datum>) {
-    this._params = config.params ?? null;
     this.config = config;
 
     this.initScales(config);
@@ -39,25 +37,18 @@ class DataController<Datum> {
     yScale?.scale.range([h, 0]);
   }
 
-  set params(params: ParamsTuple | null) {
-    let result: ParamsTuple | null = null;
-    if (params)
-      result = getDifParams(this.config.allParams, params, this.params);
-
-    this.config.options.handleParamsChange?.(result);
-
-    console.log(params);
-    this._params = result;
+  set params(params: ParamsTuple | undefined | null) {
+    this.config.params = params;
   }
 
-  get params(): ParamsTuple | null {
-    return this._params;
+  get params(): ParamsTuple | undefined | null {
+    return this.config.params;
   }
 
   get currentScales(): DataControllerScaleTuple {
-    if (!this._params) return [undefined, undefined];
+    if (!this.config.params) return [undefined, undefined];
 
-    const [x, y] = this._params;
+    const [x, y] = this.config.params;
     return [this.paramScales[x], y ? this.paramScales[y] : undefined];
   }
 }

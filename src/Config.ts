@@ -2,6 +2,7 @@ import { extent } from "d3-array";
 import { ZERO_MARGIN } from "./constants/common";
 import {
   checkIfParamsExist,
+  getDifParams,
   getParams,
   getParamsToBeFixed,
   getParamsTuple,
@@ -10,6 +11,7 @@ import { getParamDomain } from "./helpers/general";
 import {
   ChartConfig,
   ChartConfigDynamic,
+  DataTransform,
   Margin,
   Options,
   ParamsFixation,
@@ -22,9 +24,13 @@ class Config<Datum> {
   private _margin: Margin = ZERO_MARGIN;
 
   private _allParams: ParamType[];
+  private _params: ParamsTuple | undefined | null = null;
   private _paramsExtents: Record<ParamType, [number, number]>;
 
   private _userFixations: ParamsFixation;
+
+  private _transfomData?: DataTransform<Datum>;
+  private _transfromedData: Datum[] | undefined;
 
   constructor(config: ChartConfig<Datum> | ChartConfigDynamic<Datum>) {
     this._config = config;
@@ -38,6 +44,7 @@ class Config<Datum> {
     };
 
     this._allParams = getParams(this.data);
+    this._params = getParamsTuple(this._config.options?.params);
 
     this._paramsExtents = this._allParams.reduce(
       (acc, param) => ({
@@ -50,16 +57,23 @@ class Config<Datum> {
     this._userFixations = this._config.options?.paramsFixation ?? {};
   }
 
+  private setTransformedData(fixations: ParamsFixation) {
+    const data = (this._config as ChartConfig<Datum>).data;
+    if (this._transfomData && data)
+      this._transfromedData = this._transfomData(data, fixations);
+  }
+
   get data() {
     return (
+      this._transfromedData ??
       (this._config as ChartConfig<Datum>).data ??
       (this._config as ChartConfigDynamic<Datum>).intervals
     );
   }
 
-  get params(): ParamsTuple | undefined {
+  get params(): ParamsTuple | undefined | null {
     const dataParams = this._allParams;
-    const userParams = getParamsTuple(this._config.options?.params);
+    const userParams = this._params;
 
     if (userParams && checkIfParamsExist(dataParams, userParams))
       return userParams;
@@ -68,9 +82,19 @@ class Config<Datum> {
     return [x, y ? y : undefined];
   }
 
+  set params(params: ParamsTuple | undefined | null) {
+    let result: ParamsTuple | null = null;
+    if (params) result = getDifParams(this.allParams, params, this._params);
+
+    this._config.options?.handleParamsChange?.(result);
+
+    this._params = result;
+
+    this.paramsFixation && this.setTransformedData(this.paramsFixation);
+  }
+
   get paramsFixation() {
     if (!this.params) return undefined;
-
     return getParamsToBeFixed(
       this.params,
       this._allParams,
@@ -81,6 +105,13 @@ class Config<Datum> {
 
   set userFixations(fixations: ParamsFixation) {
     this._userFixations = fixations;
+
+    this.setTransformedData(fixations);
+  }
+
+  set dataTransform(tranformData: DataTransform<Datum>) {
+    this._transfomData = tranformData;
+    this.paramsFixation && this.setTransformedData(this.paramsFixation);
   }
 
   get options(): Options<ChartConfig<Datum>["options"]> {

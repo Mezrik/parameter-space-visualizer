@@ -1,5 +1,5 @@
 import { NumberValue } from "d3-scale";
-import { Margin, RegionDatum } from "../types/general";
+import { ParamsFixation, RegionDatum } from "../types/general";
 
 export const isRegionsData = <Value>(
   data: unknown[]
@@ -25,3 +25,26 @@ export const getParamDomain = <Value>(
 
     return [...acc, paramRange.from, paramRange.to];
   }, []);
+
+export const isValueInRange = (
+  range: { from: NumberValue; to: NumberValue },
+  value: NumberValue
+) => {
+  return range.from <= value && value <= range.to;
+};
+
+export const applyParamsFixations = <Value>(
+  data: RegionDatum<Value>[],
+  fixs?: ParamsFixation
+) => {
+  return fixs
+    ? data.filter((d) =>
+        Object.entries(fixs).every(([param, val]) =>
+          isValueInRange(
+            d.params[param],
+            typeof val === "string" ? parseInt(val, 10) : val
+          )
+        )
+      )
+    : data;
+};

@@ -49,7 +49,7 @@ export const getParams = <Datum>(data: Datum[]) => {
 export const getDifParams = (
   params: string[],
   newP: ParamsTuple,
-  oldP: ParamsTuple | null
+  oldP: ParamsTuple | undefined | null
 ): ParamsTuple => {
   if (!oldP)
     return newP[0] === newP[1]

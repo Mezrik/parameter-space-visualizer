@@ -86,3 +86,8 @@ export type ChartConfigDynamic<Datum> = {
 export type MountElement = string | HTMLElement;
 
 export type DatumRect<Datum> = Datum & Rect;
+
+export type DataTransform<Datum> = (
+  data: Datum[],
+  fixs?: ParamsFixation
+) => Datum[];

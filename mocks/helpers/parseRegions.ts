@@ -3,7 +3,9 @@ export type RegionResultValue =
   | "false"
   | "unknown"
   | "partially_sat"
-  | "partially_violated";
+  | "partially_violated"
+  | "center_sat"
+  | "center_violated";
 export interface RegionResult<T> {
   value: T;
   params: Record<string, { from: number; to: number }>;
@@ -24,7 +26,7 @@ export const parseParam = (param: string) => {
 };
 
 export const parseValue = (value: string): RegionResultValue => {
-  switch (value) {
+  switch (value.trim()) {
     case "AllSat":
       return "true";
     case "AllViolated":
@@ -33,6 +35,10 @@ export const parseValue = (value: string): RegionResultValue => {
       return "partially_sat";
     case "ExistsViolated":
       return "partially_violated";
+    case "CenterSat":
+      return "center_sat";
+    case "CenterViolated":
+      return "center_violated";
     default:
       return "unknown";
   }

@@ -1,4 +1,4 @@
-import { RegionResults01Parsed } from "@mocks/./";
+import { ParametricDieData3DParsed, Tiny3DDataParsed } from "@mocks/./";
 import { RegionResultValue } from "@mocks/helpers/parseRegions";
 import { scaleLinear, interpolateHcl, hcl, HCLColor } from "d3";
 
@@ -21,8 +21,10 @@ const COLOR_MAPPING: Record<RegionResultValue, string> = {
   true: "#f0c928",
   false: "#ab0d0c",
   unknown: "#fbe6c2",
-  partially_sat: "#fbe6c2",
+  partially_sat: "#ffdc4f",
   partially_violated: "#fbe6c2",
+  center_sat: "#e0c141",
+  center_violated: "#fbe6c2",
 };
 
 const color = (d: RegionDatum<RegionResultValue>) => COLOR_MAPPING[d.value];
@@ -43,7 +45,7 @@ const createRegionsChart = () => {
     "regions-chart-styles"
   );
 
-  const params = ["param_sig", "param_block"];
+  const params = ["p", "q", "r"];
 
   let xSelect: HTMLSelectElement | undefined,
     ySelect: HTMLSelectElement | undefined;
@@ -67,7 +69,7 @@ const createRegionsChart = () => {
       params: { x: params[0], y: params[1] },
       handleParamsChange,
     },
-    data: RegionResults01Parsed!,
+    data: ParametricDieData3DParsed!,
     width: 800,
     height: 800,
   });

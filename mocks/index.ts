@@ -3,6 +3,7 @@ import RegionResults02 from "./data/csv/regions/ok-results/brp01.csv";
 import RegionResults03 from "./data/csv/regions/ok-results/brp02.csv";
 import RegionResults04 from "./data/csv/regions/ok-results/brp03.csv";
 import ParametricDie3DData from "./data/csv/regions/ok-results/test3d.csv";
+import Tiny3DData from "./data/csv/regions/ok-results/test3dTiny.csv";
 
 import { csvToRegionResultsList } from "./helpers/parseRegions";
 
@@ -16,3 +17,5 @@ export const RegionResults04Parsed = csvToRegionResultsList(RegionResults04);
 
 export const ParametricDieData3DParsed =
   csvToRegionResultsList(ParametricDie3DData);
+
+export const Tiny3DDataParsed = csvToRegionResultsList(Tiny3DData);

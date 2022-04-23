@@ -12,18 +12,25 @@ class RegionsController<Value> extends DataController<RegionDatum<Value>> {
     RegionDatum<Value>[]
   >;
 
+  private _detachedContainer: Selection<
+    HTMLElement,
+    RegionDatum<Value>[],
+    null,
+    undefined
+  >;
+
   constructor(opts: Config<RegionDatum<Value>>) {
     super(opts);
 
-    const detachedContainer = select<HTMLElement, RegionDatum<Value>[]>(
+    this._detachedContainer = select<HTMLElement, RegionDatum<Value>[]>(
       document.createElement("custom")
     );
 
-    this._regionsBinding = detachedContainer
+    this._regionsBinding = this._detachedContainer
       .selectAll("custom")
       .data(opts.data);
 
-    this.bindRegions();
+    this.bindRegions(opts.data);
   }
 
   public x = (d: RegionDatum<Value>) => {
@@ -60,9 +67,11 @@ class RegionsController<Value> extends DataController<RegionDatum<Value>> {
       : UNDEFINED_CHART_VALUE;
   };
 
-  public bindRegions() {
+  public bindRegions(data: RegionDatum<Value>[]) {
     // Bind zero for y position and height in case of 1D chart
-    this._regionsBinding = this._regionsBinding
+    this._regionsBinding = this._detachedContainer
+      .selectAll("custom")
+      .data(data)
       .join("custom")
       .classed(".region", true)
       .attr("x", this.x)
