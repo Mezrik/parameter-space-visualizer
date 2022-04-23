@@ -137,15 +137,15 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
       ctx.fillStyle = config?.options?.color?.(d) ?? theme.colors.white;
 
       const [x, y] = transform.apply([
-        parseInt(node.attr("x"), 10),
-        parseInt(node.attr("y"), 10),
+        parseFloat(node.attr("x")),
+        parseFloat(node.attr("y")),
       ]);
 
       ctx.rect(
         x,
         y,
-        parseInt(node.attr("width"), 10) * transform.k,
-        parseInt(node.attr("height"), 10) * transform.k
+        parseFloat(node.attr("width")) * transform.k,
+        parseFloat(node.attr("height")) * transform.k
       );
 
       ctx.fill();
