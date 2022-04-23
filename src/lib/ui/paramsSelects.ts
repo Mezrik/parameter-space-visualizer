@@ -71,7 +71,7 @@ export const createParamsSelect = (
       pointer-events: none;
       right: ${rem(8)}; 
       top: ${rem(2)};
-      color: ${style.color ?? "#000"};
+      color: ${style.color ?? theme.colors.black};
       font-family: monospace;
       font-size: 1.5em;
       line-height: ${rem(14.5)};
@@ -83,7 +83,9 @@ export const createParamsSelect = (
       top: ${rem(5)};
       width: ${rem(20)};
       height: ${rem(20)};
-      background: ${style.background ?? style.backgroundColor ?? "#fff"};
+      background: ${
+        style.background ?? style.backgroundColor ?? theme.colors.white
+      };
       border-radius: ${style.borderRadius ?? "0"};
       position: absolute;
       pointer-events: none;

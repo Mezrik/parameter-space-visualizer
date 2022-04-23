@@ -1,15 +1,18 @@
 import { axisBottom, axisLeft, BaseType, Selection } from "d3";
+import { theme } from "../constants/styles";
 import { AnyD3Scale } from "../types/scale";
 import { SimpleSelection } from "../types/selection";
-import { getTicks } from "./scale";
 
 const styleDomain = (stroke: number) => (g: SimpleSelection<SVGGElement>) =>
-  g.select(".domain").attr("stroke-width", stroke).attr("stroke", "#c7c7c7");
+  g
+    .select(".domain")
+    .attr("stroke-width", stroke)
+    .attr("stroke", theme.colors.lightGrey);
 
 const styleTickLines = (
   g: SimpleSelection<SVGGElement>
 ): Selection<BaseType, unknown, SVGGElement, unknown> =>
-  g.selectAll(".tick line").attr("stroke", "#c7c7c7");
+  g.selectAll(".tick line").attr("stroke", theme.colors.lightGrey);
 
 const styleTickText = (
   g: SimpleSelection<SVGGElement>
@@ -17,14 +20,14 @@ const styleTickText = (
   g
     .selectAll(".tick text")
     .style("font-size", "0.75rem")
-    .attr("fill", "#5a5a5a");
+    .attr("fill", theme.colors.textColor);
 
 const styleGridLines = (
   g: SimpleSelection<SVGGElement>
 ): Selection<BaseType, unknown, SVGGElement, unknown> =>
   g
     .selectAll(".tick line")
-    .attr("stroke", "#ffffff")
+    .attr("stroke", theme.colors.white)
     .attr("opacity", 0.3)
     .attr("stroke-dasharray", "7 3");
 

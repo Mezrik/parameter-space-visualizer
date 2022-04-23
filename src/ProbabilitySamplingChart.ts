@@ -2,6 +2,7 @@ import { select } from "d3-selection";
 import { zoomIdentity } from "d3-zoom";
 import m from "math-expression-evaluator";
 import Chart from "./Chart";
+import { theme } from "./constants/styles";
 import ScatterController from "./controllers/ScatterController";
 import {
   createStubProbabilityData,
@@ -89,7 +90,7 @@ class ProbabilitySamplingChart extends Chart<ProbabilityDatum> {
         config?.options?.color?.({
           value: this.expression(pair),
           name: "val",
-        }) ?? "#000";
+        }) ?? theme.colors.black;
       ctx.arc(x, y, POINT_RADIUS, 0, 2 * Math.PI);
 
       ctx.fill();

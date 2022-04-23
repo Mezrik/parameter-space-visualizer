@@ -2,6 +2,7 @@ import { select, zoomIdentity, ZoomTransform } from "d3";
 
 import Chart from "./Chart";
 import Tooltip from "./components/Tooltip";
+import { theme } from "./constants/styles";
 import RegionsController from "./controllers/RegionsController";
 import { applyParamsFixations } from "./helpers/regions";
 import {
@@ -104,7 +105,7 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
 
     this.highlight
       ?.attr("fill", "transparent")
-      .attr("stroke", "#9b9b9b")
+      .attr("stroke", theme.colors.grey)
       .attr("stroke-width", 3);
   }
 
@@ -128,7 +129,7 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
       const node = select(nodes[i]);
 
       ctx.beginPath();
-      ctx.fillStyle = config?.options?.color?.(d) ?? "#fff";
+      ctx.fillStyle = config?.options?.color?.(d) ?? theme.colors.white;
 
       const [x, y] = transform.apply([
         parseInt(node.attr("x"), 10),

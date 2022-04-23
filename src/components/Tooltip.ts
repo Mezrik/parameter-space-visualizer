@@ -1,3 +1,4 @@
+import { theme } from "../constants/styles";
 import { rem } from "../lib/ui/general";
 import { DatumRect } from "../types/general";
 import { SimpleSelection } from "../types/selection";
@@ -35,7 +36,7 @@ class Tooltip<Datum> {
 
   public static styleTooltipInner(tooltip: TooltipSelection) {
     tooltip
-      .style("background", "#ffffff")
+      .style("background", theme.colors.white)
       .style("padding", `${rem(8)} ${rem(14)}`)
       .style("color", "#868686")
       .style("border-radius", `${rem(4)}`)

@@ -1,5 +1,6 @@
 import { extent } from "d3-array";
 import { ZERO_MARGIN } from "./constants/common";
+import { theme } from "./constants/styles";
 import {
   checkIfParamsExist,
   getDifParams,
@@ -129,13 +130,13 @@ class Config<Datum> {
       axes: {
         x: {
           tickFontSize: opts?.axes?.x.tickFontSize ?? 10,
-          tickStrokeColor: opts?.axes?.x.tickStrokeColor ?? "#000",
+          tickStrokeColor: opts?.axes?.x.tickStrokeColor ?? theme.colors.black,
           tickCount: opts?.axes?.x.tickCount ?? 10,
           tickSize: opts?.axes?.x.tickSize ?? 6,
         },
         y: {
           tickFontSize: opts?.axes?.x.tickFontSize ?? 10,
-          tickStrokeColor: opts?.axes?.x.tickStrokeColor ?? "#000",
+          tickStrokeColor: opts?.axes?.x.tickStrokeColor ?? theme.colors.black,
           tickCount: opts?.axes?.x.tickCount ?? 10,
           tickSize: opts?.axes?.x.tickSize ?? 6,
         },
