@@ -9,6 +9,8 @@ export type ParamsTuple = [ParamType, ParamType] | [ParamType, undefined];
 export type ParamsFixation = Record<ParamType, number | string>;
 export type ParamsChangeHandler = (p: ParamsTuple | null) => void;
 
+export type FixationChangeHandler = (f: ParamsFixation) => void;
+
 export type UserMargin = {
   top?: number;
   left?: number;
@@ -28,6 +30,7 @@ export type UserOptions<Datum, XScaleInput, YScaleInput> = {
   params?: Params;
   paramsFixation?: ParamsFixation;
   handleParamsChange?: ParamsChangeHandler;
+  handleFixationChange?: FixationChangeHandler;
   margin?: UserMargin;
   color?: (d: Datum) => string;
   axes?: { x: UserAxesConfig<XScaleInput>; y?: UserAxesConfig<YScaleInput> };
@@ -56,6 +59,7 @@ export type Options<UOpts> = UOpts extends UserOptions<
       params?: Params;
       margin: Margin;
       handleParamsChange?: ParamsChangeHandler;
+      handleFixationChange?: FixationChangeHandler;
       color?: (d: Datum) => string;
       axes: {
         x: AxesConfig<XScaleInput>;

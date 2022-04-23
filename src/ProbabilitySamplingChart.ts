@@ -98,9 +98,9 @@ class ProbabilitySamplingChart extends Chart<ProbabilityDatum> {
     });
   };
 
-  public fixate(fixations: ParamsFixation) {
-    this.config.userFixations = fixations;
-  }
+  public reset = () => {
+    // TODO
+  };
 }
 
 export default ProbabilitySamplingChart;

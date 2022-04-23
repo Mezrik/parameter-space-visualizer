@@ -1,4 +1,4 @@
-import { select, Selection } from "d3";
+import { select, Selection, ZoomTransform } from "d3";
 import Axes from "./components/Axes";
 import ChartArea from "./components/ChartArea";
 import Grid from "./components/Grid";
@@ -12,11 +12,12 @@ import {
   DatumRect,
   Margin,
   MountElement,
+  ParamsFixation,
 } from "./types/general";
 import { DataControllerScaleTuple } from "./types/scale";
 import { SimpleSelection } from "./types/selection";
 
-class Chart<Datum> {
+abstract class Chart<Datum> {
   protected el?: SimpleSelection<HTMLDivElement>;
   protected config: Config<Datum>;
   protected chartArea?: ChartArea<DatumRect<Datum>>;
@@ -111,6 +112,15 @@ class Chart<Datum> {
       this.grid = grid;
     }
   }
+
+  public fixate = (fixations: ParamsFixation) => {
+    this.config.userFixations = fixations;
+    this.reset();
+  };
+
+  public abstract reset(): void;
+
+  public abstract redraw(transform: ZoomTransform): void;
 
   get width() {
     return this._width;

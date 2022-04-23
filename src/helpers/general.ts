@@ -93,7 +93,7 @@ export const getParamsToBeFixed = (
   );
 
   return {
-    ...checkParamFixationInExtent(userFixations ?? {}, paramsExtents),
+    ...checkUserParams(userFixations ?? {}, params, paramsExtents),
     ...toBeFixed.reduce(
       (acc, param) => ({ ...acc, [param]: paramsExtents[param][0] }),
       {}
@@ -108,17 +108,21 @@ export const isInExtent = (
   return typeof val === "number" && (min <= val || val <= max);
 };
 
-export const checkParamFixationInExtent = (
+export const checkUserParams = (
   fixations: ParamsFixation,
+  params: ParamsTuple,
   paramsExtents: Record<ParamType, [number, number]>
 ) => {
   return Object.entries(fixations).reduce<ParamsFixation>(
-    (acc, [param, val]) => ({
-      ...acc,
-      [param]: isInExtent(val, paramsExtents[param])
-        ? val
-        : paramsExtents[param][0],
-    }),
+    (acc, [param, val]) =>
+      params.includes(param)
+        ? acc
+        : {
+            ...acc,
+            [param]: isInExtent(val, paramsExtents[param])
+              ? val
+              : paramsExtents[param][0],
+          },
     {}
   );
 };

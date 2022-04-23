@@ -1,3 +1,4 @@
+import { ParamsChangeHandler } from "../../types/general";
 import { addStyle, applyStyles, StyleDeclaration } from "./general";
 
 type ParamSetCb = (v: string) => void;
@@ -146,5 +147,15 @@ export const appendParamsSelects = (
     ev.target && y && y((ev.target as HTMLInputElement).value);
   });
 
-  return [xSelect, ySelect];
+  const handleExternalChange: ParamsChangeHandler = (newParams) => {
+    if (!newParams) return;
+
+    const [xi] = findParam(params, newParams[0]);
+    const [yi] = findParam(params, newParams[1]);
+
+    if (xSelect) xSelect.selectedIndex = xi;
+    if (ySelect) ySelect.selectedIndex = yi;
+  };
+
+  return handleExternalChange;
 };

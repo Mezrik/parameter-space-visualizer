@@ -5,10 +5,15 @@ import { scaleLinear, interpolateHcl, hcl, HCLColor } from "d3";
 import Chart from "./Chart";
 import { createProabilityColorScale } from "./helpers/general";
 import { addStyle, applyStyles } from "./lib/ui/general";
+import { appendParamFixInputs } from "./lib/ui/paramFixInputs";
 import { appendParamsSelects, findParam } from "./lib/ui/paramsSelects";
 import ProbabilitySamplingChart from "./ProbabilitySamplingChart";
 import RegionsChart from "./RegionsChart";
-import { ParamsChangeHandler, RegionDatum } from "./types/general";
+import {
+  FixationChangeHandler,
+  ParamsChangeHandler,
+  RegionDatum,
+} from "./types/general";
 
 if (typeof window !== "undefined") {
   (window as any).Chart = Chart;
@@ -46,19 +51,10 @@ const createRegionsChart = () => {
   );
 
   const params = ["p", "q", "r"];
+  const paramsFix = { r: 0.2 };
 
-  let xSelect: HTMLSelectElement | undefined,
-    ySelect: HTMLSelectElement | undefined;
-
-  const handleParamsChange: ParamsChangeHandler = (newParams) => {
-    if (!newParams) return;
-
-    const [xi] = findParam(params, newParams[0]);
-    const [yi] = findParam(params, newParams[1]);
-
-    if (xSelect) xSelect.selectedIndex = xi;
-    if (ySelect) ySelect.selectedIndex = yi;
-  };
+  let handleParamsChange: ParamsChangeHandler | undefined;
+  let handleFixationChange: FixationChangeHandler | undefined;
 
   const leftMargin = 40;
 
@@ -67,9 +63,11 @@ const createRegionsChart = () => {
       color,
       margin: { top: 20, right: 30, bottom: 30, left: leftMargin },
       params: { x: params[0], y: params[1] },
-      handleParamsChange,
+      paramsFixation: { r: 0.2 },
+      handleParamsChange: (...args) => handleParamsChange?.(...args),
+      handleFixationChange: (...args) => handleFixationChange?.(...args),
     },
-    data: ParametricDieData3DParsed!,
+    data: Tiny3DDataParsed!,
     width: 800,
     height: 800,
   });
@@ -78,13 +76,19 @@ const createRegionsChart = () => {
   controls.classList.add("chart-controls");
   applyStyles(controls, { marginLeft: `${leftMargin}px` });
 
-  [xSelect, ySelect] = appendParamsSelects(
+  handleParamsChange = appendParamsSelects(
     controls,
     params,
     chart.x,
     params[0],
     chart.y,
     params[1]
+  );
+
+  handleFixationChange = appendParamFixInputs(
+    controls,
+    paramsFix,
+    chart.fixate
   );
 
   container.appendChild(controls);

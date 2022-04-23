@@ -8,6 +8,7 @@ import {
   ChartConfig,
   DatumRect,
   MountElement,
+  ParamsFixation,
   RegionDatum,
 } from "./types/general";
 import { SimpleSelection } from "./types/selection";
@@ -107,7 +108,7 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
       .attr("stroke-width", 3);
   }
 
-  private redraw = (transform: ZoomTransform = zoomIdentity) => {
+  public redraw = (transform: ZoomTransform = zoomIdentity) => {
     const {
       chartArea,
       dataController: { regionsBinding },
@@ -147,13 +148,14 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
     });
   };
 
-  private reset() {
+  public reset = () => {
     const {
       config: { xMax, yMax, data },
     } = this;
 
     // Re-bind the regions, this will reset scales to current params scales
     this.dataController.bindCurrentScalesRange(xMax, yMax);
+    console.log(data);
     this.dataController.bindRegions(data);
 
     this.redraw();
@@ -172,7 +174,7 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
         height: h(d),
       }))
     );
-  }
+  };
 
   /**
    * Change param displayed on axis x
