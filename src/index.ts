@@ -1,10 +1,4 @@
-import {
-  ParametricDieData3DParsed,
-  Tiny3DDataParsed,
-  RegionResults04Parsed,
-  RegionResults01Parsed,
-} from "@mocks/./";
-import { RegionResultValue } from "@mocks/helpers/parseRegions";
+import { csvToRegionResultsList, RegionResultValue } from "./lib/data/parse";
 import { scaleLinear, interpolateHcl, hcl, HCLColor } from "d3";
 
 import Chart from "./Chart";
@@ -19,6 +13,7 @@ import {
   ParamsChangeHandler,
   RegionDatum,
 } from "./types/general";
+import { fetch } from "./lib/data/fetch";
 
 if (typeof window !== "undefined") {
   (window as any).Chart = Chart;
@@ -39,7 +34,7 @@ const COLOR_MAPPING: Record<RegionResultValue, string> = {
 
 const color = (d: RegionDatum<RegionResultValue>) => COLOR_MAPPING[d.value];
 
-const createRegionsChart = () => {
+const createRegionsChart = (data: RegionDatum<RegionResultValue>[]) => {
   const container = document.createElement("div");
   document.body.appendChild(container);
   container.classList.add("regions-chart");
@@ -55,7 +50,7 @@ const createRegionsChart = () => {
     "regions-chart-styles"
   );
 
-  const params = ["param_sig", "param_block"]; // ["p", "q", "r"];
+  const params = ["pL", "pK"]; // ["p", "q", "r"];
   const paramsFix = {}; // { r: 0.2 };
 
   let handleParamsChange: ParamsChangeHandler | undefined;
@@ -71,7 +66,7 @@ const createRegionsChart = () => {
       handleParamsChange: (...args) => handleParamsChange?.(...args),
       handleFixationChange: (...args) => handleFixationChange?.(...args),
     },
-    data: RegionResults01Parsed!,
+    data,
     width: 800,
     height: 800,
   });
@@ -126,7 +121,14 @@ document.addEventListener("DOMContentLoaded", function (e) {
   `,
     "main"
   );
-  createRegionsChart();
+
+  fetch(
+    "/csv/regions/large-results/parametric-die01.csv",
+    csvToRegionResultsList
+  ).then((d) => {
+    console.log(d);
+    createRegionsChart(d);
+  });
 
   // const right = document.createElement("div");
   // right.style.position = "absolute";
