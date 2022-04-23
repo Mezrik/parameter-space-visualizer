@@ -59,7 +59,6 @@ class Config<Datum> {
 
   private setTransformedData(fixations: ParamsFixation) {
     const data = (this._config as ChartConfig<Datum>).data;
-    console.log(data.map((d) => d.params["r"]));
     if (this._transfomData && data)
       this._transfromedData = this._transfomData(data, fixations);
 

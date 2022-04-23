@@ -6,6 +6,7 @@ import Config from "./Config";
 import { ZERO_MARGIN } from "./constants/common";
 import DataController from "./controllers/DataController";
 import Zoom from "./controllers/Zoom";
+import { rem } from "./lib/ui/general";
 import {
   ChartConfig,
   ChartConfigDynamic,
@@ -53,7 +54,7 @@ abstract class Chart<Datum> {
         el,
       } = this;
 
-      el.style("width", width + "px").style("height", height + "px");
+      el.style("width", rem(width)).style("height", rem(height));
 
       // Initialize the SVG element which contains axis, highlights etc.
       this.svg = el

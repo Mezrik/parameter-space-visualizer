@@ -1,15 +1,30 @@
+import { theme } from "../../constants/styles";
 import { ParamsFixation, ParamType } from "../../types/general";
+import { addStyle, applyStyles, rem, StyleDeclaration } from "./general";
+import { labelDefaultStyle } from "./styles";
+
+const defaultInputStyle: Partial<StyleDeclaration> = {
+  padding: `${rem(6)}`,
+  fontFamily: theme.font,
+  fontSize: "0.75rem",
+  border: `${theme.colors.primary} ${rem(2)} solid`,
+  borderRadius: `${rem(4)}`,
+  color: theme.colors.textColor,
+};
 
 export const createParamInput = (
   param: ParamType,
   value: number | string,
-  onChange: (value: number) => void
+  onChange: (value: number) => void,
+  style = defaultInputStyle
 ): [HTMLDivElement, HTMLInputElement] => {
   const container = document.createElement("div");
   container.classList.add("field");
 
   const l = document.createElement("label");
   l.htmlFor = param;
+  l.innerText = param;
+  applyStyles(l, labelDefaultStyle);
 
   const input = document.createElement("input");
   input.id = param;
@@ -19,6 +34,9 @@ export const createParamInput = (
   input.addEventListener("change", (ev) => {
     onChange(parseFloat((ev.target as HTMLInputElement).value));
   });
+  input.classList.add("styled-input");
+
+  applyStyles(input, style);
 
   container.appendChild(l);
   container.appendChild(input);

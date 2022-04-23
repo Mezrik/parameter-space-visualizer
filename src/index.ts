@@ -4,7 +4,7 @@ import { scaleLinear, interpolateHcl, hcl, HCLColor } from "d3";
 
 import Chart from "./Chart";
 import { createProabilityColorScale } from "./helpers/general";
-import { addStyle, applyStyles } from "./lib/ui/general";
+import { addStyle, applyStyles, rem } from "./lib/ui/general";
 import { appendParamFixInputs } from "./lib/ui/paramFixInputs";
 import { appendParamsSelects, findParam } from "./lib/ui/paramsSelects";
 import ProbabilitySamplingChart from "./ProbabilitySamplingChart";
@@ -74,7 +74,21 @@ const createRegionsChart = () => {
 
   const controls = document.createElement("div");
   controls.classList.add("chart-controls");
-  applyStyles(controls, { marginLeft: `${leftMargin}px` });
+  applyStyles(controls, {});
+
+  addStyle(
+    `
+    .chart-controls {
+      display: flex;
+      margin-left: ${rem(leftMargin)};
+    }
+
+    .chart-controls > * + * {
+      margin-left: 2rem;
+    }
+  `,
+    "styled-chart-controls"
+  );
 
   handleParamsChange = appendParamsSelects(
     controls,
@@ -96,12 +110,12 @@ const createRegionsChart = () => {
 
 document.addEventListener("DOMContentLoaded", function (e) {
   addStyle(
-    `
+    (theme) => `
     body {
       --doc-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
       'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
       margin: 0;
-      font-family: var(--doc-font-family);
+      font-family: ${theme.font};
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }

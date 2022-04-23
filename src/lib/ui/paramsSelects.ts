@@ -1,5 +1,7 @@
+import { theme } from "../../constants/styles";
 import { ParamsChangeHandler } from "../../types/general";
-import { addStyle, applyStyles, StyleDeclaration } from "./general";
+import { addStyle, applyStyles, rem, StyleDeclaration } from "./general";
+import { labelDefaultStyle } from "./styles";
 
 type ParamSetCb = (v: string) => void;
 
@@ -24,11 +26,11 @@ export const createParamsSelectOptions = (
   });
 
 const defaultSelectStyle: Partial<StyleDeclaration> = {
-  background: "#f68328",
-  padding: "6px 16px 6px 6px",
+  background: theme.colors.primary,
+  padding: `${rem(6)} ${rem(16)} ${rem(6)} ${rem(6)}`,
   border: "none",
-  color: "#fff",
-  borderRadius: "4px",
+  color: theme.colors.white,
+  borderRadius: theme.borderRadius.deafult,
 };
 
 export const createParamsSelect = (
@@ -42,13 +44,7 @@ export const createParamsSelect = (
 
   const l = document.createElement("label");
   l.innerHTML = label;
-  applyStyles(l, {
-    fontWeight: "500",
-    marginBottom: "0.25rem",
-    fontSize: "0.75rem",
-    color: "#5a5a5a",
-    marginRight: "0.5rem",
-  });
+  applyStyles(l, labelDefaultStyle);
   container.appendChild(l);
 
   const select = document.createElement("select");
@@ -62,9 +58,9 @@ export const createParamsSelect = (
   styledSelect.classList.add("styled-select");
 
   addStyle(
-    `
+    (theme) => `
     .styled-select select {
-      font-family: var(--doc-font-family);
+      font-family: ${theme.font};
       font-size: 0.75rem;
     }
     
@@ -73,20 +69,20 @@ export const createParamsSelect = (
       position: absolute;
       transform: rotate(180deg);
       pointer-events: none;
-      right: 8px; 
-      top: 2px;
+      right: ${rem(8)}; 
+      top: ${rem(2)};
       color: ${style.color ?? "#000"};
       font-family: monospace;
       font-size: 1.5em;
-      line-height: 14.5px;
+      line-height: ${rem(14.5)};
     }
 
     .styled-select:before { 
       content: '';
-      right: 3px;
-      top: 5px;
-      width: 20px;
-      height: 20px;
+      right: ${rem(3)};
+      top: ${rem(5)};
+      width: ${rem(20)};
+      height: ${rem(20)};
       background: ${style.background ?? style.backgroundColor ?? "#fff"};
       border-radius: ${style.borderRadius ?? "0"};
       position: absolute;

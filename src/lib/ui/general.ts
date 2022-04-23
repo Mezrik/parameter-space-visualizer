@@ -1,3 +1,5 @@
+import { theme } from "../../constants/styles";
+
 export type StyleDeclaration = {
   [P in keyof CSSStyleDeclaration]?: string;
 };
@@ -11,7 +13,10 @@ export const applyStyles = (el: HTMLElement, style: StyleDeclaration) => {
   );
 };
 
-export const addStyle = (style: string, id?: string) => {
+export const addStyle = (
+  style: string | ((t: typeof theme) => string),
+  id?: string
+) => {
   const s = document.createElement("style");
   if (id) {
     const alreadyExists = document.querySelector(`style#${id}`);
@@ -20,6 +25,8 @@ export const addStyle = (style: string, id?: string) => {
     s.id = id;
   }
 
-  s.textContent = style;
+  s.textContent = typeof style === "string" ? style : style(theme);
   document.head.append(s);
 };
+
+export const rem = (value: number, base: number = 16) => `${value / base}rem`;

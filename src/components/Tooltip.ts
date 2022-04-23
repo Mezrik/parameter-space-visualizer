@@ -1,3 +1,4 @@
+import { rem } from "../lib/ui/general";
 import { DatumRect } from "../types/general";
 import { SimpleSelection } from "../types/selection";
 
@@ -35,16 +36,16 @@ class Tooltip<Datum> {
   public static styleTooltipInner(tooltip: TooltipSelection) {
     tooltip
       .style("background", "#ffffff")
-      .style("padding", "8px 14px")
+      .style("padding", `${rem(8)} ${rem(14)}`)
       .style("color", "#868686")
-      .style("border-radius", "4px")
+      .style("border-radius", `${rem(4)}`)
       .style("font-family", "sans-serif")
       .style("box-sizing", "border-box")
-      .style("box-shadow", "0px 0px 10px 3px rgba(0,0,0,0.1)");
+      .style("box-shadow", `0 0 ${rem(10)} ${rem(3)} rgba(0,0,0,0.1)`);
   }
 
   public static styleTooltip(tooltip: TooltipSelection) {
-    tooltip.style("padding", "14px");
+    tooltip.style("padding", `${rem(14)}`);
   }
 
   public static hideTooltip(tooltip: TooltipFO) {
