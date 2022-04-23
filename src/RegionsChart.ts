@@ -77,6 +77,11 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
       tooltip?.showTooltip({ ...lastRect, width: 0, height: 0, x, y });
     });
 
+    chartArea?.on("mouseout", () => {
+      this.highlight?.style("display", "none");
+      tooltip.hideTooltip();
+    });
+
     this.zoom?.onChange(this.redraw);
     this.zoom?.onChange(() => {
       this.highlight?.style("display", "none");

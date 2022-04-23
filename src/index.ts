@@ -1,4 +1,9 @@
-import { ParametricDieData3DParsed, Tiny3DDataParsed } from "@mocks/./";
+import {
+  ParametricDieData3DParsed,
+  Tiny3DDataParsed,
+  RegionResults04Parsed,
+  RegionResults01Parsed,
+} from "@mocks/./";
 import { RegionResultValue } from "@mocks/helpers/parseRegions";
 import { scaleLinear, interpolateHcl, hcl, HCLColor } from "d3";
 
@@ -50,8 +55,8 @@ const createRegionsChart = () => {
     "regions-chart-styles"
   );
 
-  const params = ["p", "q", "r"];
-  const paramsFix = { r: 0.2 };
+  const params = ["param_sig", "param_block"]; // ["p", "q", "r"];
+  const paramsFix = {}; // { r: 0.2 };
 
   let handleParamsChange: ParamsChangeHandler | undefined;
   let handleFixationChange: FixationChangeHandler | undefined;
@@ -63,11 +68,10 @@ const createRegionsChart = () => {
       color,
       margin: { top: 20, right: 30, bottom: 30, left: leftMargin },
       params: { x: params[0], y: params[1] },
-      paramsFixation: { r: 0.2 },
       handleParamsChange: (...args) => handleParamsChange?.(...args),
       handleFixationChange: (...args) => handleFixationChange?.(...args),
     },
-    data: Tiny3DDataParsed!,
+    data: RegionResults01Parsed!,
     width: 800,
     height: 800,
   });

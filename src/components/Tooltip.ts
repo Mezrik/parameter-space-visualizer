@@ -67,6 +67,10 @@ class Tooltip<Datum> {
 
     Tooltip.showTooltip(fo);
   }
+
+  public hideTooltip() {
+    Tooltip.hideTooltip(this.fo);
+  }
 }
 
 export default Tooltip;
