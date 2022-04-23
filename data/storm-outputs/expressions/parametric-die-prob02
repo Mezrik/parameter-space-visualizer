@@ -1,0 +1,26 @@
+Storm-pars 1.5.2 (dev)
+
+Date: Mon Nov  1 21:12:10 2021
+Command line arguments: --prism parametric_die.pm --prop 'P=? [F s=7&d=6]' --printfullresult
+Current working directory: /home/xpetr1
+
+Time for model input parsing: 0.001s.
+
+Time for model construction: 0.011s.
+
+-------------------------------------------------------------- 
+Model type: 	DTMC (sparse)
+States: 	13
+Transitions: 	20
+Reward Models:  none
+State Labels: 	3 labels
+   * deadlock -> 0 item(s)
+   * init -> 1 item(s)
+   * ((s = 7) & (d = 6)) -> 1 item(s)
+Choice Labels: 	none
+-------------------------------------------------------------- 
+
+Model checking property "1": P=? [F ((s = 7) & (d = 6))] ...
+Result (initial states): (-1 * ((p+(-1)) * (q*r+(-1)*r+(-1)*q+1)))/(q*r+(-1)*r+1)
+Time for model checking: 0.000s.
+

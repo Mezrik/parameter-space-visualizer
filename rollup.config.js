@@ -7,7 +7,6 @@ import commonjs from "@rollup/plugin-commonjs";
 import { terser } from "rollup-plugin-terser";
 import replace from "@rollup/plugin-replace";
 import { visualizer } from "rollup-plugin-visualizer";
-import dsv from "@rollup/plugin-dsv";
 
 const isProd = process.env.NODE_ENV === "production";
 const visualizeSpace = process.env.VISUALIZE_SPACE === "true";
@@ -31,7 +30,6 @@ export default {
     },
   ],
   plugins: [
-    dsv(),
     typescript(),
     resolve({
       extensions,
