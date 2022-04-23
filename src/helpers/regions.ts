@@ -17,14 +17,16 @@ export const getParams = <Value>(data: RegionDatum<Value>[]) =>
 export const getParamDomain = <Value>(
   data: RegionDatum<Value>[],
   param: string
-) =>
-  data.reduce<NumberValue[]>((acc, datum) => {
-    const paramRange = datum.params[param];
+) => {
+  const result: NumberValue[] = [];
+  data.forEach((d) => {
+    const paramRange = d.params[param];
 
-    if (!paramRange) return acc;
+    result.push(paramRange.from, paramRange.to);
+  });
 
-    return [...acc, paramRange.from, paramRange.to];
-  }, []);
+  return result;
+};
 
 export const isValueInRange = (
   range: { from: NumberValue; to: NumberValue },

@@ -50,8 +50,8 @@ const createRegionsChart = (data: RegionDatum<RegionResultValue>[]) => {
     "regions-chart-styles"
   );
 
-  const params = ["pL", "pK"]; // ["p", "q", "r"];
-  const paramsFix = {}; // { r: 0.2 };
+  const params = ["p", "q", "r"];
+  const paramsFix = { r: 0.2 };
 
   let handleParamsChange: ParamsChangeHandler | undefined;
   let handleFixationChange: FixationChangeHandler | undefined;
