@@ -1,5 +1,6 @@
 import { csvToRegionResultsList, RegionResultValue } from "./lib/data/parse";
 import { scaleLinear, interpolateHcl, hcl, HCLColor } from "d3";
+import * as Comlink from "comlink";
 
 import Chart from "./Chart";
 import { createProabilityColorScale } from "./helpers/general";
@@ -13,9 +14,9 @@ import {
   ParamsChangeHandler,
   RegionDatum,
 } from "./types/general";
-import { fetch } from "./lib/data/fetch";
+import { fetchCSV } from "./lib/data/utils";
 import DataWorker from "web-worker:./lib/data/dataStreamWorker.ts";
-import { releaseProxy, wrap } from "comlink";
+import { DataStreamWorker } from "./lib/data/dataStreamWorker";
 
 if (typeof window !== "undefined") {
   (window as any).Chart = Chart;
@@ -124,7 +125,7 @@ document.addEventListener("DOMContentLoaded", function (e) {
     "main"
   );
 
-  fetch(
+  fetchCSV(
     "/csv/regions/large-results/parametric-die01.csv",
     csvToRegionResultsList
   ).then((d) => {
@@ -133,11 +134,15 @@ document.addEventListener("DOMContentLoaded", function (e) {
   });
 
   const dataWorker = new DataWorker();
-  const proxy = wrap<any>(dataWorker);
+  const proxy = Comlink.wrap<DataStreamWorker>(dataWorker);
 
-  proxy.streamData();
+  proxy.streamData(
+    document.location.origin +
+      "/csv/regions/large-results/parametric-die01.csv",
+    Comlink.proxy((values) => console.log(csvToRegionResultsList(values)))
+  );
 
-  proxy[releaseProxy]();
+  proxy[Comlink.releaseProxy]();
 
   // const right = document.createElement("div");
   // right.style.position = "absolute";
