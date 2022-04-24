@@ -1,4 +1,4 @@
-import { BaseType, select, Selection } from "d3-selection";
+import { BaseType, EnterElement, select, Selection } from "d3-selection";
 import Config from "../Config";
 import { UNDEFINED_CHART_VALUE } from "../constants/common";
 import { RegionDatum, ParamsTuple, Margin } from "../types/general";
@@ -30,7 +30,7 @@ class RegionsController<Value> extends DataController<RegionDatum<Value>> {
       .selectAll("custom")
       .data(opts.data);
 
-    this.bindRegions(opts.data);
+    this._regionsBinding = this._regionsBinding.join(this.joinRegions);
   }
 
   public x = (d: RegionDatum<Value>) => {
@@ -67,18 +67,28 @@ class RegionsController<Value> extends DataController<RegionDatum<Value>> {
       : UNDEFINED_CHART_VALUE;
   };
 
-  public bindRegions(data: RegionDatum<Value>[]) {
+  public bindRegions = (data: RegionDatum<Value>[]) => {
     // Bind zero for y position and height in case of 1D chart
-    this._regionsBinding = this._detachedContainer
-      .selectAll("custom")
+    this._regionsBinding = this._regionsBinding
       .data(data)
-      .join("custom")
-      .classed(".region", true)
+      .join(this.joinRegions);
+  };
+
+  private joinRegions = (
+    c: Selection<
+      EnterElement,
+      RegionDatum<Value>,
+      HTMLElement,
+      RegionDatum<Value>[]
+    >
+  ) => {
+    return c
+      .append("custom")
       .attr("x", this.x)
       .attr("y", this.y)
       .attr("width", this.w)
       .attr("height", this.h);
-  }
+  };
 
   get regionsBinding() {
     return this._regionsBinding;
