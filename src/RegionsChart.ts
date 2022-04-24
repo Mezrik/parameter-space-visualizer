@@ -43,7 +43,7 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
     //   }))
     // );
 
-    this.addGrid(this.dataController.currentScales);
+    this.addGrid(this.dataController);
 
     this.g = this.chartArea?.svg
       ?.append("g")
@@ -166,6 +166,7 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
     this.redraw();
 
     this.axes?.redrawAxes();
+    this.grid?.redrawGrid();
 
     const { x, y, w, h } = this.dataController;
 
