@@ -41,7 +41,7 @@ class ProbabilitySamplingChart extends Chart<ProbabilityDatum> {
     this.dataController = new ScatterController(this.config);
 
     this.redraw();
-    this.addAxes(this.dataController.currentScales);
+    this.addAxes(this.dataController);
 
     this.zoom?.onChange(this.redraw);
   }
