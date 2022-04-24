@@ -50,7 +50,6 @@ export const csvStreamParser = () => {
 
   return {
     parseChunk(chunk: Uint8Array) {
-      console.log(prevLine);
       let text = prevLine + decoder.decode(chunk);
 
       if (!cols) {

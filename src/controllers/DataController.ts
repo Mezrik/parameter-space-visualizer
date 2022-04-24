@@ -1,6 +1,5 @@
 import { scaleLinear } from "d3";
 import Config from "../Config";
-import { getDifParams } from "../helpers/general";
 import { ParamsTuple, ParamType } from "../types/general";
 import {
   DataControllerScaleTuple,
@@ -16,9 +15,8 @@ class DataController<Datum> {
     this.initScales(config);
   }
 
-  private initScales(config: Config<Datum>) {
+  public initScales(config: Config<Datum>) {
     const { allParams, paramsExtents, xMax, yMax } = config;
-
     allParams.forEach((param) => {
       const [min, max] = paramsExtents[param];
       if (typeof min === "number" && typeof max === "number")

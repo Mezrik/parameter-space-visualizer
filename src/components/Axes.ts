@@ -1,4 +1,6 @@
 import { zoomIdentity, ZoomTransform } from "d3-zoom";
+import Config from "../Config";
+import DataController from "../controllers/DataController";
 
 import { xAxisFactory, yAxisFactory } from "../helpers/axis";
 import { AnyD3Scale, DataControllerScaleTuple } from "../types/scale";
@@ -8,45 +10,46 @@ class Axes {
   private gx?: SimpleSelection<SVGGElement>;
   private gy?: SimpleSelection<SVGGElement>;
 
-  private height: number;
-  private scales: DataControllerScaleTuple;
+  private config: Config<any>;
+  private dataController: DataController<any>;
 
   constructor(
     el: SimpleSelection<SVGGElement>,
-    height: number,
-    scales: DataControllerScaleTuple
+    config: Config<any>,
+    dataController: DataController<any>
   ) {
-    const [xScale, yScale] = scales;
-    this.height = height;
-    this.scales = scales;
+    this.config = config;
+    this.dataController = dataController;
+    const [xScale, yScale] = this.dataController.currentScales;
+    this.gx = el.append("g");
+    this.gy = el.append("g");
 
     // X scale should be always defined, if not, something went wrong
     if (!xScale) return;
 
-    this.gx = el.append("g").call(xAxisFactory(height, xScale.scale));
+    this.gx.call(xAxisFactory(this.config.yMax, xScale.scale));
 
     // Y scale is not guaranteed, since the chart supports 1D chart
-    if (yScale) this.gy = el.append("g").call(yAxisFactory(yScale.scale));
+    if (yScale) this.gy.call(yAxisFactory(yScale.scale));
   }
 
   public redrawAxes = (transform: ZoomTransform = zoomIdentity) => {
-    const { height, scales } = this;
-    const [xScale, yScale] = scales;
+    const {
+      config: { yMax },
+      dataController,
+    } = this;
+    const [xScale, yScale] = dataController.currentScales;
 
     if (!xScale) return;
 
     this.gx?.call(
-      xAxisFactory(height, transform.rescaleX(xScale.scale) as AnyD3Scale)
+      xAxisFactory(yMax, transform.rescaleX(xScale.scale) as AnyD3Scale)
     );
 
     if (yScale)
       this.gy?.call(
         yAxisFactory(transform.rescaleY(yScale.scale) as AnyD3Scale)
       );
-  };
-
-  public updateScales = (scales: DataControllerScaleTuple) => {
-    this.scales = scales;
   };
 }
 

@@ -1,4 +1,8 @@
-import { csvToRegionResultsList, RegionResultValue } from "./lib/data/parse";
+import {
+  csvToRegionResultsList,
+  RegionResults,
+  RegionResultValue,
+} from "./lib/data/parse";
 import { scaleLinear, interpolateHcl, hcl, HCLColor } from "d3";
 import * as Comlink from "comlink";
 
@@ -108,9 +112,11 @@ const createRegionsChart = (data: RegionDatum<RegionResultValue>[]) => {
   );
 
   container.appendChild(controls);
+
+  return chart;
 };
 
-document.addEventListener("DOMContentLoaded", function (e) {
+document.addEventListener("DOMContentLoaded", async (e) => {
   addStyle(
     (theme) => `
     body {
@@ -125,22 +131,34 @@ document.addEventListener("DOMContentLoaded", function (e) {
     "main"
   );
 
-  fetchCSV(
-    "/csv/regions/large-results/parametric-die01.csv",
-    csvToRegionResultsList
-  ).then((d) => {
-    console.log(d);
-    createRegionsChart(d);
-  });
+  // fetchCSV(
+  //   "/csv/regions/large-results/parametric-die01.csv",
+  //   csvToRegionResultsList
+  // ).then((d) => {
+  //   console.log(d);
+  //   createRegionsChart(d);
+  // });
+
+  const chart = createRegionsChart([]);
 
   const dataWorker = new DataWorker();
   const proxy = Comlink.wrap<DataStreamWorker>(dataWorker);
 
-  proxy.streamData(
+  const data: RegionResults<RegionResultValue> = [];
+
+  const finalData = await proxy.streamData(
     document.location.origin +
       "/csv/regions/large-results/parametric-die01.csv",
-    Comlink.proxy((values) => console.log(csvToRegionResultsList(values)))
+    Comlink.proxy((values) => {
+      const parsed = csvToRegionResultsList(values);
+      Array.prototype.push.apply(data, parsed);
+      chart.data(data);
+    })
   );
+
+  console.log(csvToRegionResultsList(finalData));
+
+  chart.data(csvToRegionResultsList(finalData));
 
   proxy[Comlink.releaseProxy]();
 

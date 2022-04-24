@@ -4,13 +4,14 @@ import { UNDEFINED_CHART_VALUE } from "../constants/common";
 import { RegionDatum, ParamsTuple, Margin } from "../types/general";
 import DataController from "./DataController";
 
+type RegionNode<Value, Type extends BaseType> = Selection<
+  Type,
+  RegionDatum<Value>,
+  HTMLElement,
+  RegionDatum<Value>[]
+>;
 class RegionsController<Value> extends DataController<RegionDatum<Value>> {
-  private _regionsBinding: Selection<
-    BaseType,
-    RegionDatum<Value>,
-    HTMLElement,
-    RegionDatum<Value>[]
-  >;
+  private _regionsBinding: RegionNode<Value, BaseType>;
 
   private _detachedContainer: Selection<
     HTMLElement,
@@ -69,25 +70,21 @@ class RegionsController<Value> extends DataController<RegionDatum<Value>> {
 
   public bindRegions = (data: RegionDatum<Value>[]) => {
     // Bind zero for y position and height in case of 1D chart
-    this._regionsBinding = this._regionsBinding
+    this._regionsBinding = this._detachedContainer
+      .selectAll("custom")
       .data(data)
-      .join(this.joinRegions);
+      .join(this.joinRegions, this.updateRegion);
   };
 
-  private joinRegions = (
-    c: Selection<
-      EnterElement,
-      RegionDatum<Value>,
-      HTMLElement,
-      RegionDatum<Value>[]
-    >
-  ) => {
-    return c
-      .append("custom")
+  private updateRegion = (c: RegionNode<Value, BaseType>) =>
+    c
       .attr("x", this.x)
       .attr("y", this.y)
       .attr("width", this.w)
       .attr("height", this.h);
+
+  private joinRegions = (c: RegionNode<Value, EnterElement>) => {
+    return c.append("custom").call(this.updateRegion);
   };
 
   get regionsBinding() {
