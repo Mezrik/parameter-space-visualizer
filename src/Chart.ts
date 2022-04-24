@@ -97,13 +97,12 @@ abstract class Chart<Datum> {
     }
   }
 
-  protected addGrid(scales: DataControllerScaleTuple) {
+  protected addGrid(dataController: DataController<Datum>) {
     if (this.chartArea?.svg) {
       const grid = new Grid(
         this.chartArea?.svg.append("g"),
-        this.config.yMax,
-        this.config.xMax,
-        scales
+        this.config,
+        dataController
       );
 
       this.zoom?.onChange((transform) => {

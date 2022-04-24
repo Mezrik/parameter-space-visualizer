@@ -46,18 +46,18 @@ class Config<Datum> {
 
     this._params = getParamsTuple(this._config.options?.params);
 
-    this.setAllParams();
+    this.setAllParams(this.data);
 
     this._userFixations = this._config.options?.paramsFixation ?? {};
   }
 
-  private setAllParams() {
-    this._allParams = getParams(this.data);
+  private setAllParams(data: Datum[]) {
+    this._allParams = getParams(data);
 
     this._paramsExtents = this._allParams.reduce(
       (acc, param) => ({
         ...acc,
-        [param]: extent(getParamDomain(this.data, param)),
+        [param]: extent(getParamDomain(data, param)),
       }),
       {}
     );
@@ -82,8 +82,8 @@ class Config<Datum> {
   set data(data: Datum[]) {
     if ("data" in this._config) {
       this._config.data = data;
+      this.setAllParams(data);
       this.paramsFixation && this.setTransformedData(this.paramsFixation);
-      this.setAllParams();
     }
   }
 

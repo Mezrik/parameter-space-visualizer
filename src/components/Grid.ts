@@ -1,56 +1,56 @@
 import { zoomIdentity, ZoomTransform } from "d3-zoom";
+import Config from "../Config";
+import DataController from "../controllers/DataController";
 
 import { xGridLinesFactory, yGridLinesFactory } from "../helpers/axis";
-import { AnyD3Scale, DataControllerScaleTuple } from "../types/scale";
+import { AnyD3Scale } from "../types/scale";
 import { SimpleSelection } from "../types/selection";
 
 class Grid {
   private gx?: SimpleSelection<SVGGElement>;
   private gy?: SimpleSelection<SVGGElement>;
 
-  private height: number;
-  private width: number;
-  private scales: DataControllerScaleTuple;
+  private config: Config<any>;
+  private dataController: DataController<any>;
 
   constructor(
     el: SimpleSelection<SVGGElement>,
-    height: number,
-    width: number,
-    scales: DataControllerScaleTuple
+    config: Config<any>,
+    dataController: DataController<any>
   ) {
-    const [xScale, yScale] = scales;
-    this.height = height;
-    this.width = width;
-    this.scales = scales;
+    this.config = config;
+    this.dataController = dataController;
+    const [xScale, yScale] = dataController.currentScales;
+
+    this.gx = el.append("g");
+    this.gy = el.append("g");
 
     // X scale should be always defined, if not, something went wrong
     if (!xScale) return;
 
-    this.gx = el.append("g").call(xGridLinesFactory(height, xScale.scale));
+    this.gx.call(xGridLinesFactory(this.config.yMax, xScale.scale));
 
     // Y scale is not guaranteed, since the chart supports 1D chart
-    if (yScale)
-      this.gy = el.append("g").call(yGridLinesFactory(width, yScale.scale));
+    if (yScale) this.gy.call(yGridLinesFactory(this.config.xMax, yScale.scale));
   }
 
   public redrawGrid = (transform: ZoomTransform = zoomIdentity) => {
-    const { height, scales, width } = this;
-    const [xScale, yScale] = scales;
+    const {
+      config: { xMax, yMax },
+      dataController,
+    } = this;
+    const [xScale, yScale] = dataController.currentScales;
 
     if (!xScale) return;
 
     this.gx?.call(
-      xGridLinesFactory(height, transform.rescaleX(xScale.scale) as AnyD3Scale)
+      xGridLinesFactory(yMax, transform.rescaleX(xScale.scale) as AnyD3Scale)
     );
 
     if (yScale)
       this.gy?.call(
-        yGridLinesFactory(width, transform.rescaleY(yScale.scale) as AnyD3Scale)
+        yGridLinesFactory(xMax, transform.rescaleY(yScale.scale) as AnyD3Scale)
       );
-  };
-
-  public updateScales = (scales: DataControllerScaleTuple) => {
-    this.scales = scales;
   };
 }
 

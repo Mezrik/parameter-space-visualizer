@@ -21,6 +21,7 @@ class Axes {
     this.config = config;
     this.dataController = dataController;
     const [xScale, yScale] = this.dataController.currentScales;
+
     this.gx = el.append("g");
     this.gy = el.append("g");
 
