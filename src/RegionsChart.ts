@@ -33,15 +33,15 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
 
     const { x, y, w, h } = this.dataController;
 
-    this.chartArea?.data(
-      this.config.data.map((d) => ({
-        ...d,
-        x: x(d),
-        y: y(d),
-        width: w(d),
-        height: h(d),
-      }))
-    );
+    // this.chartArea?.data(
+    //   this.config.data.map((d) => ({
+    //     ...d,
+    //     x: x(d),
+    //     y: y(d),
+    //     width: w(d),
+    //     height: h(d),
+    //   }))
+    // );
 
     this.addGrid(this.dataController.currentScales);
 
@@ -87,7 +87,7 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
       this.highlight?.style("display", "none");
     });
 
-    this.addAxes(this.dataController.currentScales);
+    this.addAxes(this.dataController);
 
     this.redraw();
   }
@@ -161,25 +161,23 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
 
     // Re-bind the regions, this will reset scales to current params scales
     this.dataController.bindCurrentScalesRange(xMax, yMax);
-    console.log(data);
     this.dataController.bindRegions(data);
 
     this.redraw();
 
-    this.axes?.updateScales(this.dataController.currentScales);
     this.axes?.redrawAxes();
 
     const { x, y, w, h } = this.dataController;
 
-    this.chartArea?.data(
-      this.config.data.map((d) => ({
-        ...d,
-        x: x(d),
-        y: y(d),
-        width: w(d),
-        height: h(d),
-      }))
-    );
+    // this.chartArea?.data(
+    //   this.config.data.map((d) => ({
+    //     ...d,
+    //     x: x(d),
+    //     y: y(d),
+    //     width: w(d),
+    //     height: h(d),
+    //   }))
+    // );
   };
 
   /**
@@ -202,6 +200,12 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
       this.dataController.params = [params?.[0], param];
       this.reset();
     }
+  };
+
+  public data = (data: RegionDatum<Value>[]) => {
+    this.config.data = data;
+    this.dataController.initScales(this.config);
+    this.reset();
   };
 }
 

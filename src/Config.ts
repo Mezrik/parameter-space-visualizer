@@ -24,9 +24,9 @@ class Config<Datum> {
   private _config: ChartConfig<Datum> | ChartConfigDynamic<Datum>;
   private _margin: Margin = ZERO_MARGIN;
 
-  private _allParams: ParamType[];
+  private _allParams!: ParamType[];
   private _params: ParamsTuple | undefined | null = null;
-  private _paramsExtents: Record<ParamType, [number, number]>;
+  private _paramsExtents!: Record<ParamType, [number, number]>;
 
   private _userFixations: ParamsFixation;
 
@@ -44,8 +44,15 @@ class Config<Datum> {
       left: m?.left ?? ZERO_MARGIN.left,
     };
 
-    this._allParams = getParams(this.data);
     this._params = getParamsTuple(this._config.options?.params);
+
+    this.setAllParams();
+
+    this._userFixations = this._config.options?.paramsFixation ?? {};
+  }
+
+  private setAllParams() {
+    this._allParams = getParams(this.data);
 
     this._paramsExtents = this._allParams.reduce(
       (acc, param) => ({
@@ -54,8 +61,6 @@ class Config<Datum> {
       }),
       {}
     );
-
-    this._userFixations = this._config.options?.paramsFixation ?? {};
   }
 
   private setTransformedData(fixations: ParamsFixation) {
@@ -72,6 +77,14 @@ class Config<Datum> {
       (this._config as ChartConfig<Datum>).data ??
       (this._config as ChartConfigDynamic<Datum>).intervals
     );
+  }
+
+  set data(data: Datum[]) {
+    if ("data" in this._config) {
+      this._config.data = data;
+      this.paramsFixation && this.setTransformedData(this.paramsFixation);
+      this.setAllParams();
+    }
   }
 
   get params(): ParamsTuple | undefined | null {

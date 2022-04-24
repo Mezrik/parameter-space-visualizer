@@ -87,9 +87,9 @@ abstract class Chart<Datum> {
     }
   }
 
-  protected addAxes(scales: DataControllerScaleTuple) {
+  protected addAxes(dataController: DataController<Datum>) {
     if (this.svg) {
-      const axes = new Axes(this.svg, this.config.yMax, scales);
+      const axes = new Axes(this.svg, this.config, dataController);
       this.zoom?.onChange((transform) => {
         axes.redrawAxes(transform);
       });
