@@ -33,15 +33,15 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
 
     const { x, y, w, h } = this.dataController;
 
-    // this.chartArea?.data(
-    //   this.config.data.map((d) => ({
-    //     ...d,
-    //     x: x(d),
-    //     y: y(d),
-    //     width: w(d),
-    //     height: h(d),
-    //   }))
-    // );
+    this.chartArea?.data(
+      this.config.data.map((d) => ({
+        ...d,
+        x: x(d),
+        y: y(d),
+        width: w(d),
+        height: h(d),
+      }))
+    );
 
     this.addGrid(this.dataController.currentScales);
 
@@ -171,15 +171,15 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
 
     const { x, y, w, h } = this.dataController;
 
-    // this.chartArea?.data(
-    //   this.config.data.map((d) => ({
-    //     ...d,
-    //     x: x(d),
-    //     y: y(d),
-    //     width: w(d),
-    //     height: h(d),
-    //   }))
-    // );
+    this.chartArea?.data(
+      this.config.data.map((d) => ({
+        ...d,
+        x: x(d),
+        y: y(d),
+        width: w(d),
+        height: h(d),
+      }))
+    );
   };
 
   /**
