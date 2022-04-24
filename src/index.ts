@@ -14,6 +14,8 @@ import {
   RegionDatum,
 } from "./types/general";
 import { fetch } from "./lib/data/fetch";
+import DataWorker from "web-worker:./lib/data/dataStreamWorker.ts";
+import { releaseProxy, wrap } from "comlink";
 
 if (typeof window !== "undefined") {
   (window as any).Chart = Chart;
@@ -129,6 +131,13 @@ document.addEventListener("DOMContentLoaded", function (e) {
     console.log(d);
     createRegionsChart(d);
   });
+
+  const dataWorker = new DataWorker();
+  const proxy = wrap<any>(dataWorker);
+
+  proxy.streamData();
+
+  proxy[releaseProxy]();
 
   // const right = document.createElement("div");
   // right.style.position = "absolute";

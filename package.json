@@ -6,7 +6,8 @@
   "scripts": {
     "clean": "rimraf es && rimraf umd",
     "build": "npm run clean && cross-env NODE_ENV=production VISUALIZE_SPACE=true rollup -c",
-    "dev": "rollup -c --watch"
+    "dev": "rollup -c --watch",
+    "dev:workers": "rollup -c rollup.config.worker.js --watch"
   },
   "author": {
     "name": "Martin Petr",
@@ -44,10 +45,14 @@
     "rollup-plugin-livereload": "^2.0.0",
     "rollup-plugin-serve": "^1.1.0",
     "rollup-plugin-terser": "^7.0.2",
+    "rollup-plugin-typescript2": "^0.31.2",
+    "rollup-plugin-web-worker-loader": "^1.6.1",
+    "tslib": "^2.4.0",
     "typescript": "^4.2.4"
   },
   "dependencies": {
     "@timohausmann/quadtree-js": "^1.2.5",
+    "comlink": "^4.3.1",
     "d3": "^6.7.0",
     "math-expression-evaluator": "^1.3.14"
   }

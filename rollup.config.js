@@ -1,4 +1,4 @@
-import typescript from "@rollup/plugin-typescript";
+import typescript from "rollup-plugin-typescript2";
 import serve from "rollup-plugin-serve";
 import livereload from "rollup-plugin-livereload";
 import babel from "@rollup/plugin-babel";
@@ -7,6 +7,7 @@ import commonjs from "@rollup/plugin-commonjs";
 import { terser } from "rollup-plugin-terser";
 import replace from "@rollup/plugin-replace";
 import { visualizer } from "rollup-plugin-visualizer";
+import webWorkerLoader from "rollup-plugin-web-worker-loader";
 
 const isProd = process.env.NODE_ENV === "production";
 const visualizeSpace = process.env.VISUALIZE_SPACE === "true";
@@ -30,11 +31,15 @@ export default {
     },
   ],
   plugins: [
-    typescript(),
     resolve({
       extensions,
       preventAssignment: true,
     }),
+    commonjs({
+      include: /node_modules/,
+    }),
+    webWorkerLoader(),
+    typescript(),
     replace({
       "process.env.NODE_ENV": JSON.stringify(
         isProd ? "production" : "development"
@@ -45,9 +50,6 @@ export default {
       extensions,
       exclude: /node_modules/,
       presets: ["@babel/preset-env", "@babel/preset-typescript"],
-    }),
-    commonjs({
-      include: /node_modules/,
     }),
     visualizeSpace &&
       visualizer({
