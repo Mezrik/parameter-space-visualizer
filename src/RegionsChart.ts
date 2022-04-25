@@ -18,6 +18,7 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
   private dataController: RegionsController<Value>;
   private g?: SimpleSelection<SVGGElement>;
   private highlight?: SimpleSelection<SVGRectElement>;
+  private bindDataToArea = false;
 
   constructor(element: MountElement, config: ChartConfig<RegionDatum<Value>>) {
     super(element, config);
@@ -170,15 +171,17 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
 
     const { x, y, w, h } = this.dataController;
 
-    // this.chartArea?.data(
-    //   this.config.data.map((d) => ({
-    //     ...d,
-    //     x: x(d),
-    //     y: y(d),
-    //     width: w(d),
-    //     height: h(d),
-    //   }))
-    // );
+    if (this.bindDataToArea) {
+      this.chartArea?.data(
+        this.config.data.map((d) => ({
+          ...d,
+          x: x(d),
+          y: y(d),
+          width: w(d),
+          height: h(d),
+        }))
+      );
+    }
   };
 
   /**
@@ -207,6 +210,20 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
     this.config.data = data;
     this.dataController.initScales(this.config);
     this.reset();
+  };
+
+  public bindDataToChartArea = () => {
+    this.bindDataToArea = true;
+    const { x, y, w, h } = this.dataController;
+    this.chartArea?.data(
+      this.config.data.map((d) => ({
+        ...d,
+        x: x(d),
+        y: y(d),
+        width: w(d),
+        height: h(d),
+      }))
+    );
   };
 }
 

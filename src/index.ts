@@ -21,6 +21,7 @@ import {
 import { fetchCSV } from "./lib/data/utils";
 import DataWorker from "web-worker:./lib/data/dataStreamWorker.ts";
 import { DataStreamWorker } from "./lib/data/dataStreamWorker";
+import { addLoadingOverlay } from "./lib/ui/loadingOverlay";
 
 if (typeof window !== "undefined") {
   (window as any).Chart = Chart;
@@ -41,9 +42,10 @@ const COLOR_MAPPING: Record<RegionResultValue, string> = {
 
 const color = (d: RegionDatum<RegionResultValue>) => COLOR_MAPPING[d.value];
 
-const createRegionsChart = (data: RegionDatum<RegionResultValue>[]) => {
-  const container = document.createElement("div");
-  document.body.appendChild(container);
+const createRegionsChart = (
+  data: RegionDatum<RegionResultValue>[],
+  container: HTMLElement
+) => {
   container.classList.add("regions-chart");
 
   addStyle(
@@ -52,6 +54,7 @@ const createRegionsChart = (data: RegionDatum<RegionResultValue>[]) => {
       display: flex;
       flex-direction: column-reverse;
       padding: 1rem;
+      width: 800px;
     }
   `,
     "regions-chart-styles"
@@ -131,6 +134,9 @@ document.addEventListener("DOMContentLoaded", async (e) => {
     "main"
   );
 
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+
   // fetchCSV(
   //   "/csv/regions/large-results/parametric-die01.csv",
   //   csvToRegionResultsList
@@ -139,12 +145,14 @@ document.addEventListener("DOMContentLoaded", async (e) => {
   //   createRegionsChart(d);
   // });
 
-  const chart = createRegionsChart([]);
+  const chart = createRegionsChart([], container);
 
   const dataWorker = new DataWorker();
   const proxy = Comlink.wrap<DataStreamWorker>(dataWorker);
 
   const data: RegionResults<RegionResultValue> = [];
+
+  const loadingOverlay = addLoadingOverlay(container);
 
   const finalData = await proxy.streamData(
     document.location.origin +
@@ -159,6 +167,10 @@ document.addEventListener("DOMContentLoaded", async (e) => {
   console.log(csvToRegionResultsList(finalData));
 
   chart.data(csvToRegionResultsList(finalData));
+
+  chart.bindDataToChartArea();
+
+  loadingOverlay.remove();
 
   proxy[Comlink.releaseProxy]();
 
