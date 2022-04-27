@@ -55,18 +55,17 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
 
     let tooltip: Tooltip<RegionDatum<Value>>;
     if (this.g) {
-      const [xParam, yParam] = this.dataController.params ?? [];
-
-      tooltip = new Tooltip(
-        this.g,
-        (d) => `
+      tooltip = new Tooltip(this.g, (d) => {
+        const [xParam, yParam] = this.config.params ?? [];
+        console.log(xParam, yParam, d);
+        return `
         value: ${d.value}</br>
         x-from: ${xParam ? d.params[xParam].from : ""}</br>
         x-to: ${xParam ? d.params[xParam].to : ""}</br>
         y-from: ${yParam ? d.params[yParam].from : ""}</br>
         y-to: ${yParam ? d.params[yParam].to : ""}
-      `
-      );
+      `;
+      });
     }
 
     chartArea?.on("mousemove", (d, [x, y]) => {
