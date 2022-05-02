@@ -7,6 +7,9 @@ import commonjs from "@rollup/plugin-commonjs";
 import { terser } from "rollup-plugin-terser";
 import { visualizer } from "rollup-plugin-visualizer";
 import webWorkerLoader from "rollup-plugin-web-worker-loader";
+import alias from "@rollup/plugin-alias";
+import replace from "@rollup/plugin-replace";
+import json from "@rollup/plugin-json";
 
 const isProd = process.env.NODE_ENV === "production";
 const visualizeSpace = process.env.VISUALIZE_SPACE === "true";
@@ -15,9 +18,23 @@ const prodExtensions = [".js", ".ts"];
 const demoExtensions = [...prodExtensions, ".jsx", ".tsx"];
 
 const getCommonPlugins = (extensions, babelPlugins = []) => [
+  alias({
+    entries: [
+      { find: "react", replacement: "preact/compat" },
+      { find: "react-dom/test-utils", replacement: "preact/test-utils" },
+      { find: "react-dom", replacement: "preact/compat" },
+      { find: "react/jsx-runtime", replacement: "preact/jsx-runtime" },
+    ],
+  }),
+  json(),
   resolve({
     extensions,
     preventAssignment: true,
+  }),
+  replace({
+    "process.env.NODE_ENV": JSON.stringify(
+      isProd ? "production" : "development"
+    ),
   }),
   commonjs({
     include: /node_modules/,
@@ -29,7 +46,12 @@ const getCommonPlugins = (extensions, babelPlugins = []) => [
     exclude: /node_modules/,
     babelHelpers: "runtime",
     presets: ["@babel/preset-env", "@babel/preset-typescript"],
-    plugins: ["@babel/plugin-transform-runtime", ...babelPlugins],
+    plugins: [
+      "@babel/plugin-transform-runtime",
+      "babel-plugin-transform-goober",
+      ...babelPlugins,
+      "macros",
+    ],
   }),
 ];
 

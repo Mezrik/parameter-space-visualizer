@@ -1,5 +1,9 @@
-import { render } from "preact";
+import { h, render } from "preact";
 import { useState, useEffect } from "preact/hooks";
+import { setup, styled } from "goober";
+import Router from "preact-router";
+import { Button } from "@mantine/core";
+
 import { createProabilityColorScale } from "../src/helpers/general";
 import ProbabilitySamplingChart from "../src/ProbabilitySamplingChart";
 import { RegionResultValue } from "../src/lib/data/parse";
@@ -18,6 +22,8 @@ const colorScale = createProabilityColorScale([
   COLOR_MAPPING.false,
   COLOR_MAPPING.true,
 ]);
+
+setup(h);
 
 const App = () => {
   const [container, ref] = useState<HTMLDivElement | null>(null);
@@ -45,7 +51,11 @@ const App = () => {
     }
   }, [container]);
 
-  return <div ref={ref}></div>;
+  return (
+    <div ref={ref}>
+      <Button>Hello world!</Button>
+    </div>
+  );
 };
 
 render(<App />, document.body);
