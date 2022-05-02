@@ -2,11 +2,12 @@ import { h, render } from "preact";
 import { useState, useEffect } from "preact/hooks";
 import { setup, styled } from "goober";
 import Router from "preact-router";
-import { Button } from "@mantine/core";
+import { AppShell } from "@mantine/core";
 
 import { createProabilityColorScale } from "../src/helpers/general";
 import ProbabilitySamplingChart from "../src/ProbabilitySamplingChart";
 import { RegionResultValue } from "../src/lib/data/parse";
+import Navbar from "./components/Layout/Navbar";
 
 const COLOR_MAPPING: Record<RegionResultValue, string> = {
   true: "#f0c928",
@@ -52,9 +53,9 @@ const App = () => {
   }, [container]);
 
   return (
-    <div ref={ref}>
-      <Button>Hello world!</Button>
-    </div>
+    <AppShell padding="md" navbar={<Navbar />}>
+      <div ref={ref}></div>
+    </AppShell>
   );
 };
 
