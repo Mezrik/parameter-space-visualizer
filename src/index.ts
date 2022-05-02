@@ -139,6 +139,14 @@ const createProbabilityChart = (expression: string, container: HTMLElement) => {
     COLOR_MAPPING.true,
   ]);
 
+  const params = ["p", "q", "r"];
+  const paramsFix = { r: 0.2 };
+
+  let handleParamsChange: ParamsChangeHandler | undefined;
+  let handleFixationChange: FixationChangeHandler | undefined;
+
+  const leftMargin = 40;
+
   const chart = new ProbabilitySamplingChart(container, {
     options: {
       color: ({ value }) => {
@@ -157,6 +165,41 @@ const createProbabilityChart = (expression: string, container: HTMLElement) => {
     width: 800,
     height: 800,
   });
+
+  const controls = document.createElement("div");
+  controls.classList.add("chart-controls");
+  applyStyles(controls, {});
+
+  addStyle(
+    `
+    .chart-controls {
+      display: flex;
+      margin-left: ${rem(leftMargin)};
+    }
+
+    .chart-controls > * + * {
+      margin-left: 2rem;
+    }
+  `,
+    "styled-chart-controls"
+  );
+
+  handleParamsChange = appendParamsSelects(
+    controls,
+    params,
+    chart.x,
+    params[0],
+    chart.y,
+    params[1]
+  );
+
+  handleFixationChange = appendParamFixInputs(
+    controls,
+    paramsFix,
+    chart.fixate
+  );
+
+  container.appendChild(controls);
 
   return chart;
 };
@@ -177,47 +220,45 @@ document.addEventListener("DOMContentLoaded", (e) => {
   );
 });
 
-document.addEventListener("DOMContentLoaded", async (e) => {
-  const container = document.createElement("div");
-  document.body.appendChild(container);
+// document.addEventListener("DOMContentLoaded", async (e) => {
+//   const container = document.createElement("div");
+//   document.body.appendChild(container);
 
-  // fetchCSV(
-  //   "/csv/regions/large-results/parametric-die01.csv",
-  //   csvToRegionResultsList
-  // ).then((d) => {
-  //   console.log(d);
-  //   createRegionsChart(d);
-  // });
+//   // fetchCSV(
+//   //   "/csv/regions/large-results/parametric-die01.csv",
+//   //   csvToRegionResultsList
+//   // ).then((d) => {
+//   //   console.log(d);
+//   //   createRegionsChart(d);
+//   // });
 
-  const chart = createRegionsChart([], container);
+//   const chart = createRegionsChart([], container);
 
-  const dataWorker = new DataWorker();
-  const proxy = Comlink.wrap<DataStreamWorker>(dataWorker);
+//   const dataWorker = new DataWorker();
+//   const proxy = Comlink.wrap<DataStreamWorker>(dataWorker);
 
-  const data: RegionResults<RegionResultValue> = [];
+//   const data: RegionResults<RegionResultValue> = [];
 
-  const loadingOverlay = addLoadingOverlay(container);
+//   const loadingOverlay = addLoadingOverlay(container);
 
-  const finalData = await proxy.streamData(
-    document.location.origin +
-      "/csv/regions/large-results/parametric-die01.csv",
-    Comlink.proxy((values) => {
-      const parsed = csvToRegionResultsList(values);
-      Array.prototype.push.apply(data, parsed);
-      chart.data(data);
-    })
-  );
+//   const finalData = await proxy.streamData(
+//     document.location.origin +
+//       "/csv/regions/large-results/parametric-die01.csv",
+//     Comlink.proxy((values) => {
+//       const parsed = csvToRegionResultsList(values);
+//       Array.prototype.push.apply(data, parsed);
+//       chart.data(data);
+//     })
+//   );
 
-  console.log(csvToRegionResultsList(finalData));
+//   chart.data(csvToRegionResultsList(finalData));
 
-  chart.data(csvToRegionResultsList(finalData));
+//   chart.bindDataToChartArea();
 
-  chart.bindDataToChartArea();
+//   loadingOverlay.remove();
 
-  loadingOverlay.remove();
-
-  proxy[Comlink.releaseProxy]();
-});
+//   proxy[Comlink.releaseProxy]();
+// });
 
 document.addEventListener("DOMContentLoaded", (e) => {
   const container = document.createElement("div");

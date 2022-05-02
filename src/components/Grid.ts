@@ -28,10 +28,23 @@ class Grid {
     // X scale should be always defined, if not, something went wrong
     if (!xScale) return;
 
-    this.gx.call(xGridLinesFactory(this.config.yMax, xScale.scale));
+    this.gx.call(
+      xGridLinesFactory(
+        this.config.yMax,
+        xScale.scale,
+        this.config.options.grid?.x?.color
+      )
+    );
 
     // Y scale is not guaranteed, since the chart supports 1D chart
-    if (yScale) this.gy.call(yGridLinesFactory(this.config.xMax, yScale.scale));
+    if (yScale)
+      this.gy.call(
+        yGridLinesFactory(
+          this.config.xMax,
+          yScale.scale,
+          this.config.options.grid?.y?.color
+        )
+      );
   }
 
   public redrawGrid = (transform: ZoomTransform = zoomIdentity) => {
@@ -44,12 +57,20 @@ class Grid {
     if (!xScale) return;
 
     this.gx?.call(
-      xGridLinesFactory(yMax, transform.rescaleX(xScale.scale) as AnyD3Scale)
+      xGridLinesFactory(
+        yMax,
+        transform.rescaleX(xScale.scale) as AnyD3Scale,
+        this.config.options.grid?.x?.color
+      )
     );
 
     if (yScale)
       this.gy?.call(
-        yGridLinesFactory(xMax, transform.rescaleY(yScale.scale) as AnyD3Scale)
+        yGridLinesFactory(
+          xMax,
+          transform.rescaleY(yScale.scale) as AnyD3Scale,
+          this.config.options.grid?.y?.color
+        )
       );
   };
 }

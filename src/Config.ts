@@ -1,4 +1,5 @@
 import { extent } from "d3-array";
+import { NumberValue } from "d3-scale";
 import { ZERO_MARGIN } from "./constants/common";
 import { theme } from "./constants/styles";
 import {
@@ -18,6 +19,7 @@ import {
   ParamsFixation,
   ParamsTuple,
   ParamType,
+  UserOptions,
 } from "./types/general";
 
 class Config<Datum> {
@@ -155,6 +157,18 @@ class Config<Datum> {
         },
       },
     };
+  }
+
+  set axesOptions(axes: UserOptions<Datum, NumberValue, NumberValue>["axes"]) {
+    if (!this._config.options) this._config.options = { axes };
+
+    this._config.options.axes = axes;
+  }
+
+  set gridOptions(grid: UserOptions<Datum, NumberValue, NumberValue>["grid"]) {
+    if (!this._config.options) this._config.options = { grid };
+
+    this._config.options.grid = grid;
   }
 
   get margin() {

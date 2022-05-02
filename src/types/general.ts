@@ -26,6 +26,10 @@ export type UserAxesConfig<ScaleInput> = {
   tickSize?: number;
 };
 
+export type UserGridConfig = {
+  color?: string;
+};
+
 export type UserOptions<Datum, XScaleInput, YScaleInput> = {
   params?: Params;
   paramsFixation?: ParamsFixation;
@@ -34,6 +38,7 @@ export type UserOptions<Datum, XScaleInput, YScaleInput> = {
   margin?: UserMargin;
   color?: (d: Datum) => string;
   axes?: { x: UserAxesConfig<XScaleInput>; y?: UserAxesConfig<YScaleInput> };
+  grid?: { x?: UserGridConfig; y?: UserGridConfig };
 };
 
 export type Margin = {
@@ -65,6 +70,7 @@ export type Options<UOpts> = UOpts extends UserOptions<
         x: AxesConfig<XScaleInput>;
         y?: AxesConfig<YScaleInput>;
       };
+      grid?: { x?: UserGridConfig; y?: UserGridConfig };
     }
   : never;
 export interface RegionDatum<Value = unknown> {

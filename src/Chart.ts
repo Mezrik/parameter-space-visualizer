@@ -97,7 +97,15 @@ abstract class Chart<Datum> {
     }
   }
 
-  protected addGrid(dataController: DataController<Datum>) {
+  protected addGrid(dataController: DataController<Datum>, color?: string) {
+    const gridOpts = this.config.options.grid;
+
+    this.config.gridOptions = {
+      ...gridOpts,
+      x: { color, ...gridOpts?.x },
+      y: { color, ...gridOpts?.y },
+    };
+
     if (this.chartArea?.svg) {
       const grid = new Grid(
         this.chartArea?.svg.append("g"),
@@ -116,6 +124,28 @@ abstract class Chart<Datum> {
   public fixate = (fixations: ParamsFixation) => {
     this.config.userFixations = fixations;
     this.reset();
+  };
+
+  /**
+   * Change param displayed on axis x
+   * @param param
+   */
+  public x = (param: string) => {
+    const { params } = this.config;
+    this.config.params = [param, params?.[1]];
+    this.reset();
+  };
+
+  /**
+   * Change param displayed on axis y
+   * @param param
+   */
+  public y = (param?: string) => {
+    const { params } = this.config;
+    if (params) {
+      this.config.params = [params?.[0], param];
+      this.reset();
+    }
   };
 
   public abstract reset(): void;

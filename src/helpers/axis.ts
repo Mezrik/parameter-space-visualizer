@@ -22,14 +22,16 @@ const styleTickText = (
     .style("font-size", "0.75rem")
     .attr("fill", theme.colors.textColor);
 
-const styleGridLines = (
-  g: SimpleSelection<SVGGElement>
-): Selection<BaseType, unknown, SVGGElement, unknown> =>
-  g
-    .selectAll(".tick line")
-    .attr("stroke", theme.colors.white)
-    .attr("opacity", 0.3)
-    .attr("stroke-dasharray", "7 3");
+const styleGridLines =
+  (color: string = theme.colors.white) =>
+  (
+    g: SimpleSelection<SVGGElement>
+  ): Selection<BaseType, unknown, SVGGElement, unknown> =>
+    g
+      .selectAll(".tick line")
+      .attr("stroke", color)
+      .attr("opacity", 0.3)
+      .attr("stroke-dasharray", "7 3");
 
 const makeXGridLines = (xScale: AnyD3Scale) => {
   return axisBottom(xScale).ticks(5);
@@ -43,7 +45,8 @@ const removeDomain = (g: SimpleSelection<SVGGElement>) =>
   g.select(".domain").remove();
 
 export const xGridLinesFactory =
-  (height: number, xScale: AnyD3Scale) => (g: SimpleSelection<SVGGElement>) => {
+  (height: number, xScale: AnyD3Scale, color?: string) =>
+  (g: SimpleSelection<SVGGElement>) => {
     g.attr("class", "grid")
       .attr("transform", "translate(0," + height + ")")
       .call(
@@ -52,11 +55,12 @@ export const xGridLinesFactory =
           .tickFormat(() => "")
       )
       .call(removeDomain)
-      .call(styleGridLines);
+      .call(styleGridLines(color));
   };
 
 export const yGridLinesFactory =
-  (width: number, yScale: AnyD3Scale) => (g: SimpleSelection<SVGGElement>) => {
+  (width: number, yScale: AnyD3Scale, color?: string) =>
+  (g: SimpleSelection<SVGGElement>) => {
     g.attr("class", "grid")
       .call(
         makeYGridLines(yScale)
@@ -64,7 +68,7 @@ export const yGridLinesFactory =
           .tickFormat(() => "")
       )
       .call(removeDomain)
-      .call(styleGridLines);
+      .call(styleGridLines(color));
   };
 
 export const xAxisFactory =

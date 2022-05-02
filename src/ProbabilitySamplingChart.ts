@@ -42,6 +42,7 @@ class ProbabilitySamplingChart extends Chart<ProbabilityDatum> {
 
     this.redraw();
     this.addAxes(this.dataController);
+    this.addGrid(this.dataController, theme.colors.black);
 
     this.zoom?.onChange(this.redraw);
   }
@@ -76,8 +77,6 @@ class ProbabilitySamplingChart extends Chart<ProbabilityDatum> {
       const y = parseInt(node.attr("y"), 10);
       const [xT, yT] = transform.apply([x, y]);
 
-      console.log(xT, yT);
-
       const pair: Record<string, number | string> = {
         [xParam]: xCoordScale(xT),
         ...fixedParams,
@@ -100,7 +99,17 @@ class ProbabilitySamplingChart extends Chart<ProbabilityDatum> {
   };
 
   public reset = () => {
-    // TODO
+    const {
+      config: { xMax, yMax, data },
+    } = this;
+
+    // Re-bind the regions, this will reset scales to current params scales
+    this.dataController.bindCurrentScalesRange(xMax, yMax);
+
+    this.redraw();
+
+    this.axes?.redrawAxes();
+    this.grid?.redrawGrid();
   };
 }
 

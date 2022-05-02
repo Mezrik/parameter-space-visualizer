@@ -9,7 +9,6 @@ import {
   ChartConfig,
   DatumRect,
   MountElement,
-  ParamsFixation,
   RegionDatum,
 } from "./types/general";
 import { SimpleSelection } from "./types/selection";
@@ -32,19 +31,7 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
 
     this.dataController = new RegionsController(this.config);
 
-    const { x, y, w, h } = this.dataController;
-
-    // this.chartArea?.data(
-    //   this.config.data.map((d) => ({
-    //     ...d,
-    //     x: x(d),
-    //     y: y(d),
-    //     width: w(d),
-    //     height: h(d),
-    //   }))
-    // );
-
-    this.addGrid(this.dataController);
+    this.addGrid(this.dataController, theme.colors.white);
 
     this.g = this.chartArea?.svg
       ?.append("g")
@@ -57,7 +44,6 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
     if (this.g) {
       tooltip = new Tooltip(this.g, (d) => {
         const [xParam, yParam] = this.config.params ?? [];
-        console.log(xParam, yParam, d);
         return `
         value: ${d.value}</br>
         x-from: ${xParam ? d.params[xParam].from : ""}</br>
@@ -180,28 +166,6 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
           height: h(d),
         }))
       );
-    }
-  };
-
-  /**
-   * Change param displayed on axis x
-   * @param param
-   */
-  public x = (param: string) => {
-    const { params } = this.dataController;
-    this.dataController.params = [param, params?.[1]];
-    this.reset();
-  };
-
-  /**
-   * Change param displayed on axis y
-   * @param param
-   */
-  public y = (param?: string) => {
-    const { params } = this.dataController;
-    if (params) {
-      this.dataController.params = [params?.[0], param];
-      this.reset();
     }
   };
 
