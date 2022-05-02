@@ -1,4 +1,4 @@
-import { scaleLinear } from "d3";
+import { scaleLinear } from "d3-scale";
 import Config from "../Config";
 import { ParamsTuple, ParamType } from "../types/general";
 import {

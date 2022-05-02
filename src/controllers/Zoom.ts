@@ -1,4 +1,4 @@
-import { zoom, ZoomedElementBaseType, ZoomTransform } from "d3";
+import { zoom, ZoomedElementBaseType, ZoomTransform } from "d3-zoom";
 
 type ZoomListener = (translate: ZoomTransform) => void;
 

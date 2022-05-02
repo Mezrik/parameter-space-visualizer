@@ -1,5 +1,6 @@
-import { Selection, pointer, zoomIdentity, ZoomTransform } from "d3";
 import QuadTree, { Rect } from "@timohausmann/quadtree-js";
+import { pointer } from "d3-selection";
+import { zoomIdentity, ZoomTransform } from "d3-zoom";
 
 // import QuadTree, { Accessor } from "../lib/QuadTree";
 import { rectsOverlapping } from "../helpers/canvas";

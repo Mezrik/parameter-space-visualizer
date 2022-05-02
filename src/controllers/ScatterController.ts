@@ -1,4 +1,5 @@
-import { select, Selection, BaseType, ScaleLinear, scaleLinear } from "d3";
+import { select, Selection, BaseType } from "d3-selection";
+import { ScaleLinear, scaleLinear } from "d3-scale";
 import Config from "../Config";
 import { ProbabilityDatum } from "../types/expression";
 import { ParamsTuple } from "../types/general";

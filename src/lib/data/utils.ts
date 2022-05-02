@@ -1,11 +1,6 @@
-import {
-  buffer,
-  csv,
-  csvParse,
-  csvParseRows,
-  DSVRowArray,
-  DSVRowString,
-} from "d3";
+import { csv } from "d3-fetch";
+
+import { DSVRowArray, DSVRowString, csvParseRows } from "d3-dsv";
 
 /**
  * Used to retrieve entire CSV from remote location

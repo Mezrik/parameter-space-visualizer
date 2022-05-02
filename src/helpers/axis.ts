@@ -1,4 +1,5 @@
-import { axisBottom, axisLeft, BaseType, Selection } from "d3";
+import { axisBottom, axisLeft } from "d3-axis";
+import { BaseType, Selection } from "d3-selection";
 import { theme } from "../constants/styles";
 import { AnyD3Scale } from "../types/scale";
 import { SimpleSelection } from "../types/selection";

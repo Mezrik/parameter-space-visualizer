@@ -1,5 +1,6 @@
 import { Rect } from "@timohausmann/quadtree-js";
-import { NumberValue } from "d3";
+import { NumberValue } from "d3-scale";
+
 import { VariableInterval } from "./expression";
 import { TickFormatter } from "./scale";
 

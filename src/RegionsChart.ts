@@ -1,5 +1,5 @@
-import { select, zoomIdentity, ZoomTransform } from "d3";
-
+import { select } from "d3-selection";
+import { zoomIdentity, ZoomTransform } from "d3-zoom";
 import Chart from "./Chart";
 import Tooltip from "./components/Tooltip";
 import { theme } from "./constants/styles";

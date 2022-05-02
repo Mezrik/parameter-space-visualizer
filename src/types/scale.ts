@@ -12,7 +12,7 @@ import {
   ScaleOrdinal,
   ScalePoint,
   NumberValue,
-} from "d3";
+} from "d3-scale";
 
 type ValueOf<Scale> = Scale[keyof Scale];
 

@@ -1,4 +1,5 @@
-import { select, Selection, ZoomTransform } from "d3";
+import { select } from "d3-selection";
+import { ZoomTransform } from "d3-zoom";
 import Axes from "./components/Axes";
 import ChartArea from "./components/ChartArea";
 import Grid from "./components/Grid";

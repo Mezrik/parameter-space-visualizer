@@ -1,4 +1,5 @@
-import { csv, DSVRowArray, DSVRowString } from "d3";
+import { DSVRowArray, DSVRowString } from "d3-dsv";
+import { csv } from "d3-fetch";
 
 export const fetch = <Column extends string, ParsedRow = DSVRowString<Column>>(
   from: string,

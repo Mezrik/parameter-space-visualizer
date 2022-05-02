@@ -3,7 +3,7 @@ import {
   RegionResults,
   RegionResultValue,
 } from "./lib/data/parse";
-import { scaleLinear, interpolateHcl, hcl, HCLColor } from "d3";
+// import { scaleLinear, interpolateHcl, hcl, HCLColor } from "d3";
 import * as Comlink from "comlink";
 
 import Chart from "./Chart";
