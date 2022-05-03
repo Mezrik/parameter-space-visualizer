@@ -35,6 +35,7 @@ const getCommonPlugins = (extensions, babelPlugins = []) => [
     "process.env.NODE_ENV": JSON.stringify(
       isProd ? "production" : "development"
     ),
+    preventAssignment: true,
   }),
   commonjs({
     include: /node_modules/,

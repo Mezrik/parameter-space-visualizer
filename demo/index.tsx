@@ -1,60 +1,45 @@
 import { h, render } from "preact";
-import { useState, useEffect } from "preact/hooks";
-import { setup, styled } from "goober";
-import Router from "preact-router";
+import { setup } from "goober";
+import { Router, Route } from "preact-router";
 import { AppShell } from "@mantine/core";
 
-import { createProabilityColorScale } from "../src/helpers/general";
-import ProbabilitySamplingChart from "../src/ProbabilitySamplingChart";
-import { RegionResultValue } from "../src/lib/data/parse";
 import Navbar from "./components/Layout/Navbar";
-
-const COLOR_MAPPING: Record<RegionResultValue, string> = {
-  true: "#f0c928",
-  false: "#ab0d0c",
-  unknown: "#fbe6c2",
-  partially_sat: "#ffdc4f",
-  partially_violated: "#fbe6c2",
-  center_sat: "#e0c141",
-  center_violated: "#fbe6c2",
-};
-
-const colorScale = createProabilityColorScale([
-  COLOR_MAPPING.false,
-  COLOR_MAPPING.true,
-]);
+import ProbabilitySampling from "./examples/ProbabilitySampling";
+import Regions from "./examples/Regions";
+import { PATH_NAMES } from "./constants";
+import { ChartDots, Rectangle } from "tabler-icons-react";
 
 setup(h);
 
 const App = () => {
-  const [container, ref] = useState<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (container) {
-      const chart = new ProbabilitySamplingChart(container, {
-        options: {
-          color: ({ value }) => {
-            return typeof value === "number" ? colorScale(value) : "#fde6c4";
-          },
-          margin: { top: 20, right: 30, bottom: 30, left: 40 },
-        },
-        expression: "(-1 * ((p+(-1)) * (q*r+(-1)*r+(-1)*q+1)))/(q*r+(-1)*r+1)",
-        intervals: [
-          // { name: "pL", start: 0, end: 1 },
-          // { name: "pK", start: 0, end: 1 },
-          { name: "p", start: 0, end: 1 },
-          { name: "q", start: 0, end: 0.5 },
-          { name: "r", start: 1 / 10, end: 3 / 10 },
-        ],
-        width: 800,
-        height: 800,
-      });
-    }
-  }, [container]);
-
   return (
-    <AppShell padding="md" navbar={<Navbar />}>
-      <div ref={ref}></div>
+    <AppShell
+      padding="md"
+      navbar={
+        <Navbar>
+          <Navbar.Link
+            label="Probability Sampling"
+            icon={<ChartDots size={16} />}
+            href={PATH_NAMES.probabilitySampling}
+            color="teal"
+          />
+          <Navbar.Link
+            label="Regions chart"
+            icon={<Rectangle size={16} />}
+            href={PATH_NAMES.regions}
+            color="blue"
+          />
+        </Navbar>
+      }
+    >
+      <Router>
+        <Route path={PATH_NAMES.regions} component={Regions} />
+        <Route
+          path={PATH_NAMES.probabilitySampling}
+          component={ProbabilitySampling}
+          default
+        />
+      </Router>
     </AppShell>
   );
 };

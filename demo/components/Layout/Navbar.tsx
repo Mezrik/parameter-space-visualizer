@@ -1,22 +1,19 @@
 import { Navbar as MantineNav } from "@mantine/core";
 import { ComponentChildren } from "preact";
-import {
-  GitPullRequest,
-  AlertCircle,
-  Messages,
-  Database,
-} from "tabler-icons-react";
 import { ThemeIcon, UnstyledButton, Group, Text } from "@mantine/core";
+import { route } from "preact-router";
 
 interface MainLinkProps {
   icon: ComponentChildren;
   color: string;
   label: string;
+  href: string;
 }
 
-function MainLink({ icon, color, label }: MainLinkProps) {
+function MainLink({ icon, color, label, href }: MainLinkProps) {
   return (
     <UnstyledButton
+      onClick={() => route(href)}
       sx={(theme) => ({
         display: "block",
         width: "100%",
@@ -44,26 +41,20 @@ function MainLink({ icon, color, label }: MainLinkProps) {
   );
 }
 
-const data = [
-  { icon: <GitPullRequest size={16} />, color: "blue", label: "Pull Requests" },
-  { icon: <AlertCircle size={16} />, color: "teal", label: "Open Issues" },
-  { icon: <Messages size={16} />, color: "violet", label: "Discussions" },
-  { icon: <Database size={16} />, color: "grape", label: "Databases" },
-];
+export type NavbarProps = {
+  children: ComponentChildren;
+};
 
-export function MainLinks() {
-  const links = data.map((link) => <MainLink {...link} key={link.label} />);
-  return <div>{links}</div>;
-}
-
-const Navbar = () => {
+const Navbar = ({ children }: NavbarProps) => {
   return (
     <MantineNav width={{ base: 300 }} height={500} p="xs">
       <MantineNav.Section grow mt="xs">
-        <MainLinks />
+        <div>{children}</div>
       </MantineNav.Section>
     </MantineNav>
   );
 };
+
+Navbar.Link = MainLink;
 
 export default Navbar;
