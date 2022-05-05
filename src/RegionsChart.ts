@@ -1,17 +1,12 @@
-import { select } from "d3-selection";
-import { zoomIdentity, ZoomTransform } from "d3-zoom";
-import Chart from "./Chart";
-import Tooltip from "./components/Tooltip";
-import { theme } from "./constants/styles";
-import RegionsController from "./controllers/RegionsController";
-import { applyParamsFixations } from "./helpers/regions";
-import {
-  ChartConfig,
-  DatumRect,
-  MountElement,
-  RegionDatum,
-} from "./types/general";
-import { SimpleSelection } from "./types/selection";
+import { select } from 'd3-selection';
+import { zoomIdentity, ZoomTransform } from 'd3-zoom';
+import Chart from './Chart';
+import Tooltip from './components/Tooltip';
+import { theme } from './constants/styles';
+import RegionsController from './controllers/RegionsController';
+import { applyParamsFixations } from './helpers/regions';
+import { ChartConfig, DatumRect, MountElement, RegionDatum } from './types/general';
+import { SimpleSelection } from './types/selection';
 
 class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
   private dataController: RegionsController<Value>;
@@ -33,28 +28,25 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
 
     this.addGrid(this.dataController, theme.colors.white);
 
-    this.g = this.chartArea?.svg
-      ?.append("g")
-      .attr("width", this.width)
-      .attr("height", this.height);
+    this.g = this.chartArea?.svg?.append('g').attr('width', this.width).attr('height', this.height);
 
     this.initHighlightLayer();
 
     let tooltip: Tooltip<RegionDatum<Value>>;
     if (this.g) {
-      tooltip = new Tooltip(this.g, (d) => {
+      tooltip = new Tooltip(this.g, d => {
         const [xParam, yParam] = this.config.params ?? [];
         return `
         value: ${d.value}</br>
-        x-from: ${xParam ? d.params[xParam].from : ""}</br>
-        x-to: ${xParam ? d.params[xParam].to : ""}</br>
-        y-from: ${yParam ? d.params[yParam].from : ""}</br>
-        y-to: ${yParam ? d.params[yParam].to : ""}
+        x-from: ${xParam ? d.params[xParam].from : ''}</br>
+        x-to: ${xParam ? d.params[xParam].to : ''}</br>
+        y-from: ${yParam ? d.params[yParam].from : ''}</br>
+        y-to: ${yParam ? d.params[yParam].to : ''}
       `;
       });
     }
 
-    chartArea?.on("mousemove", (d, [x, y]) => {
+    chartArea?.on('mousemove', (d, [x, y]) => {
       const lastRect = d[d.length - 1];
       if (!lastRect) return;
 
@@ -63,14 +55,14 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
       tooltip?.showTooltip({ ...lastRect, width: 0, height: 0, x, y });
     });
 
-    chartArea?.on("mouseout", () => {
-      this.highlight?.style("display", "none");
+    chartArea?.on('mouseout', () => {
+      this.highlight?.style('display', 'none');
       tooltip.hideTooltip();
     });
 
     this.zoom?.onChange(this.redraw);
     this.zoom?.onChange(() => {
-      this.highlight?.style("display", "none");
+      this.highlight?.style('display', 'none');
     });
 
     this.addAxes(this.dataController);
@@ -84,20 +76,20 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
     if (!highlight) return;
 
     highlight
-      .style("display", "initial")
-      .attr("x", x)
-      .attr("y", y)
-      .attr("width", width)
-      .attr("height", height);
+      .style('display', 'initial')
+      .attr('x', x)
+      .attr('y', y)
+      .attr('width', width)
+      .attr('height', height);
   }
 
   private initHighlightLayer() {
-    this.highlight = this.g?.append("rect");
+    this.highlight = this.g?.append('rect');
 
     this.highlight
-      ?.attr("fill", "transparent")
-      .attr("stroke", theme.colors.grey)
-      .attr("stroke-width", 3);
+      ?.attr('fill', 'transparent')
+      .attr('stroke', theme.colors.grey)
+      .attr('stroke-width', 3);
   }
 
   public redraw = (transform: ZoomTransform = zoomIdentity) => {
@@ -122,16 +114,13 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
       ctx.beginPath();
       ctx.fillStyle = config?.options?.color?.(d) ?? theme.colors.white;
 
-      const [x, y] = transform.apply([
-        parseFloat(node.attr("x")),
-        parseFloat(node.attr("y")),
-      ]);
+      const [x, y] = transform.apply([parseFloat(node.attr('x')), parseFloat(node.attr('y'))]);
 
       ctx.rect(
         x,
         y,
-        parseFloat(node.attr("width")) * transform.k,
-        parseFloat(node.attr("height")) * transform.k
+        parseFloat(node.attr('width')) * transform.k,
+        parseFloat(node.attr('height')) * transform.k,
       );
 
       ctx.fill();
@@ -158,13 +147,13 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
 
     if (this.bindDataToArea) {
       this.chartArea?.data(
-        this.config.data.map((d) => ({
+        this.config.data.map(d => ({
           ...d,
           x: x(d),
           y: y(d),
           width: w(d),
           height: h(d),
-        }))
+        })),
       );
     }
   };
@@ -179,13 +168,13 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
     this.bindDataToArea = true;
     const { x, y, w, h } = this.dataController;
     this.chartArea?.data(
-      this.config.data.map((d) => ({
+      this.config.data.map(d => ({
         ...d,
         x: x(d),
         y: y(d),
         width: w(d),
         height: h(d),
-      }))
+      })),
     );
   };
 }

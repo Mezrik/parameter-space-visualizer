@@ -1,8 +1,8 @@
-import { Rect } from "@timohausmann/quadtree-js";
-import { NumberValue } from "d3-scale";
+import { Rect } from '@timohausmann/quadtree-js';
+import { NumberValue } from 'd3-scale';
 
-import { VariableInterval } from "./expression";
-import { TickFormatter } from "./scale";
+import { ProbabilityDatum, VariableInterval } from './expression';
+import { TickFormatter } from './scale';
 
 export type ParamType = string;
 export type Params = { x: ParamType; y: ParamType } | ParamType;
@@ -79,26 +79,72 @@ export interface RegionDatum<Value = unknown> {
   params: Record<string, { from: NumberValue; to: NumberValue }>;
 }
 
+export interface ScatterDatum<Value = unknown> {
+  value: Value;
+  params: Record<string, NumberValue>;
+}
+
 export type ChartConfig<Datum> = {
-  options?: UserOptions<Datum, NumberValue, NumberValue>;
   data: Array<Datum>;
+} & ChartConfigCommon<Datum>;
+
+export type ExpressionConfigPart = {
+  expression: string;
+  intervals: VariableInterval[];
+  data?: never;
+};
+
+export type DataConfigPart<Datum> = { expression?: never; intervals?: never; data: Array<Datum> };
+
+export type ChartConfigCommon<Datum> = {
+  options?: UserOptions<Datum, NumberValue, NumberValue>;
   width: number;
   height: number;
 };
 
-export type ChartConfigDynamic<Datum> = {
-  options?: UserOptions<Datum, NumberValue, NumberValue>;
-  expression: string;
-  intervals: VariableInterval[];
+export type ChartConfigDynamic<Datum> = ChartConfigCommon<Datum> &
+  (ExpressionConfigPart | DataConfigPart<Datum>);
+
+export type ExpressionConfig = ChartConfigCommon<ScatterDatum<ProbabilityDatum>> &
+  ExpressionConfigPart;
+
+export type DataConfig<Value> = ChartConfigCommon<ScatterDatum<Value>> &
+  DataConfigPart<ScatterDatum<Value>>;
+
+export type SimpleConfigCommon = {
+  el: MountElement;
   width: number;
   height: number;
 };
+
+export type SimpleConfigScatter<Datum> = (
+  | {
+      data: ScatterDatum<Datum>[];
+      expression?: never;
+      intervals?: never;
+      url?: never;
+      color: (d: ScatterDatum<Datum>) => string;
+    }
+  | { data?: never; expression: string; intervals: VariableInterval[]; url?: never; color?: never }
+  | {
+      data?: never;
+      expression?: never;
+      intervals?: never;
+      url: string;
+      color?: (d: ScatterDatum<Datum>) => string;
+    }
+) & {} & SimpleConfigCommon;
+
+export type SimpleConfigRegions<Datum> = (
+  | {
+      data: RegionDatum<Datum>[];
+      url?: never;
+    }
+  | { data?: never; url: string }
+) & { color: (d: Datum) => string } & SimpleConfigCommon;
 
 export type MountElement = string | HTMLElement;
 
 export type DatumRect<Datum> = Datum & Rect;
 
-export type DataTransform<Datum> = (
-  data: Datum[],
-  fixs?: ParamsFixation
-) => Datum[];
+export type DataTransform<Datum> = (data: Datum[], fixs?: ParamsFixation) => Datum[];

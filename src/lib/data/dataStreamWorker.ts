@@ -1,6 +1,6 @@
-import { expose } from "comlink";
-import { csvParse } from "d3-dsv";
-import { csvStreamParser } from "./utils";
+import { expose } from 'comlink';
+import { csvParse } from 'd3-dsv';
+import { csvStreamParser } from './utils';
 
 type OnLoadCallback = (values: {}[]) => void;
 
@@ -30,7 +30,7 @@ const streamData = async (filename: string, onLoad: OnLoadCallback) => {
   const response = await fetch(filename);
 
   if (!response.body) {
-    throw Error("ReadableStream is not supported in your browser.");
+    throw Error('ReadableStream is not supported in your browser.');
   }
 
   const parser = csvStreamParser();
@@ -38,7 +38,7 @@ const streamData = async (filename: string, onLoad: OnLoadCallback) => {
   const streamedResponse = new Response(
     new ReadableStream({
       start: startStream(response, parser.parseChunk, onLoad),
-    })
+    }),
   );
 
   const data = await streamedResponse.text();

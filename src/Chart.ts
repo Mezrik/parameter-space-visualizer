@@ -1,13 +1,14 @@
-import { select } from "d3-selection";
-import { ZoomTransform } from "d3-zoom";
-import Axes from "./components/Axes";
-import ChartArea from "./components/ChartArea";
-import Grid from "./components/Grid";
-import Config from "./Config";
-import { ZERO_MARGIN } from "./constants/common";
-import DataController from "./controllers/DataController";
-import Zoom from "./controllers/Zoom";
-import { rem } from "./lib/ui/general";
+import { select } from 'd3-selection';
+import { ZoomTransform } from 'd3-zoom';
+import Axes from './components/Axes';
+import ChartArea from './components/ChartArea';
+import Grid from './components/Grid';
+import Config from './Config';
+import { ZERO_MARGIN } from './constants/common';
+import DataController from './controllers/DataController';
+import Zoom from './controllers/Zoom';
+import { getDOMNodeSelection } from './helpers/general';
+import { rem } from './lib/ui/general';
 import {
   ChartConfig,
   ChartConfigDynamic,
@@ -15,9 +16,9 @@ import {
   Margin,
   MountElement,
   ParamsFixation,
-} from "./types/general";
-import { DataControllerScaleTuple } from "./types/scale";
-import { SimpleSelection } from "./types/selection";
+} from './types/general';
+import { DataControllerScaleTuple } from './types/scale';
+import { SimpleSelection } from './types/selection';
 
 abstract class Chart<Datum> {
   protected el?: SimpleSelection<HTMLDivElement>;
@@ -31,21 +32,13 @@ abstract class Chart<Datum> {
   private _width: number;
   private _height: number;
 
-  constructor(
-    element: MountElement,
-    config: ChartConfig<Datum> | ChartConfigDynamic<Datum>
-  ) {
+  constructor(element: MountElement, config: ChartConfig<Datum> | ChartConfigDynamic<Datum>) {
     this.config = new Config(config);
 
     this._height = config.height;
     this._width = config.width;
 
-    if (typeof element === "string") {
-      const domEl: HTMLElement | null = document.querySelector(element);
-      domEl && (this.el = select<HTMLElement, unknown>(domEl).append("div"));
-    } else {
-      this.el = select<HTMLElement, unknown>(element).append("div");
-    }
+    this.el = getDOMNodeSelection(element);
 
     if (this.el) {
       const {
@@ -55,19 +48,16 @@ abstract class Chart<Datum> {
         el,
       } = this;
 
-      el.style("width", rem(width)).style("height", rem(height));
+      el.style('width', rem(width)).style('height', rem(height));
 
       // Initialize the SVG element which contains axis, highlights etc.
       this.svg = el
-        .append("svg")
-        .attr("width", width)
-        .attr("height", height)
-        .style("position", "absolute")
-        .append("g");
-      this.svg.attr(
-        "transform",
-        "translate(" + margin.left + " " + margin.top + ")"
-      );
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height)
+        .style('position', 'absolute')
+        .append('g');
+      this.svg.attr('transform', 'translate(' + margin.left + ' ' + margin.top + ')');
 
       // Initialize chart area, which renders the visualization
       const chartArea = new ChartArea<DatumRect<Datum>>(el, xMax, yMax, margin);
@@ -80,18 +70,18 @@ abstract class Chart<Datum> {
         [
           [0, 0],
           [xMax, yMax],
-        ]
+        ],
       );
 
       this.chartArea?.canvas.call(this.zoom?.zoom);
-      this.zoom.onChange((t) => (chartArea.transform = t));
+      this.zoom.onChange(t => (chartArea.transform = t));
     }
   }
 
   protected addAxes(dataController: DataController<Datum>) {
     if (this.svg) {
       const axes = new Axes(this.svg, this.config, dataController);
-      this.zoom?.onChange((transform) => {
+      this.zoom?.onChange(transform => {
         axes.redrawAxes(transform);
       });
       this.axes = axes;
@@ -108,13 +98,9 @@ abstract class Chart<Datum> {
     };
 
     if (this.chartArea?.svg) {
-      const grid = new Grid(
-        this.chartArea?.svg.append("g"),
-        this.config,
-        dataController
-      );
+      const grid = new Grid(this.chartArea?.svg.append('g'), this.config, dataController);
 
-      this.zoom?.onChange((transform) => {
+      this.zoom?.onChange(transform => {
         grid.redrawGrid(transform);
       });
 
@@ -159,6 +145,18 @@ abstract class Chart<Datum> {
 
   get height() {
     return this._height;
+  }
+
+  get allParams() {
+    return this.config.allParams;
+  }
+
+  get params() {
+    return this.config.params;
+  }
+
+  get paramFixations() {
+    return this.config.paramsFixation;
   }
 }
 

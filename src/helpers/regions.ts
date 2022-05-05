@@ -1,28 +1,26 @@
-import { NumberValue } from "d3-scale";
-import { ParamsFixation, RegionDatum } from "../types/general";
+import { NumberValue } from 'd3-scale';
+import { ParamsFixation, RegionDatum } from '../types/general';
 
-export const isRegionsData = <Value>(
-  data: unknown[]
-): data is RegionDatum<Value>[] => {
+export const isRegionsData = <Value>(data: unknown[]): data is RegionDatum<Value>[] => {
   const datum = (data as RegionDatum<Value>[])[0];
   return (
-    !data.length ||
-    (typeof datum.params !== "undefined" && typeof datum.value !== "undefined")
+    !data.length || (typeof datum.params !== 'undefined' && typeof datum.value !== 'undefined')
   );
 };
 
 export const getParams = <Value>(data: RegionDatum<Value>[]) =>
   data.length > 0 ? Object.keys(data[0].params) : [];
 
-export const getParamDomain = <Value>(
-  data: RegionDatum<Value>[],
-  param: string
-) => {
+export const getParamDomain = <Value>(data: RegionDatum<Value>[], param: string) => {
   const result: NumberValue[] = [];
-  data.forEach((d) => {
+  data.forEach(d => {
     const paramRange = d.params[param];
 
-    result.push(paramRange.from, paramRange.to);
+    if (typeof paramRange.from === 'number') result.push(paramRange.from);
+
+    if (typeof paramRange.to === 'number') result.push(paramRange.to);
+
+    if (typeof paramRange === 'number') result.push(paramRange);
   });
 
   return result;
@@ -30,23 +28,17 @@ export const getParamDomain = <Value>(
 
 export const isValueInRange = (
   range: { from: NumberValue; to: NumberValue },
-  value: NumberValue
+  value: NumberValue,
 ) => {
   return range.from <= value && value <= range.to;
 };
 
-export const applyParamsFixations = <Value>(
-  data: RegionDatum<Value>[],
-  fixs?: ParamsFixation
-) => {
+export const applyParamsFixations = <Value>(data: RegionDatum<Value>[], fixs?: ParamsFixation) => {
   return fixs
-    ? data.filter((d) =>
+    ? data.filter(d =>
         Object.entries(fixs).every(([param, val]) =>
-          isValueInRange(
-            d.params[param],
-            typeof val === "string" ? parseInt(val, 10) : val
-          )
-        )
+          isValueInRange(d.params[param], typeof val === 'string' ? parseInt(val, 10) : val),
+        ),
       )
     : data;
 };

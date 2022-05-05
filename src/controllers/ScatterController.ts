@@ -1,68 +1,63 @@
-import { select, Selection, BaseType } from "d3-selection";
-import { ScaleLinear, scaleLinear } from "d3-scale";
-import Config from "../Config";
-import { ProbabilityDatum } from "../types/expression";
-import { ParamsTuple } from "../types/general";
-import DataController from "./DataController";
+import { BaseType, EnterElement, select, Selection } from 'd3-selection';
+import Config from '../Config';
+import { UNDEFINED_CHART_VALUE } from '../constants/common';
+import { ScatterDatum } from '../types/general';
+import DataController from './DataController';
 
-class ScatterController extends DataController<ProbabilityDatum> {
-  private _scatterBinding: Selection<BaseType, any, HTMLElement, []>;
-  private distributionScales: [
-    ScaleLinear<number, number>,
-    ScaleLinear<number, number>
-  ];
-  private density: number;
-  private dimensions: { width: number; height: number };
+type ScatterNode<Value, Type extends BaseType> = Selection<
+  Type,
+  ScatterDatum<Value>,
+  HTMLElement,
+  ScatterDatum<Value>[]
+>;
+class ScatterController<Value> extends DataController<ScatterDatum<Value>> {
+  private _scatterBinding: ScatterNode<Value, BaseType>;
 
-  constructor(config: Config<ProbabilityDatum>, density = 30) {
-    super(config);
+  private _detachedContainer: Selection<HTMLElement, ScatterDatum<Value>[], null, undefined>;
 
-    const detachedContainer = select<HTMLElement, []>(
-      document.createElement("custom")
+  constructor(opts: Config<ScatterDatum<Value>>) {
+    super(opts);
+
+    this._detachedContainer = select<HTMLElement, ScatterDatum<Value>[]>(
+      document.createElement('custom'),
     );
 
-    this._scatterBinding = detachedContainer
-      .selectAll("custom")
-      .data(new Array(density * density));
+    this._scatterBinding = this._detachedContainer.selectAll('custom').data(opts.data);
 
-    const distDom = [0, density - 1];
-
-    this.distributionScales = [
-      scaleLinear().domain(distDom).range([0, config.xMax]),
-      scaleLinear().domain(distDom).range([0, config.yMax]),
-    ];
-
-    this.density = density;
-    this.dimensions = { width: config.xMax, height: config.yMax };
-
-    this.bindScatter();
+    this._scatterBinding = this._scatterBinding.join(this.joinScatterPoints);
   }
 
-  public bindScatter() {
-    const [xDist, yDist] = this.distributionScales;
-    this._scatterBinding = this._scatterBinding
-      .join("custom")
-      .classed(".region", true)
-      .attr("x", (_, i) => xDist(Math.floor(i / this.density)))
-      .attr("y", (_, i) => yDist(i % this.density));
-  }
+  public x = (d: ScatterDatum<Value>) => {
+    const [xScale] = this.currentScales;
+
+    return this.params && xScale ? xScale.scale(d.params[this.params[0]]) : UNDEFINED_CHART_VALUE;
+  };
+
+  public y = (d: ScatterDatum<Value>) => {
+    const [, yScale] = this.currentScales;
+
+    return this.params && this.params[1] && yScale
+      ? yScale.scale(d.params[this.params[1]])
+      : UNDEFINED_CHART_VALUE;
+  };
+
+  public bindRegions = (data: ScatterDatum<Value>[]) => {
+    // Bind zero for y position and height in case of 1D chart
+    this._scatterBinding = this._detachedContainer
+      .selectAll('custom')
+      .data(data)
+      .join(this.joinScatterPoints, this.updateScatterPoints);
+  };
+
+  private updateScatterPoints = (c: ScatterNode<Value, BaseType>) =>
+    c.attr('x', this.x).attr('y', this.y);
+
+  private joinScatterPoints = (c: ScatterNode<Value, EnterElement>) => {
+    return c.append('custom').call(this.updateScatterPoints);
+  };
 
   get binding() {
     return this._scatterBinding;
-  }
-
-  get coordsScales(): [
-    ScaleLinear<number, number>,
-    ScaleLinear<number, number>
-  ] {
-    return [
-      scaleLinear()
-        .domain([0, this.dimensions.width])
-        .range((this.currentScales[0]?.extent as [number, number]) ?? []),
-      scaleLinear()
-        .domain([0, this.dimensions.height])
-        .range((this.currentScales[1]?.extent as [number, number]) ?? []),
-    ];
   }
 }
 
