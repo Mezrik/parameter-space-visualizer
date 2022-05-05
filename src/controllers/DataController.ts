@@ -1,10 +1,7 @@
-import { scaleLinear } from "d3-scale";
-import Config from "../Config";
-import { ParamsTuple, ParamType } from "../types/general";
-import {
-  DataControllerScaleTuple,
-  DataControllerScaleType,
-} from "../types/scale";
+import { scaleLinear } from 'd3-scale';
+import Config from '../Config';
+import { ParamsTuple, ParamType } from '../types/general';
+import { DataControllerScaleTuple, DataControllerScaleType } from '../types/scale';
 class DataController<Datum> {
   private paramScales: Record<ParamType, DataControllerScaleType> = {};
   private config: Config<Datum>;
@@ -17,9 +14,9 @@ class DataController<Datum> {
 
   public initScales(config: Config<Datum>) {
     const { allParams, paramsExtents, xMax, yMax } = config;
-    allParams.forEach((param) => {
+    allParams.forEach(param => {
       const [min, max] = paramsExtents[param];
-      if (typeof min === "number" && typeof max === "number")
+      if (typeof min === 'number' && typeof max === 'number')
         this.paramScales[param] = {
           scale: scaleLinear().domain([min, max]),
           extent: [min, max],
