@@ -15,7 +15,7 @@ import {
 import { scaleLinear } from 'd3-scale';
 import { hcl, HCLColor } from 'd3-color';
 import { interpolateHcl } from 'd3-interpolate';
-import { select } from 'd3-selection';
+import { BaseType, select } from 'd3-selection';
 
 export const checkIfParamsExist = (existing: string[], p: ParamsTuple) =>
   p[1] ? existing.includes(p[0]) && existing.includes(p[1]) : existing.includes(p[0]);
@@ -129,4 +129,11 @@ export const getDOMNodeSelection = (element: HTMLElement | string) => {
   if (node) return select<HTMLElement, unknown>(node).append('div');
 
   return undefined;
+};
+
+export const getNodeXY = (nodes: BaseType[] | ArrayLike<BaseType>, i: number): [number, number] => {
+  const node = select(nodes[i]);
+  const x = parseInt(node.attr('x'), 10);
+  const y = parseInt(node.attr('y'), 10);
+  return [x, y];
 };
