@@ -109,6 +109,8 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
     transform = zoomIdentity,
     binding: Selection<BaseType, any, HTMLElement, any[]>,
     fillStyle: (xT: number, yT: number, d: any) => string,
+    xAccessor: (x: number, xT: number) => number,
+    yAccessor: (y: number, yT: number) => number,
   ) {
     const { chartArea, width, height } = this;
     console.log(binding);
@@ -127,7 +129,7 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
 
       ctx.beginPath();
       ctx.fillStyle = fillStyle(xT, yT, d);
-      ctx.arc(x, y, POINT_RADIUS, 0, 2 * Math.PI);
+      ctx.arc(xAccessor(x, xT), yAccessor(y, yT), POINT_RADIUS, 0, 2 * Math.PI);
 
       ctx.fill();
       ctx.closePath();
@@ -154,6 +156,9 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
       return config?.options?.color?.(d) ?? theme.colors.black;
     };
 
+    let xAccessor = (_: number, xT: number) => xT;
+    let yAccessor = (_: number, yT: number) => yT;
+
     if (coordsScales) {
       const [xCoordScale, yCoordScale] = coordsScales;
 
@@ -172,9 +177,12 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
           }) ?? theme.colors.black
         );
       };
+
+      xAccessor = (x: number) => x;
+      yAccessor = (y: number) => y;
     }
 
-    this.draw(transform, binding, fillStyle);
+    this.draw(transform, binding, fillStyle, xAccessor, yAccessor);
   };
 
   public reset = () => {
@@ -259,13 +267,13 @@ export default class ScatterPlot<Value> {
         },
       });
 
-      if (rest.url) this.fetchData(rest.url);
+      if (rest.url) this.fetchData(rest.url, rest.parseCSVValue);
     }
 
     this.initChartUI();
   }
 
-  private async fetchData(url: string) {
+  private async fetchData(url: string, parseValue: (v: string) => Value) {
     const worker = new DataWorker();
 
     const proxy = Comlink.wrap<DataStreamWorker>(worker);
@@ -275,14 +283,14 @@ export default class ScatterPlot<Value> {
     const finalData = await proxy.streamData(
       url,
       Comlink.proxy(values => {
-        const parsed = csvToScatterPointsList(values);
+        const parsed = csvToScatterPointsList<Value>(values, parseValue);
         Array.prototype.push.apply(data, parsed);
         this.chart.data(data);
         this.initChartUI();
       }),
     );
 
-    this.chart.data(csvToScatterPointsList(finalData));
+    this.chart.data(csvToScatterPointsList<Value>(finalData, parseValue));
     this.initChartUI();
 
     loadingOverlay.remove();
