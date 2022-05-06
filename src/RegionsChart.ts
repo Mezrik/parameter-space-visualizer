@@ -1,7 +1,8 @@
 import { NumberValue } from 'd3-scale';
-import { select } from 'd3-selection';
+import { pointer, select } from 'd3-selection';
 import { zoomIdentity, ZoomTransform } from 'd3-zoom';
 import * as Comlink from 'comlink';
+import { Rect } from '@timohausmann/quadtree-js';
 
 import { DataWorker } from './lib/workers';
 import { DataStreamWorker } from './lib/data/dataStreamWorker';
@@ -24,22 +25,25 @@ import {
 } from './types/general';
 import { SimpleSelection } from './types/selection';
 import { addLoadingOverlay } from './lib/ui/loadingOverlay';
+import { ChartAreaQuadTreeController } from './controllers/ChartAreaDataController';
+
+type RegionRect<Value> = Rect & RegionDatum<Value>;
 
 export class CustomRegionsChart<Value> extends Chart<RegionDatum<Value>> {
   private dataController: RegionsController<Value>;
+  private chartAreaDataController?: ChartAreaQuadTreeController<RegionRect<Value>>;
+
   private g?: SimpleSelection<SVGGElement>;
   private highlight?: SimpleSelection<SVGRectElement>;
-  private bindDataToArea = false;
+
+  private showTooltipAndRect?: (rect: RegionRect<Value>, [x, y]: [number, number]) => void;
 
   constructor(element: MountElement, config: ChartConfig<RegionDatum<Value>>) {
     super(element, config);
 
     this.config.dataTransform = applyParamsFixations;
 
-    const {
-      config: { xMax, yMax },
-      chartArea,
-    } = this;
+    const { chartArea } = this;
 
     this.dataController = new RegionsController(this.config);
 
@@ -63,19 +67,16 @@ export class CustomRegionsChart<Value> extends Chart<RegionDatum<Value>> {
       });
     }
 
-    chartArea?.on('mousemove', (d, [x, y]) => {
-      const lastRect = d[d.length - 1];
-      if (!lastRect) return;
-
-      this.highlightRect(lastRect);
-
-      tooltip?.showTooltip({ ...lastRect, width: 0, height: 0, x, y });
-    });
-
-    chartArea?.on('mouseout', () => {
+    chartArea?.canvas.on('mouseout', () => {
       this.highlight?.style('display', 'none');
       tooltip.hideTooltip();
     });
+
+    this.showTooltipAndRect = (rect, [x, y]) => {
+      this.highlightRect(rect);
+
+      tooltip?.showTooltip({ ...rect, width: 0, height: 0, x, y });
+    };
 
     this.zoom?.onChange(this.redraw);
     this.zoom?.onChange(() => {
@@ -160,18 +161,9 @@ export class CustomRegionsChart<Value> extends Chart<RegionDatum<Value>> {
     this.axes?.redrawAxes();
     this.grid?.redrawGrid();
 
-    const { x, y, w, h } = this.dataController;
-
-    if (this.bindDataToArea) {
-      this.chartArea?.data(
-        this.config.data.map(d => ({
-          ...d,
-          x: x(d),
-          y: y(d),
-          width: w(d),
-          height: h(d),
-        })),
-      );
+    if (this.chartAreaDataController) {
+      const rects = this.config.data.map(this.transfromDatumToRect);
+      this.chartAreaDataController.bindData(rects);
     }
   };
 
@@ -182,17 +174,33 @@ export class CustomRegionsChart<Value> extends Chart<RegionDatum<Value>> {
   };
 
   public bindDataToChartArea = () => {
-    this.bindDataToArea = true;
+    const { chartArea } = this;
+
+    if (!chartArea) return;
+
+    const { width, height } = chartArea.canvas.node() ?? {};
+    if (!width || !height) return;
+
+    if (!this.chartAreaDataController)
+      this.chartAreaDataController = new ChartAreaQuadTreeController(width, height);
+
+    const rects = this.config.data.map(this.transfromDatumToRect);
+
+    this.chartAreaDataController.bindData(rects);
+
+    chartArea.canvas.on('mousemove', ev => {
+      const p = pointer(ev);
+      const finalPointer = this.zoom ? this.zoom.currentTransfrom.invert(p) : p;
+
+      const rect = this.chartAreaDataController?.find(finalPointer);
+
+      if (this.showTooltipAndRect && rect) this.showTooltipAndRect(rect, finalPointer);
+    });
+  };
+
+  private transfromDatumToRect = (d: RegionDatum<Value>) => {
     const { x, y, w, h } = this.dataController;
-    this.chartArea?.data(
-      this.config.data.map(d => ({
-        ...d,
-        x: x(d),
-        y: y(d),
-        width: w(d),
-        height: h(d),
-      })),
-    );
+    return { ...d, x: x(d), y: y(d), width: w(d), height: h(d) };
   };
 }
 
@@ -253,8 +261,6 @@ export default class RegionsChart<Value> {
 
     loadingOverlay.remove();
     proxy[Comlink.releaseProxy]();
-
-    console.log(JSON.stringify(csvToRegionResultsList<Value>(finalData, parseValue)));
 
     this.chart.bindDataToChartArea();
   }

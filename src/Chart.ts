@@ -23,7 +23,7 @@ import { SimpleSelection } from './types/selection';
 abstract class Chart<Datum> {
   protected el?: SimpleSelection<HTMLDivElement>;
   protected config: Config<Datum>;
-  protected chartArea?: ChartArea<DatumRect<Datum>>;
+  protected chartArea?: ChartArea;
   protected axes?: Axes;
   protected grid?: Grid;
   protected svg?: SimpleSelection<SVGGElement>;
@@ -60,7 +60,7 @@ abstract class Chart<Datum> {
       this.svg.attr('transform', 'translate(' + margin.left + ' ' + margin.top + ')');
 
       // Initialize chart area, which renders the visualization
-      const chartArea = new ChartArea<DatumRect<Datum>>(el, xMax, yMax, margin);
+      const chartArea = new ChartArea(el, xMax, yMax, margin);
       this.chartArea = chartArea;
 
       // Initialize general zoom
@@ -74,7 +74,6 @@ abstract class Chart<Datum> {
       );
 
       this.chartArea?.canvas.call(this.zoom?.zoom);
-      this.zoom.onChange(t => (chartArea.transform = t));
     }
   }
 

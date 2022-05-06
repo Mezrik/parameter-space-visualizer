@@ -114,7 +114,6 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
     yAccessor: (y: number, yT: number) => number,
   ) {
     const { chartArea, width, height } = this;
-    console.log(binding);
     const ctx = chartArea?.context;
 
     if (!ctx) return;
@@ -153,7 +152,6 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
     const fixedParams = this.config.paramsFixation;
 
     let fillStyle = (xT: number, yT: number, d: ScatterDatum<Value>) => {
-      console.log(d);
       return config?.options?.color?.(d) ?? theme.colors.black;
     };
 
@@ -204,7 +202,6 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
   };
 
   public data = (data: ScatterDatum<Value>[]) => {
-    console.log(data);
     if (!isDataConfigInstance<Value>(this.config)) return;
 
     this.config.data = data;
