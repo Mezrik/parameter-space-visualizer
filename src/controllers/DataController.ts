@@ -4,7 +4,7 @@ import { ParamsTuple, ParamType } from '../types/general';
 import { DataControllerScaleTuple, DataControllerScaleType } from '../types/scale';
 class DataController<Datum> {
   private paramScales: Record<ParamType, DataControllerScaleType> = {};
-  private config: Config<Datum>;
+  protected config: Config<Datum>;
 
   constructor(config: Config<Datum>) {
     this.config = config;

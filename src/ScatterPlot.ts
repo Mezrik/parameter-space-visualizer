@@ -139,7 +139,6 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
   private draw(
     transform = zoomIdentity,
     binding: Selection<BaseType, any, HTMLElement, any[]>,
-    fillStyle: (xT: number, yT: number, d: any) => string,
     xAccessor: (x: number, xT: number) => number,
     yAccessor: (y: number, yT: number) => number,
   ) {
@@ -158,7 +157,7 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
       const [xT, yT] = transform.apply([x, y]);
 
       ctx.beginPath();
-      ctx.fillStyle = fillStyle(xT, yT, d);
+      ctx.fillStyle = node.attr('fillStyle');
       ctx.arc(xAccessor(x, xT), yAccessor(y, yT), POINT_RADIUS, 0, 2 * Math.PI);
 
       ctx.fill();
@@ -177,41 +176,17 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
 
     if (!this.config.params) return;
 
-    const [xParam, yParam] = this.config.params;
-
-    const fixedParams = this.config.paramsFixation;
-
-    let fillStyle = (xT: number, yT: number, d: ScatterDatum<Value>) => {
-      return config?.options?.color?.(d) ?? theme.colors.black;
-    };
-
     let xAccessor = (_: number, xT: number) => xT;
     let yAccessor = (_: number, yT: number) => yT;
 
     if (coordsScales) {
-      const [xCoordScale, yCoordScale] = coordsScales;
-
-      fillStyle = (xT: number, yT: number) => {
-        const pair: Record<string, number | string> = {
-          [xParam]: xCoordScale(xT),
-          ...fixedParams,
-        };
-
-        if (yParam) pair[yParam] = yCoordScale(yT);
-
-        return (
-          config?.options?.color?.({
-            value: this.expression?.(pair) ?? '',
-            name: 'val',
-          }) ?? theme.colors.black
-        );
-      };
-
       xAccessor = (x: number) => x;
       yAccessor = (y: number) => y;
     }
 
-    this.draw(transform, binding, fillStyle, xAccessor, yAccessor);
+    this.enhanceBindingWithFillStyle(binding);
+
+    this.draw(transform, binding, xAccessor, yAccessor);
   };
 
   public reset = () => {
@@ -247,35 +222,120 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
 
     if (!('x' in dataController && 'y' in dataController)) return;
 
-    if (!this.chartAreaDataController)
-      this.chartAreaDataController = new ChartAreaDelaunayController(
-        (p: Point<Value>) => p.x,
-        (p: Point<Value>) => p.y,
-      );
+    if (!this.chartAreaDataController) this.initChartAreaDataController();
 
     const pts = (this.config.data as ScatterDatum<Value>[]).map(
       this.transfromDatumToPoint(dataController.x, dataController.y),
     );
 
-    this.chartAreaDataController.bindData(pts);
+    this.chartAreaDataController!.bindData(pts);
+    this.bindMouseMove(true);
+  };
 
-    chartArea.canvas.on('mousemove', ev => {
+  public bindScatterGridToChartArea = () => {
+    console.log(true);
+    const { chartArea, dataController } = this;
+    if (!('coordsScales' in dataController) || !chartArea) return;
+
+    if (!this.chartAreaDataController) this.initChartAreaDataController();
+
+    const pts: Point<Value>[] = [];
+
+    dataController.binding.each((d, i, nodes) => {
+      const node = select(nodes[i]);
+      const x = parseInt(node.attr('x'), 10);
+      const y = parseInt(node.attr('y'), 10);
+      pts.push({ ...d, x, y });
+    });
+
+    this.chartAreaDataController!.bindData(pts);
+
+    this.bindMouseMove();
+  };
+
+  private initChartAreaDataController = () => {
+    this.chartAreaDataController = new ChartAreaDelaunayController(
+      (p: Point<Value>) => p.x,
+      (p: Point<Value>) => p.y,
+    );
+  };
+
+  private bindMouseMove = (zoom?: boolean) => {
+    this.chartArea?.canvas.on('mousemove', ev => {
       const p = pointer(ev);
-      const finalPointer = this.zoom ? this.zoom.currentTransfrom.invert(p) : p;
+      const finalPointer = this.zoom && zoom ? this.zoom.currentTransfrom.invert(p) : p;
 
       const point = this.chartAreaDataController?.find(finalPointer);
 
-      if (point) this.highlightPoint(point);
+      if (point) this.highlightPoint(zoom ? this.applyZoomTransformToPoint(point) : point);
     });
-  };
 
-  public bindScatterGridToChartArea = () => {};
+    if (zoom) this.zoom?.onChange(() => this.highlight?.style('display', 'none'));
+  };
 
   private transfromDatumToPoint =
     (x: (d: ScatterDatum<Value>) => number, y: (d: ScatterDatum<Value>) => number) =>
     (d: ScatterDatum<Value>): Point<Value> => {
       return { ...d, x: x(d), y: y(d) };
     };
+
+  private applyZoomTransformToPoint = (p: Point<Value>) => {
+    if (!this.zoom) return p;
+
+    const [x, y] = this.zoom.currentTransfrom.apply([p.x, p.y]);
+    return { ...p, x, y };
+  };
+
+  private enhanceBindingWithFillStyle = (binding: Selection<BaseType, any, HTMLElement, any[]>) => {
+    const { config } = this;
+
+    const coordsScales = (this.dataController as ScatterGridController).coordsScales;
+
+    if (!this.config.params) return;
+
+    const [xParam, yParam] = this.config.params;
+
+    const fixedParams = this.config.paramsFixation;
+
+    let getFillAndValue: (
+      xT: number,
+      yT: number,
+      d: ScatterDatum<Value>,
+    ) => [string, string | number | undefined] = (xT, yT, d) => {
+      return [config?.options?.color?.(d) ?? theme.colors.black, undefined];
+    };
+
+    if (coordsScales) {
+      const [xCoordScale, yCoordScale] = coordsScales;
+
+      getFillAndValue = (xT, yT) => {
+        const pair: Record<string, number | string> = {
+          [xParam]: xCoordScale(xT),
+          ...fixedParams,
+        };
+
+        if (yParam) pair[yParam] = yCoordScale(yT);
+
+        const value = this.expression?.(pair);
+        return [
+          config?.options?.color?.({
+            value: value ?? '',
+            name: 'val',
+          }) ?? theme.colors.black,
+          value,
+        ];
+      };
+    }
+
+    binding.each((d, i, nodes) => {
+      const node = select(nodes[i]);
+      const x = parseInt(node.attr('x'), 10);
+      const y = parseInt(node.attr('y'), 10);
+      const [xT, yT] = this.zoom?.currentTransfrom.apply([x, y]) ?? [x, y];
+      const [fill, value] = getFillAndValue(xT, yT, d);
+      node.attr('fillStyle', fill).attr('point-value', value ?? '');
+    });
+  };
 }
 
 export default class ScatterPlot<Value> {

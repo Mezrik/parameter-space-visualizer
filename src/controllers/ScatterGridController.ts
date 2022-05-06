@@ -5,6 +5,8 @@ import { ProbabilityDatum } from '../types/expression';
 import { ParamsTuple } from '../types/general';
 import DataController from './DataController';
 
+export type CoordsScales = [ScaleLinear<number, number>, ScaleLinear<number, number>];
+
 class ScatterGridController extends DataController<ProbabilityDatum> {
   private _scatterBinding: Selection<BaseType, any, HTMLElement, []>;
   private distributionScales: [ScaleLinear<number, number>, ScaleLinear<number, number>];
@@ -44,7 +46,7 @@ class ScatterGridController extends DataController<ProbabilityDatum> {
     return this._scatterBinding;
   }
 
-  get coordsScales(): [ScaleLinear<number, number>, ScaleLinear<number, number>] {
+  get coordsScales(): CoordsScales {
     return [
       scaleLinear()
         .domain([0, this.dimensions.width])
