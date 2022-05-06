@@ -18,7 +18,7 @@ const visualizeSpace = process.env.VISUALIZE_SPACE === 'true';
 const prodExtensions = ['.js', '.ts'];
 const demoExtensions = [...prodExtensions, '.jsx', '.tsx'];
 
-const getCommonPlugins = (extensions, babelPlugins = [], workersDist, workerLoadPath) => [
+const getCommonPlugins = (extensions, babelPlugins = [], workerLoadPath) => [
   alias({
     entries: [
       { find: 'react', replacement: 'preact/compat' },
@@ -42,7 +42,6 @@ const getCommonPlugins = (extensions, babelPlugins = [], workersDist, workerLoad
   webWorkerLoader({
     targetPlatform: 'browser',
     inline: false,
-    outputFolder: workersDist,
     loadPath: workerLoadPath,
   }),
   typescript({
@@ -97,9 +96,6 @@ export default [
           dir: `demo/dist/`,
           format: 'umd',
           sourcemap: true,
-          globals: {
-            'web-worker:./lib/data/dataStreamWorker': 'DataWorker',
-          },
         },
 
         plugins: [
@@ -114,7 +110,6 @@ export default [
                 },
               ],
             ],
-            'demo/dist',
             '/dist',
           ),
           serve({

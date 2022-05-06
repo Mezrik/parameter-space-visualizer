@@ -1,14 +1,31 @@
+import { NumberValue } from 'd3-scale';
 import { select } from 'd3-selection';
 import { zoomIdentity, ZoomTransform } from 'd3-zoom';
+import * as Comlink from 'comlink';
+
+import { DataWorker } from './lib/workers';
+import { DataStreamWorker } from './lib/data/dataStreamWorker';
 import Chart from './Chart';
+import ChartUI from './components/ChartUI';
 import Tooltip from './components/Tooltip';
+import { DEFAULT_CHART_MARGIN } from './constants/common';
 import { theme } from './constants/styles';
 import RegionsController from './controllers/RegionsController';
+import { getDOMNode } from './helpers/general';
 import { applyParamsFixations } from './helpers/regions';
-import { ChartConfig, DatumRect, MountElement, RegionDatum } from './types/general';
+import { csvToRegionResultsList } from './lib/data/parse';
+import {
+  ChartConfig,
+  DatumRect,
+  MountElement,
+  RegionDatum,
+  SimpleConfigRegions,
+  UserOptions,
+} from './types/general';
 import { SimpleSelection } from './types/selection';
+import { addLoadingOverlay } from './lib/ui/loadingOverlay';
 
-class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
+export class CustomRegionsChart<Value> extends Chart<RegionDatum<Value>> {
   private dataController: RegionsController<Value>;
   private g?: SimpleSelection<SVGGElement>;
   private highlight?: SimpleSelection<SVGRectElement>;
@@ -179,4 +196,66 @@ class RegionsChart<Value> extends Chart<RegionDatum<Value>> {
   };
 }
 
-export default RegionsChart;
+export default class RegionsChart<Value> {
+  private root: HTMLElement;
+  private chart: CustomRegionsChart<Value>;
+  private chartUI: ChartUI;
+
+  constructor({ el, width, height, data, color, ...rest }: SimpleConfigRegions<Value>) {
+    const node = getDOMNode(el);
+    if (node) this.root = node;
+    else {
+      this.root = document.createElement('div');
+      document.appendChild(this.root);
+    }
+
+    this.chartUI = new ChartUI(this.root);
+
+    const options: UserOptions<RegionDatum<Value>, NumberValue, NumberValue> = {
+      handleParamsChange: (...args) => this.chartUI.handleParamsChange?.(...args),
+      handleFixationChange: (...args) => this.chartUI.handleFixationChange?.(...args),
+      margin: DEFAULT_CHART_MARGIN,
+      color,
+    };
+
+    this.chart = new CustomRegionsChart(this.root, {
+      width,
+      height,
+      data: data ?? [],
+      options,
+    });
+
+    if (rest.url) this.fetchData(rest.url, rest.parseCSVValue);
+    else this.chart.bindDataToChartArea();
+
+    this.chartUI.initChartUI(this.chart);
+  }
+
+  private async fetchData(url: string, parseValue: (v?: string) => Value) {
+    const worker = new DataWorker();
+
+    const proxy = Comlink.wrap<DataStreamWorker>(worker);
+    const data: RegionDatum<Value>[] = [];
+    const loadingOverlay = addLoadingOverlay(this.root);
+
+    const finalData = await proxy.streamData(
+      url,
+      Comlink.proxy(values => {
+        const parsed = csvToRegionResultsList<Value>(values, parseValue);
+        Array.prototype.push.apply(data, parsed);
+        this.chart.data(data);
+        this.chartUI.initChartUI(this.chart);
+      }),
+    );
+
+    this.chart.data(csvToRegionResultsList<Value>(finalData, parseValue));
+    this.chartUI.initChartUI(this.chart);
+
+    loadingOverlay.remove();
+    proxy[Comlink.releaseProxy]();
+
+    console.log(JSON.stringify(csvToRegionResultsList<Value>(finalData, parseValue)));
+
+    this.chart.bindDataToChartArea();
+  }
+}

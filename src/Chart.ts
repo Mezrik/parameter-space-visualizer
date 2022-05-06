@@ -1,5 +1,5 @@
 import { select } from 'd3-selection';
-import { ZoomTransform } from 'd3-zoom';
+import { zoomIdentity, ZoomTransform } from 'd3-zoom';
 import Axes from './components/Axes';
 import ChartArea from './components/ChartArea';
 import Grid from './components/Grid';
@@ -113,6 +113,11 @@ abstract class Chart<Datum> {
     this.reset();
   };
 
+  public resetZoom = () => {
+    if (!this.zoom?.zoom) return;
+    this.chartArea?.canvas.call(this.zoom.zoom, zoomIdentity);
+  };
+
   /**
    * Change param displayed on axis x
    * @param param
@@ -120,6 +125,7 @@ abstract class Chart<Datum> {
   public x = (param: string) => {
     const { params } = this.config;
     this.config.params = [param, params?.[1]];
+    this.resetZoom();
     this.reset();
   };
 
@@ -131,6 +137,7 @@ abstract class Chart<Datum> {
     const { params } = this.config;
     if (params) {
       this.config.params = [params?.[0], param];
+      this.resetZoom();
       this.reset();
     }
   };

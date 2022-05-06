@@ -17,7 +17,7 @@ export type RawCSVObject = Array<Record<string, string | undefined>>;
 export type RegionResults<T> = Array<RegionResult<T>>;
 
 export const parseFraction = (fract: string) => {
-  if (!fract?.includes('/')) return parseInt(fract, 10);
+  if (!fract?.includes('/')) return parseFloat(fract);
   const splitted = fract.split('/');
   return parseInt(splitted[0], 10) / parseInt(splitted[1], 10);
 };
@@ -50,9 +50,12 @@ export const parseValue = (value: string | undefined): RegionResultValue => {
   }
 };
 
-export const csvToRegionResultsList = (raw: RawCSVObject): RegionResults<RegionResultValue> => {
+export const csvToRegionResultsList = <Value = RegionResultValue>(
+  raw: RawCSVObject,
+  parseVal?: (v?: string) => Value,
+): RegionResults<Value> => {
   return raw.map(result => {
-    const value = parseValue(result['value']);
+    const value = (parseVal ?? parseValue)(result['value']) as Value;
     return {
       value,
       params: Object.keys(result).reduce<RegionResult<RegionResultValue>['params']>(
@@ -68,17 +71,16 @@ export const csvToScatterPointsList = <Value>(
   raw: RawCSVObject,
   parseVal: (v: string) => Value,
 ): ScatterDatum<Value>[] => {
+  console.log(raw);
   return raw.map(result => {
     return {
-      value: parseVal(result['value']!),
+      value: parseVal(result['value']?.trim()!),
 
-      params: Object.keys(result).reduce<ScatterDatum<Value>['params']>(
-        (params, param) =>
-          param !== 'value' && result[param]
-            ? { ...params, [param]: parseFraction(result[param]!) }
-            : params,
-        {},
-      ),
+      params: Object.keys(result).reduce<ScatterDatum<Value>['params']>((params, param) => {
+        return param !== 'value' && result[param]
+          ? { ...params, [param.trim()]: parseFraction(result[param]!) }
+          : params;
+      }, {}),
     };
   });
 };
