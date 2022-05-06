@@ -1,4 +1,4 @@
-import { BaseType, select, Selection } from 'd3-selection';
+import { BaseType, pointer, select, Selection } from 'd3-selection';
 import { zoomIdentity } from 'd3-zoom';
 import m from 'math-expression-evaluator';
 import * as Comlink from 'comlink';
@@ -33,6 +33,8 @@ import { DEFAULT_CHART_MARGIN, DEFAUL_COLOR_SCALE } from './constants/common';
 import { appendParamsSelects } from './lib/ui/paramsSelects';
 import { appendParamFixInputs } from './lib/ui/paramFixInputs';
 import ChartUI from './components/ChartUI';
+import { ChartAreaDelaunayController } from './controllers/ChartAreaDataController';
+import { SimpleSelection } from './types/selection';
 
 const POINT_RADIUS = 5;
 
@@ -67,9 +69,15 @@ const isScatterDatum = <Value>(d: Datum<Value>): d is ScatterDatum<Value> => {
 
 type Datum<Value> = ScatterDatum<Value> | ProbabilityDatum;
 
+type Point<Value> = Datum<Value> & { x: number; y: number };
+
 export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
   private dataController!: ScatterController<Value> | ScatterGridController;
+  private chartAreaDataController?: ChartAreaDelaunayController<Point<Value>>;
   private expression?: EvalFunction;
+
+  private g?: SimpleSelection<SVGGElement>;
+  private highlight?: SimpleSelection<SVGCircleElement>;
 
   constructor(element: MountElement, config: ChartConfigDynamic<Datum<Value>>) {
     super(element, config);
@@ -85,6 +93,10 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
     this.addGrid(controller, theme.colors.black);
 
     this.zoom?.onChange(this.redraw);
+
+    this.g = this.chartArea?.svg?.append('g').attr('width', this.width).attr('height', this.height);
+
+    this.initHighlightLayer();
   }
 
   private initWithData(_config: DataConfig<Value>) {
@@ -104,6 +116,24 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
         _config.intervals.map(({ name }) => createVariableTokens(name)),
         pair,
       );
+  }
+
+  public highlightPoint({ x, y }: Point<Value>) {
+    const { highlight } = this;
+
+    if (!highlight) return;
+
+    highlight.style('display', 'initial').attr('cx', x).attr('cy', y);
+  }
+
+  private initHighlightLayer() {
+    this.highlight = this.g?.append('circle');
+
+    this.highlight
+      ?.attr('fill', 'transparent')
+      .attr('stroke', theme.colors.grey)
+      .attr('stroke-width', 3)
+      .attr('r', POINT_RADIUS);
   }
 
   private draw(
@@ -209,6 +239,43 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
     this.dataController.initScales(this.config);
     this.reset();
   };
+
+  public bindDataToChartArea = () => {
+    const { chartArea, dataController } = this;
+
+    if (!chartArea) return;
+
+    if (!('x' in dataController && 'y' in dataController)) return;
+
+    if (!this.chartAreaDataController)
+      this.chartAreaDataController = new ChartAreaDelaunayController(
+        (p: Point<Value>) => p.x,
+        (p: Point<Value>) => p.y,
+      );
+
+    const pts = (this.config.data as ScatterDatum<Value>[]).map(
+      this.transfromDatumToPoint(dataController.x, dataController.y),
+    );
+
+    this.chartAreaDataController.bindData(pts);
+
+    chartArea.canvas.on('mousemove', ev => {
+      const p = pointer(ev);
+      const finalPointer = this.zoom ? this.zoom.currentTransfrom.invert(p) : p;
+
+      const point = this.chartAreaDataController?.find(finalPointer);
+
+      if (point) this.highlightPoint(point);
+    });
+  };
+
+  public bindScatterGridToChartArea = () => {};
+
+  private transfromDatumToPoint =
+    (x: (d: ScatterDatum<Value>) => number, y: (d: ScatterDatum<Value>) => number) =>
+    (d: ScatterDatum<Value>): Point<Value> => {
+      return { ...d, x: x(d), y: y(d) };
+    };
 }
 
 export default class ScatterPlot<Value> {
@@ -241,7 +308,7 @@ export default class ScatterPlot<Value> {
       margin: DEFAULT_CHART_MARGIN,
     };
 
-    if (expression && intervals)
+    if (expression && intervals) {
       this.chart = new CustomScatterPlot(this.root, {
         ...commonConfig,
         expression,
@@ -253,7 +320,9 @@ export default class ScatterPlot<Value> {
           },
         },
       });
-    else {
+
+      this.chart.bindScatterGridToChartArea();
+    } else {
       // if not expression, data or url must be defined
       this.chart = new CustomScatterPlot(this.root, {
         ...commonConfig,
@@ -266,6 +335,7 @@ export default class ScatterPlot<Value> {
       });
 
       if (rest.url) this.fetchData(rest.url, rest.parseCSVValue);
+      else this.chart.bindDataToChartArea();
     }
 
     this.chartUI.initChartUI(this.chart);
@@ -294,5 +364,7 @@ export default class ScatterPlot<Value> {
     loadingOverlay.remove();
 
     proxy[Comlink.releaseProxy]();
+
+    this.chart.bindDataToChartArea();
   }
 }

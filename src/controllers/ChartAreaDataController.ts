@@ -13,7 +13,9 @@ abstract class ChartAreaDataController<Datum> {
 
 type GetCoordinate<P> = Delaunay.GetCoordinate<P, ArrayLike<P> | Iterable<P>>;
 
-export class ChartAreaDelaunayController<Point> extends ChartAreaDataController<Point> {
+export class ChartAreaDelaunayController<
+  Point extends { x: number; y: number },
+> extends ChartAreaDataController<Point> {
   private _delaunay?: Delaunay<Point>;
   private _data?: ArrayLike<Point>;
   private _getX: GetCoordinate<Point>;
