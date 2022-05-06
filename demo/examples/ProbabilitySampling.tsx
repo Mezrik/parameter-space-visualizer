@@ -1,12 +1,60 @@
 import { useEffect, useState } from 'preact/hooks';
+import { Tabs } from '@mantine/core';
 import { COLOR_MAPPING } from '../constants';
 
 import { createProabilityColorScale } from '../../src/helpers/general';
 import ScatterPlot from '../../src/ScatterPlot';
+import { ScatterDatum } from '../../src/types/general';
 
 const colorScale = createProabilityColorScale([COLOR_MAPPING.false, COLOR_MAPPING.true]);
 
-const ProbabilitySampling = () => {
+const color = (d: ScatterDatum<boolean>) => (d.value ? COLOR_MAPPING.true : COLOR_MAPPING.false);
+
+const parseCSVValue = (v: string): boolean => (v === 'true' ? true : false);
+
+const FromURL = () => {
+  const [container, ref] = useState<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (container) {
+      const chart = new ScatterPlot({
+        el: container,
+        url: document.location.origin + '/csv/scatter/test.csv',
+        parseCSVValue,
+        color,
+        width: 800,
+        height: 800,
+      });
+    }
+  }, [container]);
+
+  return <div ref={ref} />;
+};
+
+const FromData = () => {
+  const [container, ref] = useState<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (container) {
+      const chart = new ScatterPlot({
+        el: container,
+        color,
+        data: [
+          { value: true, params: { q: 0.2, p: 0.1 } },
+          { value: true, params: { q: 0.35, p: 0.12 } },
+          { value: true, params: { q: 0.1, p: 0.153 } },
+          { value: true, params: { q: 0.22, p: 0.125 } },
+        ],
+        width: 800,
+        height: 800,
+      });
+    }
+  }, [container]);
+
+  return <div ref={ref} />;
+};
+
+const Expression = () => {
   const [container, ref] = useState<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -23,13 +71,6 @@ const ProbabilitySampling = () => {
           { name: 'q', start: 0, end: 0.5 },
           { name: 'r', start: 1 / 10, end: 3 / 10 },
         ],
-        // url: document.location.origin + '/csv/regions/large-results/parametric-die01.csv',
-        // data: [
-        //   { value: true, params: { q: 0.2, p: 0.1 } },
-        //   { value: true, params: { q: 0.35, p: 0.12 } },
-        //   { value: true, params: { q: 0.1, p: 0.153 } },
-        //   { value: true, params: { q: 0.22, p: 0.125 } },
-        // ],
         width: 800,
         height: 800,
       });
@@ -37,6 +78,22 @@ const ProbabilitySampling = () => {
   }, [container]);
 
   return <div ref={ref} />;
+};
+
+const ProbabilitySampling = () => {
+  return (
+    <Tabs>
+      <Tabs.Tab label="Expression">
+        <Expression />
+      </Tabs.Tab>
+      <Tabs.Tab label="Data">
+        <FromData />
+      </Tabs.Tab>
+      <Tabs.Tab label="Async data">
+        <FromURL />
+      </Tabs.Tab>
+    </Tabs>
+  );
 };
 
 export default ProbabilitySampling;

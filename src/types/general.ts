@@ -144,13 +144,14 @@ export type SimpleConfigScatter<Value> = (
     }
 ) & {} & SimpleConfigCommon;
 
-export type SimpleConfigRegions<Datum> = (
+export type SimpleConfigRegions<Value> = (
   | {
-      data: RegionDatum<Datum>[];
+      data: RegionDatum<Value>[];
       url?: never;
+      parseCSVValue?: never;
     }
-  | { data?: never; url: string }
-) & { color: (d: Datum) => string } & SimpleConfigCommon;
+  | { data?: never; url: string; parseCSVValue: (v?: string) => Value }
+) & { color: (d: RegionDatum<Value>) => string } & SimpleConfigCommon;
 
 export type MountElement = string | HTMLElement;
 

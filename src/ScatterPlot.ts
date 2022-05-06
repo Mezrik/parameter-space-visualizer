@@ -22,7 +22,7 @@ import {
 } from './types/general';
 import Config from './Config';
 import DataController from './controllers/DataController';
-import DataWorker from 'web-worker:./lib/data/dataStreamWorker.ts';
+import { DataWorker } from './lib/workers';
 import { DataStreamWorker } from './lib/data/dataStreamWorker';
 import { addLoadingOverlay } from './lib/ui/loadingOverlay';
 import { getDOMNode } from './helpers/general';
@@ -32,6 +32,7 @@ import { NumberValue } from 'd3-scale';
 import { DEFAULT_CHART_MARGIN, DEFAUL_COLOR_SCALE } from './constants/common';
 import { appendParamsSelects } from './lib/ui/paramsSelects';
 import { appendParamFixInputs } from './lib/ui/paramFixInputs';
+import ChartUI from './components/ChartUI';
 
 const POINT_RADIUS = 5;
 
@@ -203,6 +204,7 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
   };
 
   public data = (data: ScatterDatum<Value>[]) => {
+    console.log(data);
     if (!isDataConfigInstance<Value>(this.config)) return;
 
     this.config.data = data;
@@ -215,10 +217,7 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
 export default class ScatterPlot<Value> {
   private root: HTMLElement;
   private chart: CustomScatterPlot<Value>;
-  private controls?: HTMLDivElement;
-
-  private handleParamsChange?: ParamsChangeHandler;
-  private handleFixationChange?: FixationChangeHandler;
+  private chartUI: ChartUI;
 
   constructor({
     el,
@@ -236,10 +235,12 @@ export default class ScatterPlot<Value> {
       document.appendChild(this.root);
     }
 
+    this.chartUI = new ChartUI(this.root);
+
     const commonConfig = { width, height };
     const options: UserOptions<ScatterDatum<Value> | ProbabilityDatum, NumberValue, NumberValue> = {
-      handleParamsChange: (...args) => this.handleParamsChange?.(...args),
-      handleFixationChange: (...args) => this.handleFixationChange?.(...args),
+      handleParamsChange: (...args) => this.chartUI.handleParamsChange?.(...args),
+      handleFixationChange: (...args) => this.chartUI.handleFixationChange?.(...args),
       margin: DEFAULT_CHART_MARGIN,
     };
 
@@ -270,14 +271,14 @@ export default class ScatterPlot<Value> {
       if (rest.url) this.fetchData(rest.url, rest.parseCSVValue);
     }
 
-    this.initChartUI();
+    this.chartUI.initChartUI(this.chart);
   }
 
   private async fetchData(url: string, parseValue: (v: string) => Value) {
     const worker = new DataWorker();
-
     const proxy = Comlink.wrap<DataStreamWorker>(worker);
     const data: ScatterDatum<Value>[] = [];
+
     const loadingOverlay = addLoadingOverlay(this.root);
 
     const finalData = await proxy.streamData(
@@ -286,82 +287,15 @@ export default class ScatterPlot<Value> {
         const parsed = csvToScatterPointsList<Value>(values, parseValue);
         Array.prototype.push.apply(data, parsed);
         this.chart.data(data);
-        this.initChartUI();
+        this.chartUI.initChartUI(this.chart);
       }),
     );
 
     this.chart.data(csvToScatterPointsList<Value>(finalData, parseValue));
-    this.initChartUI();
+    this.chartUI.initChartUI(this.chart);
 
     loadingOverlay.remove();
+
     proxy[Comlink.releaseProxy]();
-  }
-
-  private initChartUI() {
-    const { chart } = this;
-
-    if (this.controls) this.controls.remove();
-
-    this.root.classList.add('parameter-space-visualization');
-
-    addStyle(
-      `
-      body {
-        --doc-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
-        'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-      }
-
-      .parameter-space-visualization {
-        display: flex;
-        flex-direction: column-reverse;
-        padding: 1rem;
-        width: 800px;
-        font-family: ${theme.font};
-      }
-    `,
-      'parameter-space-visualization-styles',
-    );
-
-    const controls = document.createElement('div');
-    controls.classList.add('chart-controls');
-
-    addStyle(
-      `
-    .chart-controls {
-      display: flex;
-      margin-left: ${rem(DEFAULT_CHART_MARGIN.left)};
-    }
-
-    .chart-controls > * + * {
-      margin-left: 2rem;
-    }
-  `,
-      'styled-chart-controls',
-    );
-
-    if (chart.params) {
-      this.handleParamsChange = appendParamsSelects(
-        controls,
-        chart.allParams,
-        chart.x,
-        chart.params[0],
-        chart.y,
-        chart.params[1],
-      );
-    }
-
-    if (chart.paramFixations) {
-      this.handleFixationChange = appendParamFixInputs(
-        controls,
-        chart.paramFixations,
-        chart.fixate,
-      );
-    }
-
-    this.root.appendChild(controls);
-
-    this.controls = controls;
   }
 }
