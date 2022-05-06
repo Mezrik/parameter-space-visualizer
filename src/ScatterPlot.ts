@@ -8,7 +8,7 @@ import { theme } from './constants/styles';
 import ScatterGridController from './controllers/ScatterGridController';
 import ScatterController from './controllers/ScatterController';
 import { createVariableTokens, isVariableIntervalData } from './helpers/expression';
-import { EvalFunction, ProbabilityDatum } from './types/expression';
+import { EvalFunction, ProbabilityDatum, Token } from './types/expression';
 import {
   ChartConfigDynamic,
   DataConfig,
@@ -22,21 +22,20 @@ import {
 } from './types/general';
 import Config from './Config';
 import DataController from './controllers/DataController';
-import { DataWorker } from './lib/workers';
+import { DataWorker, SamplingWorker } from './lib/workers';
 import { DataStreamWorker } from './lib/data/dataStreamWorker';
 import { addLoadingOverlay } from './lib/ui/loadingOverlay';
-import { getDOMNode } from './helpers/general';
+import { getDOMNode, getNodeXY } from './helpers/general';
 import { csvToScatterPointsList } from './lib/data/parse';
 import { addStyle, rem } from './lib/ui/general';
 import { NumberValue } from 'd3-scale';
-import { DEFAULT_CHART_MARGIN, DEFAUL_COLOR_SCALE } from './constants/common';
+import { DEFAULT_CHART_MARGIN, DEFAUL_COLOR_SCALE, POINT_RADIUS } from './constants/common';
 import { appendParamsSelects } from './lib/ui/paramsSelects';
 import { appendParamFixInputs } from './lib/ui/paramFixInputs';
 import ChartUI from './components/ChartUI';
 import { ChartAreaDelaunayController } from './controllers/ChartAreaDataController';
 import { SimpleSelection } from './types/selection';
-
-const POINT_RADIUS = 5;
+import { SamplingWorkerType } from './lib/data/samplingWorker';
 
 const isDataConfigInstance = <Value>(
   config: Config<any>,
@@ -74,7 +73,10 @@ type Point<Value> = Datum<Value> & { x: number; y: number };
 export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
   private dataController!: ScatterController<Value> | ScatterGridController;
   private chartAreaDataController?: ChartAreaDelaunayController<Point<Value>>;
-  private expression?: EvalFunction;
+
+  private expression?: string;
+  private variableTokens?: Token[];
+  private samplingProxy?: Comlink.Remote<SamplingWorkerType>;
 
   private g?: SimpleSelection<SVGGElement>;
   private highlight?: SimpleSelection<SVGCircleElement>;
@@ -110,12 +112,8 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
 
     this.dataController = new ScatterGridController(this.config);
 
-    this.expression = pair =>
-      m.eval(
-        _config.expression,
-        _config.intervals.map(({ name }) => createVariableTokens(name)),
-        pair,
-      );
+    this.expression = _config.expression;
+    this.variableTokens = _config.intervals.map(({ name }) => createVariableTokens(name));
   }
 
   public highlightPoint({ x, y }: Point<Value>) {
@@ -152,8 +150,7 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
 
     binding.each((d, i, nodes) => {
       const node = select(nodes[i]);
-      const x = parseInt(node.attr('x'), 10);
-      const y = parseInt(node.attr('y'), 10);
+      const [x, y] = getNodeXY(nodes, i);
       const [xT, yT] = transform.apply([x, y]);
 
       ctx.beginPath();
@@ -166,7 +163,7 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
     });
   }
 
-  public redraw = (transform = zoomIdentity) => {
+  public redraw = async (transform = zoomIdentity) => {
     const {
       dataController: { binding },
       config,
@@ -184,7 +181,7 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
       yAccessor = (y: number) => y;
     }
 
-    this.enhanceBindingWithFillStyle(binding);
+    await this.enhanceBindingWithFillStyle(binding);
 
     this.draw(transform, binding, xAccessor, yAccessor);
   };
@@ -233,7 +230,6 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
   };
 
   public bindScatterGridToChartArea = () => {
-    console.log(true);
     const { chartArea, dataController } = this;
     if (!('coordsScales' in dataController) || !chartArea) return;
 
@@ -242,9 +238,7 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
     const pts: Point<Value>[] = [];
 
     dataController.binding.each((d, i, nodes) => {
-      const node = select(nodes[i]);
-      const x = parseInt(node.attr('x'), 10);
-      const y = parseInt(node.attr('y'), 10);
+      const [x, y] = getNodeXY(nodes, i);
       pts.push({ ...d, x, y });
     });
 
@@ -286,7 +280,9 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
     return { ...p, x, y };
   };
 
-  private enhanceBindingWithFillStyle = (binding: Selection<BaseType, any, HTMLElement, any[]>) => {
+  private enhanceBindingWithFillStyle = async (
+    binding: Selection<BaseType, any, HTMLElement, any[]>,
+  ) => {
     const { config } = this;
 
     const coordsScales = (this.dataController as ScatterGridController).coordsScales;
@@ -298,17 +294,21 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
     const fixedParams = this.config.paramsFixation;
 
     let getFillAndValue: (
-      xT: number,
-      yT: number,
+      i: number,
       d: ScatterDatum<Value>,
-    ) => [string, string | number | undefined] = (xT, yT, d) => {
+    ) => [string, string | number | undefined] = (_, d) => {
       return [config?.options?.color?.(d) ?? theme.colors.black, undefined];
     };
 
     if (coordsScales) {
       const [xCoordScale, yCoordScale] = coordsScales;
 
-      getFillAndValue = (xT, yT) => {
+      const pairs: Record<string, number | string>[] = [];
+      binding.each((d, i, nodes) => {
+        const [x, y] = getNodeXY(nodes, i);
+
+        const [xT, yT] = this.zoom?.currentTransfrom.apply([x, y]) ?? [x, y];
+
         const pair: Record<string, number | string> = {
           [xParam]: xCoordScale(xT),
           ...fixedParams,
@@ -316,7 +316,15 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
 
         if (yParam) pair[yParam] = yCoordScale(yT);
 
-        const value = this.expression?.(pair);
+        pairs.push(pair);
+      });
+
+      const samples = await this.runSampling(pairs);
+
+      console.log(samples);
+
+      getFillAndValue = i => {
+        const value = (samples ?? [])[i];
         return [
           config?.options?.color?.({
             value: value ?? '',
@@ -329,12 +337,29 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
 
     binding.each((d, i, nodes) => {
       const node = select(nodes[i]);
-      const x = parseInt(node.attr('x'), 10);
-      const y = parseInt(node.attr('y'), 10);
-      const [xT, yT] = this.zoom?.currentTransfrom.apply([x, y]) ?? [x, y];
-      const [fill, value] = getFillAndValue(xT, yT, d);
+      const [x, y] = getNodeXY(nodes, i);
+
+      // const [xT, yT] = this.zoom?.currentTransfrom.apply([x, y]) ?? [x, y];
+      const [fill, value] = getFillAndValue(i, d);
       node.attr('fillStyle', fill).attr('point-value', value ?? '');
     });
+  };
+
+  private runSampling = async (pairs: Record<string, string | number>[]) => {
+    if (!this.expression || !this.variableTokens) return;
+
+    if (!this.samplingProxy) {
+      const worker = new SamplingWorker();
+      this.samplingProxy = Comlink.wrap<SamplingWorkerType>(worker);
+    }
+
+    const sample = await this.samplingProxy.calculateSampling(
+      pairs,
+      this.expression!,
+      this.variableTokens,
+    );
+
+    return sample;
   };
 }
 

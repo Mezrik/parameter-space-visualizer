@@ -22,3 +22,5 @@ export const DEFAUL_COLOR_SCALE = createProabilityColorScale([
   COLOR_MAPPING.false,
   COLOR_MAPPING.true,
 ]);
+
+export const POINT_RADIUS = 8;
