@@ -1,15 +1,15 @@
-import { extent } from "d3-array";
-import { NumberValue } from "d3-scale";
-import { ZERO_MARGIN } from "./constants/common";
-import { theme } from "./constants/styles";
+import { extent } from 'd3-array';
+import { NumberValue } from 'd3-scale';
+import { ZERO_MARGIN } from './constants/common';
+import { theme } from './constants/styles';
 import {
   checkIfParamsExist,
   getDifParams,
   getParams,
   getParamsToBeFixed,
   getParamsTuple,
-} from "./helpers/general";
-import { getParamDomain } from "./helpers/general";
+} from './helpers/general';
+import { getParamDomain } from './helpers/general';
 import {
   ChartConfig,
   ChartConfigDynamic,
@@ -20,7 +20,7 @@ import {
   ParamsTuple,
   ParamType,
   UserOptions,
-} from "./types/general";
+} from './types/general';
 
 class Config<Datum> {
   private _config: ChartConfig<Datum> | ChartConfigDynamic<Datum>;
@@ -61,14 +61,13 @@ class Config<Datum> {
         ...acc,
         [param]: extent(getParamDomain(data, param)),
       }),
-      {}
+      {},
     );
   }
 
   private setTransformedData(fixations: ParamsFixation) {
     const data = (this._config as ChartConfig<Datum>).data;
-    if (this._transfomData && data)
-      this._transfromedData = this._transfomData(data, fixations);
+    if (this._transfomData && data) this._transfromedData = this._transfomData(data, fixations);
 
     this._config.options?.handleFixationChange?.(fixations);
   }
@@ -82,7 +81,7 @@ class Config<Datum> {
   }
 
   set data(data: Datum[]) {
-    if ("data" in this._config) {
+    if ('data' in this._config) {
       this._config.data = data;
       this.setAllParams(data);
       this.paramsFixation && this.setTransformedData(this.paramsFixation);
@@ -93,8 +92,7 @@ class Config<Datum> {
     const dataParams = this._allParams;
     const userParams = this._params;
 
-    if (userParams && checkIfParamsExist(dataParams, userParams))
-      return userParams;
+    if (userParams && checkIfParamsExist(dataParams, userParams)) return userParams;
 
     const [x, y] = dataParams;
     return [x, y ? y : undefined];
@@ -117,7 +115,7 @@ class Config<Datum> {
       this.params,
       this._allParams,
       this._paramsExtents,
-      this._userFixations
+      this._userFixations,
     );
   }
 
@@ -132,7 +130,7 @@ class Config<Datum> {
     this.paramsFixation && this.setTransformedData(this.paramsFixation);
   }
 
-  get options(): Options<ChartConfig<Datum>["options"]> {
+  get options(): Options<ChartConfig<Datum>['options']> {
     const opts = this._config.options;
     return {
       ...(opts ?? {}),
@@ -159,13 +157,13 @@ class Config<Datum> {
     };
   }
 
-  set axesOptions(axes: UserOptions<Datum, NumberValue, NumberValue>["axes"]) {
+  set axesOptions(axes: UserOptions<Datum, NumberValue, NumberValue>['axes']) {
     if (!this._config.options) this._config.options = { axes };
 
     this._config.options.axes = axes;
   }
 
-  set gridOptions(grid: UserOptions<Datum, NumberValue, NumberValue>["grid"]) {
+  set gridOptions(grid: UserOptions<Datum, NumberValue, NumberValue>['grid']) {
     if (!this._config.options) this._config.options = { grid };
 
     this._config.options.grid = grid;

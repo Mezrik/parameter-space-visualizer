@@ -10,6 +10,7 @@ import webWorkerLoader from 'rollup-plugin-web-worker-loader';
 import alias from '@rollup/plugin-alias';
 import replace from '@rollup/plugin-replace';
 import json from '@rollup/plugin-json';
+import path from 'path';
 
 const isProd = process.env.NODE_ENV === 'production';
 const visualizeSpace = process.env.VISUALIZE_SPACE === 'true';
@@ -17,7 +18,7 @@ const visualizeSpace = process.env.VISUALIZE_SPACE === 'true';
 const prodExtensions = ['.js', '.ts'];
 const demoExtensions = [...prodExtensions, '.jsx', '.tsx'];
 
-const getCommonPlugins = (extensions, babelPlugins = []) => [
+const getCommonPlugins = (extensions, babelPlugins = [], workersDist, workerLoadPath) => [
   alias({
     entries: [
       { find: 'react', replacement: 'preact/compat' },
@@ -38,8 +39,17 @@ const getCommonPlugins = (extensions, babelPlugins = []) => [
   commonjs({
     include: /node_modules/,
   }),
-  webWorkerLoader(),
-  typescript({ check: false }), // TEMP: Check is off
+  webWorkerLoader({
+    targetPlatform: 'browser',
+    inline: false,
+    outputFolder: workersDist,
+    loadPath: workerLoadPath,
+  }),
+  typescript({
+    check: false,
+    typescript: require('typescript'),
+    cacheRoot: path.resolve(__dirname, '.rts2_cache'),
+  }), // TEMP: Check is off
   babel({
     extensions,
     exclude: /node_modules/,
@@ -84,9 +94,8 @@ export default [
     : {
         input: 'demo/index.tsx',
         output: {
-          file: `demo/dist/index.js`,
+          dir: `demo/dist/`,
           format: 'umd',
-          name: 'paramVis',
           sourcemap: true,
           globals: {
             'web-worker:./lib/data/dataStreamWorker': 'DataWorker',
@@ -94,15 +103,20 @@ export default [
         },
 
         plugins: [
-          ...getCommonPlugins(demoExtensions, [
+          ...getCommonPlugins(
+            demoExtensions,
             [
-              '@babel/plugin-transform-react-jsx',
-              {
-                pragma: 'h',
-                pragmaFrag: 'Fragment',
-              },
+              [
+                '@babel/plugin-transform-react-jsx',
+                {
+                  pragma: 'h',
+                  pragmaFrag: 'Fragment',
+                },
+              ],
             ],
-          ]),
+            'demo/dist',
+            '/dist',
+          ),
           serve({
             open: true,
             contentBase: ['', 'demo'],
