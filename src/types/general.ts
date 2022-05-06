@@ -117,21 +117,30 @@ export type SimpleConfigCommon = {
   height: number;
 };
 
-export type SimpleConfigScatter<Datum> = (
+export type SimpleConfigScatter<Value> = (
   | {
-      data: ScatterDatum<Datum>[];
+      data: ScatterDatum<Value>[];
       expression?: never;
       intervals?: never;
       url?: never;
-      color: (d: ScatterDatum<Datum>) => string;
+      color: (d: ScatterDatum<Value>) => string;
+      parseCSVValue?: never;
     }
-  | { data?: never; expression: string; intervals: VariableInterval[]; url?: never; color?: never }
+  | {
+      data?: never;
+      expression: string;
+      intervals: VariableInterval[];
+      url?: never;
+      color?: never;
+      parseCSVValue?: never;
+    }
   | {
       data?: never;
       expression?: never;
       intervals?: never;
       url: string;
-      color?: (d: ScatterDatum<Datum>) => string;
+      color: (d: ScatterDatum<Value>) => string;
+      parseCSVValue: (v: string) => Value;
     }
 ) & {} & SimpleConfigCommon;
 

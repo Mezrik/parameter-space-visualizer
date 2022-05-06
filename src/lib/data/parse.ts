@@ -64,15 +64,21 @@ export const csvToRegionResultsList = (raw: RawCSVObject): RegionResults<RegionR
   });
 };
 
-export const csvToScatterPointsList = <Value>(raw: RawCSVObject): ScatterDatum<Value>[] => {
-  // TODO
-  return [
-    { value: true, params: { q: 0.2, p: 0.1 } },
-    { value: true, params: { q: 0.35, p: 0.12 } },
-    { value: true, params: { q: 0.1, p: 0.153 } },
-    { value: true, params: { q: 0.22, p: 0.125 } },
-  ];
-  // return raw.map(result => {
-  //   // TODO
-  // });
+export const csvToScatterPointsList = <Value>(
+  raw: RawCSVObject,
+  parseVal: (v: string) => Value,
+): ScatterDatum<Value>[] => {
+  return raw.map(result => {
+    return {
+      value: parseVal(result['value']!),
+
+      params: Object.keys(result).reduce<ScatterDatum<Value>['params']>(
+        (params, param) =>
+          param !== 'value' && result[param]
+            ? { ...params, [param]: parseFraction(result[param]!) }
+            : params,
+        {},
+      ),
+    };
+  });
 };
