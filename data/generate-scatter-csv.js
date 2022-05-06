@@ -37,8 +37,6 @@ const argv = yargs(hideBin(process.argv))
     default: [0, 10],
   }).argv;
 
-console.log(argv);
-
 fs.writeFileSync(
   `${argv.output}.csv`,
   generateScatterCSV(100, ['p', 'q', 'value'], argv.x, argv.y),

@@ -71,7 +71,6 @@ export const csvToScatterPointsList = <Value>(
   raw: RawCSVObject,
   parseVal: (v: string) => Value,
 ): ScatterDatum<Value>[] => {
-  console.log(raw);
   return raw.map(result => {
     return {
       value: parseVal(result['value']?.trim()!),
