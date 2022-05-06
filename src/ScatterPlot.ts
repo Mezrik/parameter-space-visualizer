@@ -22,7 +22,7 @@ import {
 } from './types/general';
 import Config from './Config';
 import DataController from './controllers/DataController';
-import DataWorker from 'web-worker:./lib/data/dataStreamWorker';
+import DataWorker from 'web-worker:./lib/data/dataStreamWorker.ts';
 import { DataStreamWorker } from './lib/data/dataStreamWorker';
 import { addLoadingOverlay } from './lib/ui/loadingOverlay';
 import { getDOMNode } from './helpers/general';
@@ -111,7 +111,7 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
     fillStyle: (xT: number, yT: number, d: any) => string,
   ) {
     const { chartArea, width, height } = this;
-
+    console.log(binding);
     const ctx = chartArea?.context;
 
     if (!ctx) return;
@@ -150,6 +150,7 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
     const fixedParams = this.config.paramsFixation;
 
     let fillStyle = (xT: number, yT: number, d: ScatterDatum<Value>) => {
+      console.log(d);
       return config?.options?.color?.(d) ?? theme.colors.black;
     };
 
@@ -178,11 +179,14 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
 
   public reset = () => {
     const {
-      config: { xMax, yMax, data },
+      config: { xMax, yMax },
     } = this;
 
     // Re-bind the regions, this will reset scales to current params scales
     this.dataController.bindCurrentScalesRange(xMax, yMax);
+
+    if (isDataConfigInstance(this.config))
+      this.dataController.bindScatter(this.config.data as ScatterDatum<Value>[]);
 
     this.redraw();
 
@@ -203,6 +207,7 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
 export default class ScatterPlot<Value> {
   private root: HTMLElement;
   private chart: CustomScatterPlot<Value>;
+  private controls?: HTMLDivElement;
 
   private handleParamsChange?: ParamsChangeHandler;
   private handleFixationChange?: FixationChangeHandler;
@@ -261,25 +266,34 @@ export default class ScatterPlot<Value> {
   }
 
   private async fetchData(url: string) {
-    const dataWorker = new DataWorker();
-    const proxy = Comlink.wrap<DataStreamWorker>(dataWorker);
+    const worker = new DataWorker();
+
+    const proxy = Comlink.wrap<DataStreamWorker>(worker);
     const data: ScatterDatum<Value>[] = [];
     const loadingOverlay = addLoadingOverlay(this.root);
+
     const finalData = await proxy.streamData(
       url,
       Comlink.proxy(values => {
         const parsed = csvToScatterPointsList(values);
         Array.prototype.push.apply(data, parsed);
         this.chart.data(data);
+        this.initChartUI();
       }),
     );
+
     this.chart.data(csvToScatterPointsList(finalData));
+    this.initChartUI();
+
     loadingOverlay.remove();
     proxy[Comlink.releaseProxy]();
   }
 
   private initChartUI() {
     const { chart } = this;
+
+    if (this.controls) this.controls.remove();
+
     this.root.classList.add('parameter-space-visualization');
 
     addStyle(
@@ -339,5 +353,7 @@ export default class ScatterPlot<Value> {
     }
 
     this.root.appendChild(controls);
+
+    this.controls = controls;
   }
 }

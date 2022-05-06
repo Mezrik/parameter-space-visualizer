@@ -41,7 +41,7 @@ class ScatterController<Value> extends DataController<ScatterDatum<Value>> {
       : UNDEFINED_CHART_VALUE;
   };
 
-  public bindRegions = (data: ScatterDatum<Value>[]) => {
+  public bindScatter = (data: ScatterDatum<Value>[]) => {
     // Bind zero for y position and height in case of 1D chart
     this._scatterBinding = this._detachedContainer
       .selectAll('custom')
