@@ -13,7 +13,7 @@ class ScatterGridController extends DataController<ProbabilityDatum> {
   private density: number;
   private dimensions: { width: number; height: number };
 
-  constructor(config: Config<ProbabilityDatum>, density = 80) {
+  constructor(config: Config<ProbabilityDatum>, density = 30) {
     super(config);
 
     const detachedContainer = select<HTMLElement, []>(document.createElement('custom'));
@@ -55,6 +55,10 @@ class ScatterGridController extends DataController<ProbabilityDatum> {
         .domain([0, this.dimensions.height])
         .range((this.currentScales[1]?.extent as [number, number]) ?? []),
     ];
+  }
+
+  get type(): 'grid' {
+    return 'grid';
   }
 }
 
