@@ -456,6 +456,9 @@ export default class ScatterPlot<Value> {
         Array.prototype.push.apply(data, parsed);
         this.chart.data(data);
         this.chartUI.initChartUI(this.chart);
+
+        // Terminate worker if the chart is no longer attached to DOM
+        if (!this.root.isConnected) worker.terminate();
       }),
     );
 
