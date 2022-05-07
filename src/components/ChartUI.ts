@@ -1,7 +1,8 @@
 import Chart from '../Chart';
 import { DEFAULT_CHART_MARGIN } from '../constants/common';
 import { theme } from '../constants/styles';
-import { addStyle, rem } from '../lib/ui/general';
+import { addStyle, rem, StyleDeclaration } from '../lib/ui/general';
+import { createInput } from '../lib/ui/input';
 import { appendParamFixInputs } from '../lib/ui/paramFixInputs';
 import { appendParamsSelects } from '../lib/ui/paramsSelects';
 import { FixationChangeHandler, ParamsChangeHandler } from '../types/general';
@@ -9,6 +10,7 @@ import { FixationChangeHandler, ParamsChangeHandler } from '../types/general';
 class ChartUI {
   private root: HTMLElement;
   private controls?: HTMLDivElement;
+  private inputs: [HTMLDivElement, HTMLInputElement][] = [];
 
   public handleParamsChange?: ParamsChangeHandler;
   public handleFixationChange?: FixationChangeHandler;
@@ -80,8 +82,21 @@ class ChartUI {
 
     this.root.appendChild(controls);
 
+    this.inputs.forEach(([c]) => controls.appendChild(c));
+
     this.controls = controls;
   }
+
+  public addInput = (
+    name: string,
+    value: number | string,
+    onChange: (value: number) => void,
+    style?: StyleDeclaration,
+  ) => {
+    const [container, input] = createInput(name, value, onChange, style);
+    this.controls?.append(container);
+    this.inputs.push([container, input]);
+  };
 }
 
 export default ChartUI;
