@@ -131,7 +131,8 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
       ?.attr('fill', 'transparent')
       .attr('stroke', theme.colors.grey)
       .attr('stroke-width', 3)
-      .attr('r', POINT_RADIUS);
+      .attr('r', POINT_RADIUS)
+      .style('display', 'none');
   }
 
   private draw(
