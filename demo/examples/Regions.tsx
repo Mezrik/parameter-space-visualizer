@@ -34,7 +34,7 @@ const FromData = () => {
     if (container) {
       const chart = new RegionsChart({
         el: container,
-        data,
+        data: data1D,
         color,
         width: 800,
         height: 800,
@@ -8365,4 +8365,12 @@ const data: RegionDatum<RegionResultValue>[] = [
       r: { from: 0.2875, to: 0.3 },
     },
   },
+];
+
+const data1D: RegionDatum<RegionResultValue>[] = [
+  { value: 'true', params: { p: { from: 0, to: 0.5 } } },
+  { value: 'true', params: { p: { from: 0.5, to: 0.75 } } },
+  { value: 'true', params: { p: { from: 0.75, to: 0.8125 } } },
+  { value: 'true', params: { p: { from: 0.8125, to: 0.875 } } },
+  { value: 'false', params: { p: { from: 0.875, to: 1 } } },
 ];

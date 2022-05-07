@@ -59,10 +59,10 @@ export class CustomRegionsChart<Value> extends Chart<RegionDatum<Value>> {
         const [xParam, yParam] = this.config.params ?? [];
         return `
         value: ${d.value}</br>
-        x-from: ${xParam ? d.params[xParam].from : ''}</br>
-        x-to: ${xParam ? d.params[xParam].to : ''}</br>
-        y-from: ${yParam ? d.params[yParam].from : ''}</br>
-        y-to: ${yParam ? d.params[yParam].to : ''}
+        ${xParam ? `x-from: ${d.params[xParam].from}</br>` : ''}
+        ${xParam ? `x-to: ${d.params[xParam].to}</br>` : ''}
+        ${yParam ? `y-from: ${d.params[yParam].from}</br>` : ''}
+        ${yParam ? `y-to: ${d.params[yParam].to}</br>` : ''}
       `;
       });
     }

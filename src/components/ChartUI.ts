@@ -61,7 +61,7 @@ class ChartUI {
       'styled-chart-controls',
     );
 
-    if (chart.params) {
+    if (chart.params && chart.params[0] && chart.params[1]) {
       this.handleParamsChange = appendParamsSelects(
         controls,
         chart.allParams,
