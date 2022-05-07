@@ -194,13 +194,23 @@ export class CustomRegionsChart<Value> extends Chart<RegionDatum<Value>> {
 
       const rect = this.chartAreaDataController?.find(finalPointer);
 
-      if (this.showTooltipAndRect && rect) this.showTooltipAndRect(rect, finalPointer);
+      if (this.showTooltipAndRect && rect)
+        this.showTooltipAndRect(this.applyZoomTransformToRect(rect), p);
     });
   };
 
   private transfromDatumToRect = (d: RegionDatum<Value>) => {
     const { x, y, w, h } = this.dataController;
     return { ...d, x: x(d), y: y(d), width: w(d), height: h(d) };
+  };
+
+  private applyZoomTransformToRect = (r: RegionRect<Value>) => {
+    if (!this.zoom) return r;
+
+    const { currentTransfrom: transform } = this.zoom;
+
+    const [x, y] = transform.apply([r.x, r.y]);
+    return { ...r, width: r.width * transform.k, height: r.height * transform.k, x, y };
   };
 }
 
@@ -253,6 +263,9 @@ export default class RegionsChart<Value> {
         Array.prototype.push.apply(data, parsed);
         this.chart.data(data);
         this.chartUI.initChartUI(this.chart);
+
+        // Terminate worker if the chart is no longer attached to DOM
+        if (!this.root.isConnected) worker.terminate();
       }),
     );
 
