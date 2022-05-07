@@ -11,12 +11,16 @@ const getRandomValue = () => {
   return getRandomArbitrary() < 0.5;
 };
 
-const generateScatterCSV = (rowCount, cols, [xmin, xmax], [ymin, ymax]) => {
+const generateScatterCSV = (rowCount, cols) => {
   const rows = Array(rowCount).fill(0);
-  const getRandomRow = () =>
-    `${getRandomArbitrary(xmin, xmax)},${getRandomArbitrary(ymin, ymax)},${getRandomValue()}`;
+  console.log(cols);
 
-  return `${cols.join(',')}\n${rows.map(getRandomRow).join('\n')}`;
+  const getRandomRow = () =>
+    `${Object.values(cols)
+      .map(([min, max]) => getRandomArbitrary(min, max))
+      .join(',')},${getRandomValue()}`;
+
+  return `${[...Object.keys(cols), 'value'].join(',')}\n${rows.map(getRandomRow).join('\n')}`;
 };
 
 const argv = yargs(hideBin(process.argv))
@@ -26,18 +30,16 @@ const argv = yargs(hideBin(process.argv))
     type: 'string',
     default: 'scatter',
   })
-  .option('x', {
-    type: 'array',
-    describe: 'Specifies range for x scale',
-    default: [0, 10],
+  .option('rows', {
+    type: 'number',
+    describe: 'Row count of CSV',
+    default: 100,
   })
-  .option('y', {
+  .option('prm', {
     type: 'array',
-    describe: 'Specifies range for y scale',
-    default: [0, 10],
+    describe:
+      'Specifies params used in resulting data (specify range - --params.p 0 2 --params.q 0.2 3)',
+    default: { p: [0, 10], q: [0, 10] },
   }).argv;
 
-fs.writeFileSync(
-  `${argv.output}.csv`,
-  generateScatterCSV(100, ['p', 'q', 'value'], argv.x, argv.y),
-);
+fs.writeFileSync(`${argv.output}.csv`, generateScatterCSV(argv.rows, argv.prm));

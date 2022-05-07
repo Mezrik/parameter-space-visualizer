@@ -38,7 +38,7 @@ class ScatterController<Value> extends DataController<ScatterDatum<Value>> {
 
     return this.params && this.params[1] && yScale
       ? yScale.scale(d.params[this.params[1]])
-      : UNDEFINED_CHART_VALUE;
+      : this.config.height / 2;
   };
 
   public bindScatter = (data: ScatterDatum<Value>[]) => {
