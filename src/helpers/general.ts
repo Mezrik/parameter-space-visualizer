@@ -108,11 +108,11 @@ export const checkUserParams = (
   );
 };
 
-export const createProabilityColorScale = (colors: [string, string]) => {
+export const createProabilityColorScale = (colors: [string, string, string]) => {
   return scaleLinear<HCLColor, HCLColor>()
-    .domain([0, 1])
+    .domain([0, 0.5, 1])
     .interpolate(interpolateHcl)
-    .range([hcl(colors[0]), hcl(colors[1])]);
+    .range([hcl(colors[0]), hcl(colors[1]), hcl(colors[2])]);
 };
 
 export const getDOMNode = (element: HTMLElement | string): HTMLElement | null => {

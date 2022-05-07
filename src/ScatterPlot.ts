@@ -181,7 +181,7 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
       yAccessor = (y: number) => y;
     }
 
-    await this.enhanceBindingWithFillStyle(binding);
+    await this.enhanceBindingWithFillStyle(binding, transform);
 
     this.draw(transform, binding, xAccessor, yAccessor);
   };
@@ -282,10 +282,11 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
 
   private enhanceBindingWithFillStyle = async (
     binding: Selection<BaseType, any, HTMLElement, any[]>,
+    transform = zoomIdentity,
   ) => {
     const { config } = this;
 
-    const coordsScales = (this.dataController as ScatterGridController).coordsScales;
+    const dataControllerType = this.dataController.type;
 
     if (!this.config.params) return;
 
@@ -300,28 +301,29 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
       return [config?.options?.color?.(d) ?? theme.colors.black, undefined];
     };
 
-    if (coordsScales) {
-      const [xCoordScale, yCoordScale] = coordsScales;
+    if (dataControllerType === 'grid') {
+      const [xScale, yScale] = this.dataController.currentScales;
 
+      if (!xScale) return;
+
+      const xTCoordScale = transform.rescaleX(xScale.scale);
+      const yTCoordScale = yScale ? transform.rescaleX(yScale.scale) : undefined;
       const pairs: Record<string, number | string>[] = [];
+
       binding.each((d, i, nodes) => {
         const [x, y] = getNodeXY(nodes, i);
 
-        const [xT, yT] = this.zoom?.currentTransfrom.apply([x, y]) ?? [x, y];
-
         const pair: Record<string, number | string> = {
-          [xParam]: xCoordScale(xT),
+          [xParam]: xTCoordScale.invert(x),
           ...fixedParams,
         };
 
-        if (yParam) pair[yParam] = yCoordScale(yT);
+        if (yParam && yTCoordScale) pair[yParam] = yTCoordScale.invert(y);
 
         pairs.push(pair);
       });
 
       const samples = await this.runSampling(pairs);
-
-      console.log(samples);
 
       getFillAndValue = i => {
         const value = (samples ?? [])[i];

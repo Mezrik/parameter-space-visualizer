@@ -59,6 +59,10 @@ class ScatterController<Value> extends DataController<ScatterDatum<Value>> {
   get binding() {
     return this._scatterBinding;
   }
+
+  get type(): 'data' {
+    return 'data';
+  }
 }
 
 export default ScatterController;
