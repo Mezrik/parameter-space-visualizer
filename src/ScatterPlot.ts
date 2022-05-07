@@ -167,7 +167,7 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
 
   public redraw = async (transform = zoomIdentity) => {
     const {
-      _dataController: { binding },
+      _dataController: { binding, currentScales },
       config,
     } = this;
 
@@ -176,7 +176,9 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
     if (!this.config.params) return;
 
     let xAccessor = (_: number, xT: number) => xT;
-    let yAccessor = (_: number, yT: number) => yT;
+
+    // If the yScale isn't define, the zoom shouldn't apply
+    let yAccessor = currentScales[1] ? (_: number, yT: number) => yT : (y: number) => y;
 
     if (coordsScales) {
       xAccessor = (x: number) => x;
@@ -285,7 +287,15 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
   private applyZoomTransformToPoint = (p: Point<Value>) => {
     if (!this.zoom) return p;
 
-    const [x, y] = this.zoom.currentTransfrom.apply([p.x, p.y]);
+    const {
+      _dataController: { currentScales },
+    } = this;
+
+    const [x, y] = [
+      this.zoom.currentTransfrom.applyX(p.x),
+      currentScales[1] ? this.zoom.currentTransfrom.applyY(p.y) : p.y,
+    ];
+
     return { ...p, x, y };
   };
 
