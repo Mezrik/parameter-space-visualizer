@@ -71,7 +71,7 @@ type Datum<Value> = ScatterDatum<Value> | ProbabilityDatum;
 type Point<Value> = Datum<Value> & { x: number; y: number };
 
 export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
-  private dataController!: ScatterController<Value> | ScatterGridController;
+  private _dataController!: ScatterController<Value> | ScatterGridController;
   private chartAreaDataController?: ChartAreaDelaunayController<Point<Value>>;
 
   private expression?: string;
@@ -89,7 +89,7 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
 
     this.redraw();
 
-    const controller = this.dataController as DataController<Datum<Value>>;
+    const controller = this._dataController as DataController<Datum<Value>>;
 
     this.addAxes(controller);
     this.addGrid(controller, theme.colors.black);
@@ -104,13 +104,13 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
   private initWithData(_config: DataConfig<Value>) {
     if (!isDataConfigInstance<Value>(this.config)) return;
 
-    this.dataController = new ScatterController(this.config);
+    this._dataController = new ScatterController(this.config);
   }
 
   private initWithExpression(_config: ExpressionConfig) {
     if (!isExpConfigInstance(this.config)) return;
 
-    this.dataController = new ScatterGridController(this.config);
+    this._dataController = new ScatterGridController(this.config);
 
     this.expression = _config.expression;
     this.variableTokens = _config.intervals.map(({ name }) => createVariableTokens(name));
@@ -166,11 +166,11 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
 
   public redraw = async (transform = zoomIdentity) => {
     const {
-      dataController: { binding },
+      _dataController: { binding },
       config,
     } = this;
 
-    const coordsScales = (this.dataController as ScatterGridController).coordsScales;
+    const coordsScales = (this._dataController as ScatterGridController).coordsScales;
 
     if (!this.config.params) return;
 
@@ -193,10 +193,12 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
     } = this;
 
     // Re-bind the regions, this will reset scales to current params scales
-    this.dataController.bindCurrentScalesRange(xMax, yMax);
+    this._dataController.bindCurrentScalesRange(xMax, yMax);
 
     if (isDataConfigInstance(this.config))
-      this.dataController.bindScatter(this.config.data as ScatterDatum<Value>[]);
+      (this._dataController as ScatterController<Value>).bindScatter(
+        this.config.data as ScatterDatum<Value>[],
+      );
 
     this.redraw();
 
@@ -209,21 +211,21 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
 
     this.config.data = data;
     // @ts-ignore
-    this.dataController.initScales(this.config);
+    this._dataController.initScales(this.config);
     this.reset();
   };
 
   public bindDataToChartArea = () => {
-    const { chartArea, dataController } = this;
+    const { chartArea, _dataController } = this;
 
     if (!chartArea) return;
 
-    if (!('x' in dataController && 'y' in dataController)) return;
+    if (!('x' in _dataController && 'y' in _dataController)) return;
 
     if (!this.chartAreaDataController) this.initChartAreaDataController();
 
     const pts = (this.config.data as ScatterDatum<Value>[]).map(
-      this.transfromDatumToPoint(dataController.x, dataController.y),
+      this.transfromDatumToPoint(_dataController.x, _dataController.y),
     );
 
     this.chartAreaDataController!.bindData(pts);
@@ -231,14 +233,14 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
   };
 
   public bindScatterGridToChartArea = () => {
-    const { chartArea, dataController } = this;
-    if (!('coordsScales' in dataController) || !chartArea) return;
+    const { chartArea, _dataController } = this;
+    if (!('coordsScales' in _dataController) || !chartArea) return;
 
     if (!this.chartAreaDataController) this.initChartAreaDataController();
 
     const pts: Point<Value>[] = [];
 
-    dataController.binding.each((d, i, nodes) => {
+    _dataController.binding.each((d, i, nodes) => {
       const [x, y] = getNodeXY(nodes, i);
       pts.push({ ...d, x, y });
     });
@@ -287,7 +289,7 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
   ) => {
     const { config } = this;
 
-    const dataControllerType = this.dataController.type;
+    const dataControllerType = this._dataController.type;
 
     if (!this.config.params) return;
 
@@ -303,7 +305,7 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
     };
 
     if (dataControllerType === 'grid') {
-      const [xScale, yScale] = this.dataController.currentScales;
+      const [xScale, yScale] = this._dataController.currentScales;
 
       if (!xScale) return;
 
@@ -364,6 +366,10 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
 
     return sample;
   };
+
+  get dataController() {
+    return this._dataController;
+  }
 }
 
 export default class ScatterPlot<Value> {
@@ -410,6 +416,7 @@ export default class ScatterPlot<Value> {
       });
 
       this.chart.bindScatterGridToChartArea();
+      this.initProbabilitySamplingUI(this.chart);
     } else {
       // if not expression, data or url must be defined
       this.chart = new CustomScatterPlot(this.root, {
@@ -454,5 +461,18 @@ export default class ScatterPlot<Value> {
     proxy[Comlink.releaseProxy]();
 
     this.chart.bindDataToChartArea();
+  }
+
+  private initProbabilitySamplingUI(chart: CustomScatterPlot<Value>) {
+    const handleDensityChange = (value: number) => {
+      if (chart.dataController.type === 'grid') {
+        chart.dataController.density = value;
+        chart.redraw();
+      }
+    };
+
+    if (chart.dataController.type !== 'grid') return;
+
+    this.chartUI.addInput('density', chart.dataController.density, handleDensityChange);
   }
 }
