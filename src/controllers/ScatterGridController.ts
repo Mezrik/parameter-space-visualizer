@@ -14,7 +14,7 @@ class ScatterGridController extends DataController<ProbabilityDatum> {
   private _density: number;
   private dimensions: { width: number; height: number };
 
-  constructor(config: Config<ProbabilityDatum>, density = 60) {
+  constructor(config: Config<ProbabilityDatum>, density = 80) {
     super(config);
 
     this._detachedContainer = select<HTMLElement, []>(document.createElement('custom'));

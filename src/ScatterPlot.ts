@@ -29,7 +29,8 @@ import { getDOMNode, getNodeXY } from './helpers/general';
 import { csvToScatterPointsList } from './lib/data/parse';
 import { addStyle, rem } from './lib/ui/general';
 import { NumberValue } from 'd3-scale';
-import { DEFAULT_CHART_MARGIN, DEFAUL_COLOR_SCALE, POINT_RADIUS } from './constants/common';
+import { DEFAULT_CHART_MARGIN, DEFAUL_COLOR_SCALE } from './constants/common';
+import { MAX_DENSITY, POINT_RADIUS } from './constants/scatter';
 import { appendParamsSelects } from './lib/ui/paramsSelects';
 import { appendParamFixInputs } from './lib/ui/paramFixInputs';
 import ChartUI from './components/ChartUI';
@@ -222,21 +223,26 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
 
     if (!('x' in _dataController && 'y' in _dataController)) return;
 
-    if (!this.chartAreaDataController) this.initChartAreaDataController();
+    if (!this.chartAreaDataController) {
+      this.initChartAreaDataController();
+      this.bindMouseMove(true);
+    }
 
     const pts = (this.config.data as ScatterDatum<Value>[]).map(
       this.transfromDatumToPoint(_dataController.x, _dataController.y),
     );
 
     this.chartAreaDataController!.bindData(pts);
-    this.bindMouseMove(true);
   };
 
   public bindScatterGridToChartArea = () => {
     const { chartArea, _dataController } = this;
     if (!('coordsScales' in _dataController) || !chartArea) return;
 
-    if (!this.chartAreaDataController) this.initChartAreaDataController();
+    if (!this.chartAreaDataController) {
+      this.initChartAreaDataController();
+      this.bindMouseMove();
+    }
 
     const pts: Point<Value>[] = [];
 
@@ -464,11 +470,17 @@ export default class ScatterPlot<Value> {
   }
 
   private initProbabilitySamplingUI(chart: CustomScatterPlot<Value>) {
-    const handleDensityChange = (value: number) => {
-      if (chart.dataController.type === 'grid') {
-        chart.dataController.density = value;
-        chart.redraw();
+    const handleDensityChange = (value: number, ev: Event) => {
+      if (chart.dataController.type !== 'grid') return;
+
+      if (value > MAX_DENSITY) {
+        value = MAX_DENSITY;
+        (ev.target as HTMLInputElement).value = `${MAX_DENSITY}`;
       }
+
+      chart.dataController.density = value;
+      chart.redraw();
+      chart.bindScatterGridToChartArea();
     };
 
     if (chart.dataController.type !== 'grid') return;

@@ -19,5 +19,3 @@ export const COLOR_MAPPING: Record<RegionResultValue, string> = {
 };
 
 export const DEFAUL_COLOR_SCALE = createProabilityColorScale(['#FF0000', '#FFFF00', '#008000']);
-
-export const POINT_RADIUS = 5;

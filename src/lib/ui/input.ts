@@ -4,7 +4,7 @@ import { labelDefaultStyle, defaultInputStyle } from './styles';
 export const createInput = (
   name: string,
   value: number | string,
-  onChange: (value: number) => void,
+  onChange: (value: number, ev: Event) => void,
   style = defaultInputStyle,
 ): [HTMLDivElement, HTMLInputElement] => {
   const container = document.createElement('div');
@@ -21,7 +21,7 @@ export const createInput = (
   input.value = `${value}`;
   input.type = 'text';
   input.addEventListener('change', ev => {
-    onChange(parseFloat((ev.target as HTMLInputElement).value));
+    onChange(parseFloat((ev.target as HTMLInputElement).value), ev);
   });
   input.classList.add('styled-input');
 

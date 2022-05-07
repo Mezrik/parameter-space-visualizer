@@ -90,7 +90,7 @@ class ChartUI {
   public addInput = (
     name: string,
     value: number | string,
-    onChange: (value: number) => void,
+    onChange: (value: number, ev: Event) => void,
     style?: StyleDeclaration,
   ) => {
     const [container, input] = createInput(name, value, onChange, style);
