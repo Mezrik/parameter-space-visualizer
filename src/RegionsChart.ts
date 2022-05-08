@@ -51,32 +51,7 @@ export class CustomRegionsChart<Value> extends Chart<RegionDatum<Value>> {
 
     this.g = this.chartArea?.svg?.append('g').attr('width', this.width).attr('height', this.height);
 
-    this.initHighlightLayer();
-
-    let tooltip: Tooltip<RegionDatum<Value>>;
-    if (this.g) {
-      tooltip = new Tooltip(this.g, d => {
-        const [xParam, yParam] = this.config.params ?? [];
-        return `
-        value: ${d.value}</br>
-        ${xParam ? `x-from: ${d.params[xParam].from}</br>` : ''}
-        ${xParam ? `x-to: ${d.params[xParam].to}</br>` : ''}
-        ${yParam ? `y-from: ${d.params[yParam].from}</br>` : ''}
-        ${yParam ? `y-to: ${d.params[yParam].to}</br>` : ''}
-      `;
-      });
-    }
-
-    chartArea?.canvas.on('mouseout', () => {
-      this.highlight?.style('display', 'none');
-      tooltip.hideTooltip();
-    });
-
-    this.showTooltipAndRect = (rect, [x, y]) => {
-      this.highlightRect(rect);
-
-      tooltip?.showTooltip({ ...rect, width: 0, height: 0, x, y });
-    };
+    if (config.options?.tooltip) this.initHighlightLayer();
 
     this.zoom?.onChange(this.redraw);
     this.zoom?.onChange(() => {
@@ -108,6 +83,31 @@ export class CustomRegionsChart<Value> extends Chart<RegionDatum<Value>> {
       ?.attr('fill', 'transparent')
       .attr('stroke', theme.colors.grey)
       .attr('stroke-width', 3);
+
+    let tooltip: Tooltip<RegionDatum<Value>>;
+    if (this.g) {
+      tooltip = new Tooltip(this.g, d => {
+        const [xParam, yParam] = this.config.params ?? [];
+        return `
+          value: ${d.value}</br>
+          ${xParam ? `x-from: ${d.params[xParam].from}</br>` : ''}
+          ${xParam ? `x-to: ${d.params[xParam].to}</br>` : ''}
+          ${yParam ? `y-from: ${d.params[yParam].from}</br>` : ''}
+          ${yParam ? `y-to: ${d.params[yParam].to}</br>` : ''}
+        `;
+      });
+    }
+
+    this.chartArea?.canvas.on('mouseout', () => {
+      this.highlight?.style('display', 'none');
+      tooltip.hideTooltip();
+    });
+
+    this.showTooltipAndRect = (rect, [x, y]) => {
+      this.highlightRect(rect);
+
+      tooltip?.showTooltip({ ...rect, x, y });
+    };
   }
 
   public redraw = (transform: ZoomTransform = zoomIdentity) => {
@@ -174,6 +174,8 @@ export class CustomRegionsChart<Value> extends Chart<RegionDatum<Value>> {
   };
 
   public bindDataToChartArea = () => {
+    if (!this.config.options.tooltip) return;
+
     const { chartArea } = this;
 
     if (!chartArea) return;
@@ -234,6 +236,8 @@ export default class RegionsChart<Value> {
       handleFixationChange: (...args) => this.chartUI.handleFixationChange?.(...args),
       margin: DEFAULT_CHART_MARGIN,
       color,
+      tooltip: false,
+      maxZoomExtent: 1000,
     };
 
     this.chart = new CustomRegionsChart(this.root, {

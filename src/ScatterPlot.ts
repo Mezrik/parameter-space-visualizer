@@ -42,6 +42,7 @@ import ChartUI from './components/ChartUI';
 import { ChartAreaDelaunayController } from './controllers/ChartAreaDataController';
 import { SimpleSelection } from './types/selection';
 import { SamplingWorkerType } from './lib/data/samplingWorker';
+import Tooltip from './components/Tooltip';
 
 const isDataConfigInstance = <Value>(
   config: Config<any>,
@@ -86,6 +87,7 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
 
   private g?: SimpleSelection<SVGGElement>;
   private highlight?: SimpleSelection<SVGCircleElement>;
+  private tooltip?: Tooltip<Datum<Value>>;
 
   constructor(element: MountElement, config: ChartConfigDynamic<Datum<Value>>) {
     super(element, config);
@@ -104,7 +106,7 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
 
     this.g = this.chartArea?.svg?.append('g').attr('width', this.width).attr('height', this.height);
 
-    this.initHighlightLayer();
+    if (config.options?.tooltip) this.initHighlightLayer();
   }
 
   private initWithData(_config: DataConfig<Value>) {
@@ -141,6 +143,27 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
       .attr('stroke-width', 3)
       .attr('r', POINT_RADIUS)
       .style('display', 'none');
+
+    if (this.g) {
+      this.tooltip = new Tooltip(this.g, d => {
+        const [xParam, yParam] = this.config.params ?? [];
+        const params =
+          'params' in d
+            ? `${xParam ? `${xParam}: ${d.params?.[xParam]}</br>` : ''}
+              ${yParam ? `${yParam} ${d.params?.[yParam]}</br>` : ''}`
+            : '';
+
+        return `
+          value: ${d.value}</br>
+          ${params}
+        `;
+      });
+    }
+
+    this.chartArea?.canvas.on('mouseout', () => {
+      this.highlight?.style('display', 'none');
+      this.tooltip?.hideTooltip();
+    });
   }
 
   private draw(
@@ -210,7 +233,7 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
         this.config.data as ScatterDatum<Value>[],
       );
 
-      this.bindDataToChartArea();
+      this.bindDataToChartArea(this.config.data);
     }
     this.redraw();
 
@@ -229,7 +252,9 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
     this.reset();
   };
 
-  public bindDataToChartArea = () => {
+  public bindDataToChartArea = (data = this.config.data) => {
+    if (!this.config.options.tooltip) return;
+
     const { chartArea, _dataController } = this;
 
     if (!chartArea) return;
@@ -241,7 +266,7 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
       this.bindMouseMove(true);
     }
 
-    const pts = (this.config.data as ScatterDatum<Value>[]).map(
+    const pts = (data as ScatterDatum<Value>[]).map(
       this.transfromDatumToPoint(_dataController.x, _dataController.y),
     );
 
@@ -249,6 +274,8 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
   };
 
   public bindScatterGridToChartArea = () => {
+    if (!this.config.options.tooltip) return;
+
     const { chartArea, _dataController } = this;
     if (!('coordsScales' in _dataController) || !chartArea) return;
 
@@ -259,14 +286,24 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
 
     const pts: Point<Value>[] = [];
 
+    const [xParam, yParam] = this.config.params ?? [];
+    const [xScale, yScale] = this.dataController.currentScales;
+    if (!xParam || !xScale) return;
+
+    const transform = this.zoom?.currentTransfrom ?? zoomIdentity;
+    const xTCoordScale = transform.rescaleX(xScale.scale);
+    const yTCoordScale = yScale ? transform.rescaleY(yScale.scale) : undefined;
+
     _dataController.binding.each((d, i, nodes) => {
       const [x, y] = getNodeXY(nodes, i);
-      pts.push({ ...d, x, y });
+
+      const params = { [xParam]: xTCoordScale.invert(x) };
+      if (yTCoordScale && yParam) params[yParam] = yTCoordScale.invert(y);
+
+      pts.push({ value: select(nodes[i]).datum() as Value, params, x, y });
     });
 
     this.chartAreaDataController!.bindData(pts);
-
-    this.bindMouseMove();
   };
 
   private initChartAreaDataController = () => {
@@ -283,7 +320,10 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
 
       const point = this.chartAreaDataController?.find(finalPointer);
 
-      if (point) this.highlightPoint(zoom ? this.applyZoomTransformToPoint(point) : point);
+      if (point) {
+        this.highlightPoint(zoom ? this.applyZoomTransformToPoint(point) : point);
+        this.tooltip?.showTooltip({ ...point, x: p[0], y: p[1] });
+      }
     });
 
     if (zoom) this.zoom?.onChange(() => this.highlight?.style('display', 'none'));
@@ -369,12 +409,13 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
 
     binding.each((d, i, nodes) => {
       const node = select(nodes[i]);
-      const [x, y] = getNodeXY(nodes, i);
 
-      // const [xT, yT] = this.zoom?.currentTransfrom.apply([x, y]) ?? [x, y];
       const [fill, value] = getFillAndValue(i, d);
-      node.attr('fillStyle', fill).attr('point-value', value ?? '');
+      node.attr('fillStyle', fill);
+      node.datum(value);
     });
+
+    if (this.chartAreaDataController) this.bindScatterGridToChartArea();
   };
 
   private runSampling = async (pairs: Record<string, string | number>[]) => {
@@ -427,6 +468,7 @@ export default class ScatterPlot<Value> {
       handleParamsChange: (...args) => this.chartUI.handleParamsChange?.(...args),
       handleFixationChange: (...args) => this.chartUI.handleFixationChange?.(...args),
       margin: DEFAULT_CHART_MARGIN,
+      tooltip: true,
     };
 
     if (expression && intervals) {
