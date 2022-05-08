@@ -1,10 +1,13 @@
-import { useEffect, useState } from 'preact/hooks';
-import { Tabs } from '@mantine/core';
+import { useEffect, useState, useRef } from 'preact/hooks';
+import { Tabs, TextInput, JsonInput, Button, Group, Box } from '@mantine/core';
+import { useForm } from '@mantine/form';
 import { COLOR_MAPPING, SCATTER_COLOR_MAPPING } from '../constants';
 
 import { createProabilityColorScale } from '../../src/helpers/general';
 import ScatterPlot from '../../src/ScatterPlot';
 import { ScatterDatum } from '../../src/types/general';
+import { csvToScatterPointsList, parseValue, RegionResultValue } from '../../src/lib/data/parse';
+import { csvParse } from 'd3-dsv';
 
 // @ts-ignore
 const parseCSVValue = (v: string): 'true' | 'false' => v;
@@ -79,17 +82,157 @@ const Expression = () => {
   return <div ref={ref} />;
 };
 
+const CustomExpression = () => {
+  const [container, ref] = useState<HTMLDivElement | null>(null);
+  const [show, setShow] = useState(false);
+  const chart = useRef<ScatterPlot<string>>();
+
+  const form = useForm({
+    initialValues: {
+      expression: '(-1 * ((p+(-1)) * (q*r+(-1)*r+(-1)*q+1)))/(q*r+(-1)*r+1)',
+      params: JSON.stringify([
+        { name: 'p', start: 0, end: 1 },
+        { name: 'q', start: 0, end: 0.5 },
+        { name: 'r', start: 1 / 10, end: 3 / 10 },
+      ]),
+    },
+  });
+
+  form.values;
+
+  useEffect(() => {
+    if (container && show) {
+      chart.current = new ScatterPlot({
+        el: container,
+        expression: form.values.expression,
+        intervals: JSON.parse(form.values.params),
+        width: 800,
+        height: 800,
+      });
+    }
+  }, [container, show]);
+
+  useEffect(() => {
+    if (!show) {
+      chart.current?.remove();
+      chart.current = undefined;
+    }
+  }, [show]);
+
+  return show ? (
+    <div>
+      <Button onClick={() => setShow(false)}>Reset</Button>
+      <div ref={ref} />
+    </div>
+  ) : (
+    <Box sx={{ maxWidth: 600 }} mr="auto">
+      <form onSubmit={form.onSubmit(() => setShow(true))}>
+        <TextInput required label="Expression" {...form.getInputProps('expression')} />
+
+        <JsonInput
+          label="Params"
+          validationError="Invalid json"
+          formatOnBlur
+          autosize
+          minRows={4}
+          required
+          {...form.getInputProps('params')}
+        />
+
+        <Group position="right" mt="md">
+          <Button type="submit">Show Chart</Button>
+        </Group>
+      </form>
+    </Box>
+  );
+};
+
+const CustomData = () => {
+  const [container, ref] = useState<HTMLDivElement | null>(null);
+  const [userData, setUserData] = useState<ScatterDatum<RegionResultValue>[]>([]);
+  const chart = useRef<ScatterPlot<RegionResultValue>>();
+
+  useEffect(() => {
+    if (container && userData) {
+      chart.current = new ScatterPlot({
+        el: container,
+        data: userData,
+        colors: COLOR_MAPPING,
+        width: 800,
+        height: 800,
+      });
+    }
+  }, [container, userData]);
+
+  useEffect(() => {
+    if (userData.length && chart.current) {
+      chart.current.remove();
+      chart.current = undefined;
+    }
+  }, []);
+
+  const handleFileUpload = e => {
+    const reader = new FileReader();
+    reader.onload = evt => {
+      if (typeof evt.target.result === 'string')
+        setUserData(csvToScatterPointsList(csvParse(evt.target.result), parseValue));
+    };
+
+    reader.readAsText(e.target.files[0]);
+  };
+
+  return userData.length ? (
+    <div>
+      <Button onClick={() => setUserData([])}>Reset</Button>
+      <div ref={ref} />
+    </div>
+  ) : (
+    <div>
+      <input type="file" id="file-selector" accept=".csv" onChange={handleFileUpload} />
+    </div>
+  );
+};
+
+const From1DURL = () => {
+  const [container, ref] = useState<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (container) {
+      const chart = new ScatterPlot({
+        el: container,
+        url: document.location.origin + '/csv/scatter/1d-test.csv',
+        parseCSVValue,
+        colors: SCATTER_COLOR_MAPPING,
+        width: 800,
+        height: 800,
+      });
+    }
+  }, [container]);
+
+  return <div ref={ref} />;
+};
+
 const ProbabilitySampling = () => {
   return (
     <Tabs>
       <Tabs.Tab label="Expression">
         <Expression />
       </Tabs.Tab>
+      <Tabs.Tab label="Custom expression">
+        <CustomExpression />
+      </Tabs.Tab>
       <Tabs.Tab label="Data">
         <FromData />
       </Tabs.Tab>
       <Tabs.Tab label="Async data">
         <FromURL />
+      </Tabs.Tab>
+
+      <Tabs.Tab label="Async 1D data">
+        <From1DURL />
+      </Tabs.Tab>
+      <Tabs.Tab label="Upload own data">
+        <CustomData />
       </Tabs.Tab>
     </Tabs>
   );

@@ -1,6 +1,6 @@
-import { csv } from "d3-fetch";
+import { csv } from 'd3-fetch';
 
-import { DSVRowArray, DSVRowString, csvParseRows } from "d3-dsv";
+import { DSVRowArray, DSVRowString, csvParseRows } from 'd3-dsv';
 
 /**
  * Used to retrieve entire CSV from remote location
@@ -9,12 +9,9 @@ import { DSVRowArray, DSVRowString, csvParseRows } from "d3-dsv";
  * @param parser CSV row parser
  * @returns
  */
-export const fetchCSV = async <
-  Column extends string,
-  ParsedRow = DSVRowString<Column>
->(
+export const fetchCSV = async <Column extends string, ParsedRow = DSVRowString<Column>>(
   from: string,
-  parser?: (row: DSVRowArray<Column>) => ParsedRow[]
+  parser?: (row: DSVRowArray<Column>) => ParsedRow[],
 ): Promise<ParsedRow[]> => {
   const data = await csv<Column>(from);
   if (parser) return parser(data);
@@ -30,17 +27,17 @@ export const getLastTextLine = (text: string): [string, number] => {
   let i = text.length - 1;
   const buffer: string[] = [];
 
-  for (; i >= 0 && text[i] !== "\n"; i -= 1) buffer.push(text[i]);
+  for (; i >= 0 && text[i] !== '\n'; i -= 1) buffer.push(text[i]);
 
-  return [buffer.reverse().join(""), i];
+  return [buffer.reverse().join(''), i];
 };
 
 /**
  * Used for parsing Uint8Array chunks in ReadableStream
  */
 export const csvStreamParser = () => {
-  const decoder = new TextDecoder("UTF-8");
-  let prevLine = "";
+  const decoder = new TextDecoder('UTF-8');
+  let prevLine = '';
   let cols: string[] | null = null;
 
   return {
@@ -48,12 +45,12 @@ export const csvStreamParser = () => {
       let text = prevLine + decoder.decode(chunk);
 
       if (!cols) {
-        const endOfFirstLine = text.indexOf("\n");
+        const endOfFirstLine = text.indexOf('\n');
 
         const firstLine = text.slice(0, endOfFirstLine);
         text = text.slice(endOfFirstLine + 1);
 
-        cols = firstLine.split(",").map((c) => c.trim());
+        cols = firstLine.split(',').map(c => c.trim());
       }
 
       // Last line could be incomplete
@@ -62,8 +59,8 @@ export const csvStreamParser = () => {
 
       const lastLineItems: (string | undefined)[] = csvParseRows(lastLine)[0];
 
-      return csvParseRows(text.slice(0, i + 1), (d) =>
-        cols?.reduce((acc, col, i) => ({ ...acc, [col]: d[i]?.trim() }), {})
+      return csvParseRows(text.slice(0, i + 1), d =>
+        cols?.reduce((acc, col, i) => ({ ...acc, [col]: d[i]?.trim() }), {}),
       );
     },
     lastLine: prevLine,
