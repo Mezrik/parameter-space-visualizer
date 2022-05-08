@@ -1,4 +1,4 @@
-import { NumberValue } from 'd3-scale';
+import { NumberValue, scaleOrdinal, ScaleOrdinal } from 'd3-scale';
 import { pointer, select } from 'd3-selection';
 import { zoomIdentity, ZoomTransform } from 'd3-zoom';
 import * as Comlink from 'comlink';
@@ -26,6 +26,8 @@ import {
 import { SimpleSelection } from './types/selection';
 import { addLoadingOverlay } from './lib/ui/loadingOverlay';
 import { ChartAreaQuadTreeController } from './controllers/ChartAreaDataController';
+import { createChartLegend } from './lib/ui/legend';
+import { applyStyles } from './lib/ui/general';
 
 type RegionRect<Value> = Rect & RegionDatum<Value>;
 
@@ -216,12 +218,16 @@ export class CustomRegionsChart<Value> extends Chart<RegionDatum<Value>> {
   };
 }
 
-export default class RegionsChart<Value> {
+export default class RegionsChart<Value extends string> {
   private root: HTMLElement;
+  private chartRoot: HTMLElement;
   private chart: CustomRegionsChart<Value>;
   private chartUI: ChartUI;
+  private chartLegend: ReturnType<typeof createChartLegend>;
 
-  constructor({ el, width, height, data, color, ...rest }: SimpleConfigRegions<Value>) {
+  private color: ScaleOrdinal<string, string, never>;
+
+  constructor({ el, width, height, data, colors, ...rest }: SimpleConfigRegions<Value>) {
     const node = getDOMNode(el);
     if (node) this.root = node;
     else {
@@ -231,16 +237,22 @@ export default class RegionsChart<Value> {
 
     this.chartUI = new ChartUI(this.root);
 
+    this.color = scaleOrdinal<string>().domain(Object.keys(colors)).range(Object.values(colors));
+
+    this.chartRoot = document.createElement('div');
+    applyStyles(this.chartRoot, { display: 'flex', alignItems: 'center' });
+    this.root.appendChild(this.chartRoot);
+
     const options: UserOptions<RegionDatum<Value>, NumberValue, NumberValue> = {
       handleParamsChange: (...args) => this.chartUI.handleParamsChange?.(...args),
       handleFixationChange: (...args) => this.chartUI.handleFixationChange?.(...args),
       margin: DEFAULT_CHART_MARGIN,
-      color,
+      color: d => this.color(d.value),
       tooltip: true,
       maxZoomExtent: 1000,
     };
 
-    this.chart = new CustomRegionsChart(this.root, {
+    this.chart = new CustomRegionsChart(this.chartRoot, {
       width,
       height,
       data: data ?? [],
@@ -249,6 +261,8 @@ export default class RegionsChart<Value> {
 
     if (rest.url) this.fetchData(rest.url, rest.parseCSVValue);
     else this.chart.bindDataToChartArea();
+
+    this.chartLegend = createChartLegend(this.chartRoot, this.chart.chartValues, this.color);
 
     this.chartUI.initChartUI(this.chart);
   }
@@ -267,6 +281,7 @@ export default class RegionsChart<Value> {
         Array.prototype.push.apply(data, parsed);
         this.chart.data(data);
         this.chartUI.initChartUI(this.chart);
+        this.chartLegend.update(this.chart.chartValues);
 
         // Terminate worker if the chart is no longer attached to DOM
         if (!this.root.isConnected) worker.terminate();
@@ -275,6 +290,7 @@ export default class RegionsChart<Value> {
 
     this.chart.data(csvToRegionResultsList<Value>(finalData, parseValue));
     this.chartUI.initChartUI(this.chart);
+    this.chartLegend.update(this.chart.chartValues);
 
     loadingOverlay.remove();
     proxy[Comlink.releaseProxy]();

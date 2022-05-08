@@ -37,7 +37,6 @@ class ChartUI {
         display: flex;
         flex-direction: column-reverse;
         padding: 1rem;
-        width: 800px;
         font-family: ${theme.font};
       }
     `,

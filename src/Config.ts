@@ -4,6 +4,7 @@ import { ZERO_MARGIN } from './constants/common';
 import { theme } from './constants/styles';
 import {
   checkIfParamsExist,
+  getChartValues,
   getDifParams,
   getParams,
   getParamsToBeFixed,
@@ -29,6 +30,7 @@ class Config<Datum> {
   private _allParams!: ParamType[];
   private _params: ParamsTuple | undefined | null = null;
   private _paramsExtents!: Record<ParamType, [number, number]>;
+  private _chartValues: string[] = [];
 
   private _userFixations: ParamsFixation;
 
@@ -49,6 +51,7 @@ class Config<Datum> {
     this._params = getParamsTuple(this._config.options?.params);
 
     this.setAllParams(this.data);
+    this.setChartValues(this.data);
 
     this._userFixations = this._config.options?.paramsFixation ?? {};
   }
@@ -65,9 +68,16 @@ class Config<Datum> {
     );
   }
 
+  private setChartValues(data: Datum[]) {
+    this._chartValues = getChartValues(data);
+  }
+
   private setTransformedData(fixations: ParamsFixation) {
     const data = (this._config as ChartConfig<Datum>).data;
-    if (this._transfomData && data) this._transfromedData = this._transfomData(data, fixations);
+    if (this._transfomData && data) {
+      this._transfromedData = this._transfomData(data, fixations);
+      this.setChartValues(this._transfromedData);
+    }
 
     this._config.options?.handleFixationChange?.(fixations);
   }
@@ -84,6 +94,7 @@ class Config<Datum> {
     if ('data' in this._config) {
       this._config.data = data;
       this.setAllParams(data);
+      this.setChartValues(data);
       this.paramsFixation && this.setTransformedData(this.paramsFixation);
     }
   }
@@ -198,6 +209,10 @@ class Config<Datum> {
   get yMax() {
     const { margin, height } = this;
     return height - margin.top - margin.bottom;
+  }
+
+  get chartValues() {
+    return this._chartValues;
   }
 }
 

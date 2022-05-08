@@ -32,8 +32,8 @@ import { DataStreamWorker } from './lib/data/dataStreamWorker';
 import { addLoadingOverlay } from './lib/ui/loadingOverlay';
 import { getDOMNode, getNodeXY } from './helpers/general';
 import { csvToScatterPointsList } from './lib/data/parse';
-import { addStyle, rem } from './lib/ui/general';
-import { NumberValue } from 'd3-scale';
+import { addStyle, applyStyles, rem } from './lib/ui/general';
+import { NumberValue, ScaleOrdinal, scaleOrdinal } from 'd3-scale';
 import { DEFAULT_CHART_MARGIN, DEFAUL_COLOR_SCALE } from './constants/common';
 import { MAX_DENSITY, POINT_RADIUS } from './constants/scatter';
 import { appendParamsSelects } from './lib/ui/paramsSelects';
@@ -43,6 +43,7 @@ import { ChartAreaDelaunayController } from './controllers/ChartAreaDataControll
 import { SimpleSelection } from './types/selection';
 import { SamplingWorkerType } from './lib/data/samplingWorker';
 import Tooltip from './components/Tooltip';
+import { createChartLegend, createGradientChartLegend } from './lib/ui/legend';
 
 const isDataConfigInstance = <Value>(
   config: Config<any>,
@@ -443,10 +444,14 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
   }
 }
 
-export default class ScatterPlot<Value> {
+export default class ScatterPlot<Value extends string> {
   private root: HTMLElement;
+  private chartRoot: HTMLElement;
   private chart: CustomScatterPlot<Value>;
   private chartUI: ChartUI;
+  private chartLegend?: ReturnType<typeof createChartLegend>;
+
+  private color?: ScaleOrdinal<string, string, never>;
 
   constructor({
     el,
@@ -466,6 +471,10 @@ export default class ScatterPlot<Value> {
 
     this.chartUI = new ChartUI(this.root);
 
+    this.chartRoot = document.createElement('div');
+    applyStyles(this.chartRoot, { display: 'flex', alignItems: 'center' });
+    this.root.appendChild(this.chartRoot);
+
     const commonConfig = { width, height };
     const options: UserOptions<ScatterDatum<Value> | ProbabilityDatum, NumberValue, NumberValue> = {
       handleParamsChange: (...args) => this.chartUI.handleParamsChange?.(...args),
@@ -476,7 +485,7 @@ export default class ScatterPlot<Value> {
     };
 
     if (expression && intervals) {
-      this.chart = new CustomScatterPlot(this.root, {
+      this.chart = new CustomScatterPlot(this.chartRoot, {
         ...commonConfig,
         expression,
         intervals,
@@ -490,20 +499,28 @@ export default class ScatterPlot<Value> {
 
       this.chart.bindScatterGridToChartArea();
       this.initProbabilitySamplingUI(this.chart);
+      createGradientChartLegend(this.chartRoot);
     } else {
       // if not expression, data or url must be defined
-      this.chart = new CustomScatterPlot(this.root, {
+      this.chart = new CustomScatterPlot(this.chartRoot, {
         ...commonConfig,
         data: data ?? [],
         options: {
           ...options,
           color: d =>
-            isScatterDatum(d) ? rest.color?.(d) ?? theme.colors.black : theme.colors.black,
+            isScatterDatum(d) ? this.color?.(d.value) ?? theme.colors.black : theme.colors.black,
         },
       });
 
       if (rest.url) this.fetchData(rest.url, rest.parseCSVValue);
       else this.chart.bindDataToChartArea();
+    }
+
+    if ('colors' in rest) {
+      this.color = scaleOrdinal<string>()
+        .domain(Object.keys(rest.colors))
+        .range(Object.values(rest.colors));
+      this.chartLegend = createChartLegend(this.chartRoot, this.chart.chartValues, this.color);
     }
 
     this.chartUI.initChartUI(this.chart);
@@ -523,6 +540,7 @@ export default class ScatterPlot<Value> {
         Array.prototype.push.apply(data, parsed);
         this.chart.data(data);
         this.chartUI.initChartUI(this.chart);
+        this.chartLegend?.update(this.chart.chartValues);
 
         // Terminate worker if the chart is no longer attached to DOM
         if (!this.root.isConnected) worker.terminate();
@@ -531,6 +549,7 @@ export default class ScatterPlot<Value> {
 
     this.chart.data(csvToScatterPointsList<Value>(finalData, parseValue));
     this.chartUI.initChartUI(this.chart);
+    this.chartLegend?.update(this.chart.chartValues);
 
     loadingOverlay.remove();
 
