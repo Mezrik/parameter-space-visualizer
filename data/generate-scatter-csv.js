@@ -4,7 +4,7 @@ const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 
 const getRandomArbitrary = (min = 0, max = 1) => {
-  return Math.random() * (max - min) + min;
+  return Math.round((Math.random() * (max - min) + min) * 100) / 100;
 };
 
 const getRandomValue = () => {

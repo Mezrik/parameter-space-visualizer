@@ -7,11 +7,16 @@ import Chart from './Chart';
 import { theme } from './constants/styles';
 import ScatterGridController from './controllers/ScatterGridController';
 import ScatterController from './controllers/ScatterController';
-import { createVariableTokens, isVariableIntervalData } from './helpers/expression';
+import {
+  applyParamsFixations,
+  createVariableTokens,
+  isVariableIntervalData,
+} from './helpers/scatter';
 import { EvalFunction, ProbabilityDatum, Token } from './types/expression';
 import {
   ChartConfigDynamic,
   DataConfig,
+  DataTransform,
   ExpressionConfig,
   FixationChangeHandler,
   MountElement,
@@ -104,6 +109,8 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
 
   private initWithData(_config: DataConfig<Value>) {
     if (!isDataConfigInstance<Value>(this.config)) return;
+
+    (this.config.dataTransform as DataTransform<ScatterDatum<Value>>) = applyParamsFixations;
 
     this._dataController = new ScatterController(this.config);
   }
@@ -198,15 +205,19 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
     // Re-bind the regions, this will reset scales to current params scales
     this._dataController.bindCurrentScalesRange(xMax, yMax);
 
-    if (isDataConfigInstance(this.config))
+    if (isDataConfigInstance(this.config)) {
       (this._dataController as ScatterController<Value>).bindScatter(
         this.config.data as ScatterDatum<Value>[],
       );
 
+      this.bindDataToChartArea();
+    }
     this.redraw();
 
     this.axes?.redrawAxes();
     this.grid?.redrawGrid();
+
+    this.highlight?.style('display', 'none');
   };
 
   public data = (data: ScatterDatum<Value>[]) => {
