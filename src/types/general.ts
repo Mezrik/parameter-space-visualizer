@@ -40,6 +40,8 @@ export type UserOptions<Datum, XScaleInput, YScaleInput> = {
   color?: (d: Datum) => string;
   axes?: { x: UserAxesConfig<XScaleInput>; y?: UserAxesConfig<YScaleInput> };
   grid?: { x?: UserGridConfig; y?: UserGridConfig };
+  tooltip?: boolean;
+  maxZoomExtent?: number;
 };
 
 export type Margin = {
@@ -72,6 +74,8 @@ export type Options<UOpts> = UOpts extends UserOptions<
         y?: AxesConfig<YScaleInput>;
       };
       grid?: { x?: UserGridConfig; y?: UserGridConfig };
+      tooltip?: boolean;
+      maxZoomExtent: number;
     }
   : never;
 export interface RegionDatum<Value = unknown> {
