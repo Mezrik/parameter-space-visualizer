@@ -154,7 +154,7 @@ class Config<Datum> {
           tickSize: opts?.axes?.x.tickSize ?? 6,
         },
       },
-      maxZoomExtent: opts?.maxZoomExtent ?? 100,
+      maxZoomExtent: opts?.maxZoomExtent ?? Infinity,
     };
   }
 

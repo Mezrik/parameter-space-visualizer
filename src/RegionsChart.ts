@@ -236,7 +236,7 @@ export default class RegionsChart<Value> {
       handleFixationChange: (...args) => this.chartUI.handleFixationChange?.(...args),
       margin: DEFAULT_CHART_MARGIN,
       color,
-      tooltip: false,
+      tooltip: true,
       maxZoomExtent: 1000,
     };
 

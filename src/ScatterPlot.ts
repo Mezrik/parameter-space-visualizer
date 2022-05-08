@@ -68,6 +68,7 @@ const isExpConfig = (config: ChartConfigDynamic<any>): config is ExpressionConfi
 
 const isScatterDatum = <Value>(d: Datum<Value>): d is ScatterDatum<Value> => {
   return (
+    d &&
     typeof (d as ScatterDatum<Value>).params !== 'undefined' &&
     typeof (d as ScatterDatum<Value>).value !== 'undefined'
   );
@@ -368,6 +369,7 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
       i: number,
       d: ScatterDatum<Value>,
     ) => [string, string | number | undefined] = (_, d) => {
+      console.log(d);
       return [config?.options?.color?.(d) ?? theme.colors.black, undefined];
     };
 
@@ -412,10 +414,11 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
 
       const [fill, value] = getFillAndValue(i, d);
       node.attr('fillStyle', fill);
-      node.datum(value);
+      if (value) node.datum(value);
     });
 
-    if (this.chartAreaDataController) this.bindScatterGridToChartArea();
+    if (this.chartAreaDataController && dataControllerType === 'grid')
+      this.bindScatterGridToChartArea();
   };
 
   private runSampling = async (pairs: Record<string, string | number>[]) => {
@@ -469,6 +472,7 @@ export default class ScatterPlot<Value> {
       handleFixationChange: (...args) => this.chartUI.handleFixationChange?.(...args),
       margin: DEFAULT_CHART_MARGIN,
       tooltip: true,
+      maxZoomExtent: 100,
     };
 
     if (expression && intervals) {
