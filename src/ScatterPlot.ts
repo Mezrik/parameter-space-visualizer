@@ -97,8 +97,6 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
     if (isDataConfig<Value>(config)) this.initWithData(config);
     else if (isExpConfig(config)) this.initWithExpression(config);
 
-    this.redraw();
-
     const controller = this._dataController as DataController<Datum<Value>>;
 
     this.addAxes(controller);
@@ -109,6 +107,8 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
     this.g = this.chartArea?.svg?.append('g').attr('width', this.width).attr('height', this.height);
 
     if (config.options?.tooltip) this.initHighlightLayer();
+
+    this.redraw();
   }
 
   private initWithData(_config: DataConfig<Value>) {
@@ -484,6 +484,12 @@ export default class ScatterPlot<Value extends string> {
       maxZoomExtent: 100,
     };
 
+    if ('colors' in rest) {
+      this.color = scaleOrdinal<string>()
+        .domain(Object.keys(rest.colors))
+        .range(Object.values(rest.colors));
+    }
+
     if (expression && intervals) {
       this.chart = new CustomScatterPlot(this.chartRoot, {
         ...commonConfig,
@@ -516,12 +522,8 @@ export default class ScatterPlot<Value extends string> {
       else this.chart.bindDataToChartArea();
     }
 
-    if ('colors' in rest) {
-      this.color = scaleOrdinal<string>()
-        .domain(Object.keys(rest.colors))
-        .range(Object.values(rest.colors));
+    if (this.color)
       this.chartLegend = createChartLegend(this.chartRoot, this.chart.chartValues, this.color);
-    }
 
     this.chartUI.initChartUI(this.chart);
   }
