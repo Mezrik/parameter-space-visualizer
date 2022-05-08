@@ -297,4 +297,9 @@ export default class RegionsChart<Value extends string> {
 
     this.chart.bindDataToChartArea();
   }
+
+  public remove() {
+    this.chartUI.remove();
+    this.chartRoot.remove();
+  }
 }

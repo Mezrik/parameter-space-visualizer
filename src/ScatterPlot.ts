@@ -578,4 +578,9 @@ export default class ScatterPlot<Value extends string> {
 
     this.chartUI.addInput('density', chart.dataController.density, handleDensityChange);
   }
+
+  public remove() {
+    this.chartUI.remove();
+    this.chartRoot.remove();
+  }
 }

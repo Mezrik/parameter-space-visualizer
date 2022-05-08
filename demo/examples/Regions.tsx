@@ -1,9 +1,15 @@
-import { useEffect, useState } from 'preact/hooks';
-import { Tabs } from '@mantine/core';
+import { useEffect, useState, useRef } from 'preact/hooks';
+import { Button, Tabs } from '@mantine/core';
+import { csvParse } from 'd3-dsv';
 
 import { COLOR_MAPPING } from '../constants';
 import RegionsChart from '../../src/RegionsChart';
-import { parseValue, RegionResultValue } from '../../src/lib/data/parse';
+import {
+  parseValue,
+  RegionResultValue,
+  csvToRegionResultsList,
+  RegionResults,
+} from '../../src/lib/data/parse';
 import { RegionDatum } from '../../src/types/general';
 
 const color = (d: RegionDatum<RegionResultValue>) => COLOR_MAPPING[d.value];
@@ -27,7 +33,7 @@ const FromURL = () => {
   return <div ref={ref} />;
 };
 
-const FromData = () => {
+const From1DData = () => {
   const [container, ref] = useState<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -45,14 +51,84 @@ const FromData = () => {
   return <div ref={ref} />;
 };
 
+const FromData = () => {
+  const [container, ref] = useState<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (container) {
+      const chart = new RegionsChart({
+        el: container,
+        data: data,
+        colors: COLOR_MAPPING,
+        width: 800,
+        height: 800,
+      });
+    }
+  }, [container]);
+
+  return <div ref={ref} />;
+};
+
+const CustomData = () => {
+  const [container, ref] = useState<HTMLDivElement | null>(null);
+  const [userData, setUserData] = useState<RegionResults<RegionResultValue>>([]);
+  const chart = useRef<RegionsChart<RegionResultValue>>();
+
+  useEffect(() => {
+    if (container && userData) {
+      chart.current = new RegionsChart({
+        el: container,
+        data: userData,
+        colors: COLOR_MAPPING,
+        width: 800,
+        height: 800,
+      });
+    }
+  }, [container, userData]);
+
+  useEffect(() => {
+    if (userData.length && chart.current) {
+      chart.current.remove();
+      chart.current = undefined;
+    }
+  }, []);
+
+  const handleFileUpload = e => {
+    const reader = new FileReader();
+    reader.onload = evt => {
+      if (typeof evt.target.result === 'string')
+        setUserData(csvToRegionResultsList(csvParse(evt.target.result)));
+    };
+
+    reader.readAsText(e.target.files[0]);
+  };
+
+  return userData.length ? (
+    <div>
+      <Button onClick={() => setUserData([])}>Reset</Button>
+      <div ref={ref} />
+    </div>
+  ) : (
+    <div>
+      <input type="file" id="file-selector" accept=".csv" onChange={handleFileUpload} />
+    </div>
+  );
+};
+
 const Regions = () => {
   return (
     <Tabs>
       <Tabs.Tab label="Data">
         <FromData />
       </Tabs.Tab>
+      <Tabs.Tab label="1D data">
+        <From1DData />
+      </Tabs.Tab>
       <Tabs.Tab label="Async data">
         <FromURL />
+      </Tabs.Tab>
+      <Tabs.Tab label="Upload own data">
+        <CustomData />
       </Tabs.Tab>
     </Tabs>
   );

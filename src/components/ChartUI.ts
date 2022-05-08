@@ -96,6 +96,11 @@ class ChartUI {
     this.controls?.append(container);
     this.inputs.push([container, input]);
   };
+
+  public remove = () => {
+    this.controls?.remove();
+    this.inputs.forEach(([div]) => div.remove());
+  };
 }
 
 export default ChartUI;
