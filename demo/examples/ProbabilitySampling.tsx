@@ -6,7 +6,11 @@ import { createProabilityColorScale } from '../../src/helpers/general';
 import ScatterPlot from '../../src/ScatterPlot';
 import { ScatterDatum } from '../../src/types/general';
 
-const colorScale = createProabilityColorScale([COLOR_MAPPING.false, COLOR_MAPPING.true]);
+const colorScale = createProabilityColorScale([
+  COLOR_MAPPING.false,
+  COLOR_MAPPING.partially_sat,
+  COLOR_MAPPING.true,
+]);
 
 const color = (d: ScatterDatum<boolean>) => (d.value ? COLOR_MAPPING.true : COLOR_MAPPING.false);
 
@@ -19,7 +23,7 @@ const FromURL = () => {
     if (container) {
       const chart = new ScatterPlot({
         el: container,
-        url: document.location.origin + '/csv/scatter/1d-test.csv',
+        url: document.location.origin + '/csv/scatter/larger-test.csv',
         parseCSVValue,
         color,
         width: 800,

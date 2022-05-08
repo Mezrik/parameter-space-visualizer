@@ -11,7 +11,7 @@ import {
   getParamDomain as getVariableIntervalParamDomain,
   getParamDomainFromProbabData,
   isProbabilityData,
-} from './expression';
+} from './scatter';
 import { scaleLinear } from 'd3-scale';
 import { hcl, HCLColor } from 'd3-color';
 import { interpolateHcl } from 'd3-interpolate';
