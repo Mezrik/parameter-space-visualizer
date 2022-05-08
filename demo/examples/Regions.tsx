@@ -17,7 +17,7 @@ const FromURL = () => {
         el: container,
         url: document.location.origin + '/csv/regions/large-results/parametric-die01.csv',
         parseCSVValue: parseValue,
-        color,
+        colors: COLOR_MAPPING,
         width: 800,
         height: 800,
       });
@@ -35,7 +35,7 @@ const FromData = () => {
       const chart = new RegionsChart({
         el: container,
         data: data1D,
-        color,
+        colors: COLOR_MAPPING,
         width: 800,
         height: 800,
       });

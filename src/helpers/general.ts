@@ -1,4 +1,11 @@
-import { Margin, Params, ParamsFixation, ParamsTuple, ParamType } from '../types/general';
+import {
+  Margin,
+  Params,
+  ParamsFixation,
+  ParamsTuple,
+  ParamType,
+  ScatterDatum,
+} from '../types/general';
 import {
   isRegionsData,
   getParams as getRegionsParams,
@@ -35,6 +42,14 @@ export const getParams = <Datum>(data: Datum[]) => {
 
   if (isVariableIntervalData(data) || isProbabilityData(data))
     return getVariableIntervalParams(data);
+
+  return [];
+};
+
+export const getChartValues = <Datum>(data: Datum[]) => {
+  if (isRegionsData(data)) {
+    return Array.from(new Set((data as { value: any }[]).map(d => d.value)));
+  }
 
   return [];
 };

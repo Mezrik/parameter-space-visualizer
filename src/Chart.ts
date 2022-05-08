@@ -164,6 +164,10 @@ abstract class Chart<Datum> {
   get paramFixations() {
     return this.config.paramsFixation;
   }
+
+  get chartValues() {
+    return this.config.chartValues;
+  }
 }
 
 export default Chart;

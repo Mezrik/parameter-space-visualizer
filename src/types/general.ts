@@ -121,13 +121,13 @@ export type SimpleConfigCommon = {
   height: number;
 };
 
-export type SimpleConfigScatter<Value> = (
+export type SimpleConfigScatter<Value extends string | number | symbol> = (
   | {
       data: ScatterDatum<Value>[];
       expression?: never;
       intervals?: never;
       url?: never;
-      color: (d: ScatterDatum<Value>) => string;
+      colors: Record<Value, string>;
       parseCSVValue?: never;
     }
   | {
@@ -143,19 +143,19 @@ export type SimpleConfigScatter<Value> = (
       expression?: never;
       intervals?: never;
       url: string;
-      color: (d: ScatterDatum<Value>) => string;
+      colors: Record<Value, string>;
       parseCSVValue: (v: string) => Value;
     }
 ) & {} & SimpleConfigCommon;
 
-export type SimpleConfigRegions<Value> = (
+export type SimpleConfigRegions<Value extends string | number | symbol> = (
   | {
       data: RegionDatum<Value>[];
       url?: never;
       parseCSVValue?: never;
     }
   | { data?: never; url: string; parseCSVValue: (v?: string) => Value }
-) & { color: (d: RegionDatum<Value>) => string } & SimpleConfigCommon;
+) & { colors: Record<Value, string> } & SimpleConfigCommon;
 
 export type MountElement = string | HTMLElement;
 

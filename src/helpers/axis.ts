@@ -7,12 +7,12 @@ import { SimpleSelection } from '../types/selection';
 const styleDomain = (stroke: number) => (g: SimpleSelection<SVGGElement>) =>
   g.select('.domain').attr('stroke-width', stroke).attr('stroke', theme.colors.lightGrey);
 
-const styleTickLines = (
+export const styleTickLines = (
   g: SimpleSelection<SVGGElement>,
 ): Selection<BaseType, unknown, SVGGElement, unknown> =>
   g.selectAll('.tick line').attr('stroke', theme.colors.lightGrey);
 
-const styleTickText = (
+export const styleTickText = (
   g: SimpleSelection<SVGGElement>,
 ): Selection<BaseType, unknown, SVGGElement, unknown> =>
   g.selectAll('.tick text').style('font-size', '0.75rem').attr('fill', theme.colors.textColor);
