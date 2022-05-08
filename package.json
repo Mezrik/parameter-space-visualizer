@@ -5,7 +5,8 @@
   "main": "es/index.js",
   "scripts": {
     "clean": "rimraf es && rimraf umd",
-    "build": "npm run clean && cross-env NODE_ENV=production VISUALIZE_SPACE=true rollup -c",
+    "build": "rollup -c",
+    "build:dist": "npm run clean && cross-env NODE_ENV=production VISUALIZE_SPACE=true rollup -c",
     "dev": "rollup -c --watch",
     "dev:workers": "rollup -c rollup.config.worker.js --watch",
     "postinstall": "patch-package"
