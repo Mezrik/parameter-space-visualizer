@@ -12,7 +12,7 @@ import {
   ScaleOrdinal,
   ScalePoint,
   NumberValue,
-} from "d3-scale";
+} from 'd3-scale';
 
 type ValueOf<Scale> = Scale[keyof Scale];
 
@@ -48,7 +48,4 @@ export type DataControllerScaleType =
     }
   | undefined;
 
-export type DataControllerScaleTuple = [
-  DataControllerScaleType,
-  DataControllerScaleType
-];
+export type DataControllerScaleTuple = [DataControllerScaleType, DataControllerScaleType];

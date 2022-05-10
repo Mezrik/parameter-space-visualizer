@@ -1,3 +1,4 @@
+import { csvParse } from 'd3-dsv';
 import { ScatterDatum } from '../../types/general';
 
 export type RegionResultValue =
@@ -67,6 +68,15 @@ export const csvToRegionResultsList = <Value = RegionResultValue>(
   });
 };
 
+export const csvToRegionResults = <Value = RegionResultValue>(
+  csv: string,
+  parseVal?: (v?: string) => Value,
+): RegionResults<Value> => {
+  const raw = csvParse(csv);
+
+  return csvToRegionResultsList(raw, parseVal);
+};
+
 export const csvToScatterPointsList = <Value>(
   raw: RawCSVObject,
   parseVal: (v: string) => Value,
@@ -82,4 +92,13 @@ export const csvToScatterPointsList = <Value>(
       }, {}),
     };
   });
+};
+
+export const csvToScatterPoints = <Value>(
+  csv: string,
+  parseVal: (v: string) => Value,
+): ScatterDatum<Value>[] => {
+  const raw = csvParse(csv);
+
+  return csvToScatterPointsList(raw, parseVal);
 };

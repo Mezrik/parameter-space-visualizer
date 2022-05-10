@@ -227,7 +227,6 @@ const ProbabilitySampling = () => {
       <Tabs.Tab label="Async data">
         <FromURL />
       </Tabs.Tab>
-
       <Tabs.Tab label="Async 1D data">
         <From1DURL />
       </Tabs.Tab>

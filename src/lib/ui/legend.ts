@@ -1,12 +1,6 @@
-import { range } from 'd3-array';
-import { axisBottom, axisRight } from 'd3-axis';
-import { HCLColor } from 'd3-color';
-import { interpolate, interpolateRound, quantize } from 'd3-interpolate';
-import { ScaleLinear } from 'd3-scale';
-import { BaseType, create, EnterElement, select, Selection } from 'd3-selection';
+import { BaseType, EnterElement, select, Selection } from 'd3-selection';
 import { DEFAUL_COLOR_SCALE } from '../../constants/common';
 import { theme } from '../../constants/styles';
-import { styleTickLines, styleTickText } from '../../helpers/axis';
 import { gradientLegend } from './legendGradient';
 
 const LEGEND_RECT_SIZE = 20;

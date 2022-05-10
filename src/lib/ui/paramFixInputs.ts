@@ -1,7 +1,5 @@
-import { ParamsFixation, ParamType } from '../../types/general';
-import { applyStyles } from './general';
+import { ParamsFixation } from '../../types/general';
 import { createInput } from './input';
-import { labelDefaultStyle, defaultInputStyle } from './styles';
 
 export const appendParamFixInputs = (
   el: HTMLElement,

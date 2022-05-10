@@ -1,6 +1,5 @@
 import { theme } from '../constants/styles';
 import { rem } from '../lib/ui/general';
-import { DatumRect } from '../types/general';
 import { SimpleSelection } from '../types/selection';
 
 export type TooltipFO = SimpleSelection<SVGForeignObjectElement>;

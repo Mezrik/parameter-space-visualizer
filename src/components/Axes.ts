@@ -1,11 +1,10 @@
 import { zoomIdentity, ZoomTransform } from 'd3-zoom';
 import Config from '../Config';
 import { AXIS_LABEL_OFFSET } from '../constants/common';
-import { theme } from '../constants/styles';
 import DataController from '../controllers/DataController';
 
 import { styleAxisLabel, xAxisFactory, yAxisFactory } from '../helpers/axis';
-import { AnyD3Scale, DataControllerScaleTuple } from '../types/scale';
+import { AnyD3Scale } from '../types/scale';
 import { SimpleSelection } from '../types/selection';
 
 class Axes {

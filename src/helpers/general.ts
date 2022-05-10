@@ -1,11 +1,4 @@
-import {
-  Margin,
-  Params,
-  ParamsFixation,
-  ParamsTuple,
-  ParamType,
-  ScatterDatum,
-} from '../types/general';
+import { Params, ParamsFixation, ParamsTuple, ParamType } from '../types/general';
 import {
   isRegionsData,
   getParams as getRegionsParams,

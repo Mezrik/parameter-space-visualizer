@@ -2,7 +2,6 @@ import { select, Selection, BaseType, EnterElement } from 'd3-selection';
 import { ScaleLinear, scaleLinear } from 'd3-scale';
 import Config from '../Config';
 import { ProbabilityDatum } from '../types/expression';
-import { ParamsTuple } from '../types/general';
 import DataController from './DataController';
 
 export type CoordsScales = [ScaleLinear<number, number>, ScaleLinear<number, number>];

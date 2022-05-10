@@ -370,7 +370,6 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
       i: number,
       d: ScatterDatum<Value>,
     ) => [string, string | number | undefined] = (_, d) => {
-      console.log(d);
       return [config?.options?.color?.(d) ?? theme.colors.black, undefined];
     };
 
