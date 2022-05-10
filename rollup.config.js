@@ -10,7 +10,6 @@ import webWorkerLoader from 'rollup-plugin-web-worker-loader';
 import alias from '@rollup/plugin-alias';
 import replace from '@rollup/plugin-replace';
 import json from '@rollup/plugin-json';
-import path from 'path';
 
 const isProd = process.env.NODE_ENV === 'production';
 const visualizeSpace = process.env.VISUALIZE_SPACE === 'true';
@@ -46,8 +45,8 @@ const getCommonPlugins = (extensions, babelPlugins = [], workerLoadPath) => [
   }),
   typescript({
     check: false,
-    typescript: require('typescript'),
-    cacheRoot: path.resolve(__dirname, '.rts2_cache'),
+    // typescript: require('typescript'),
+    // cacheRoot: path.resolve(__dirname, '.rts2_cache'),
   }), // TEMP: Check is off
   babel({
     extensions,
@@ -72,17 +71,17 @@ export default [
             file: 'es/index.js',
             format: 'es',
             plugins: [terser()],
+            sourcemap: true,
           },
           {
             file: `umd/index.js`,
             format: 'umd',
             name: 'paramVis',
             plugins: [terser()],
-            sourcemap: true,
           },
         ],
         plugins: [
-          ...getCommonPlugins(prodExtensions),
+          ...getCommonPlugins(prodExtensions, [], ''),
           visualizeSpace &&
             visualizer({
               open: true,
