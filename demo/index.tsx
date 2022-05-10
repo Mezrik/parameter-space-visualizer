@@ -1,5 +1,4 @@
 import { h, render } from 'preact';
-import { setup } from 'goober';
 import Router, { Route } from 'preact-router';
 import { AppShell } from '@mantine/core';
 
@@ -8,8 +7,6 @@ import ProbabilitySampling from './examples/ProbabilitySampling';
 import Regions from './examples/Regions';
 import { PATH_NAMES } from './constants';
 import { ChartDots, Rectangle } from 'tabler-icons-react';
-
-setup(h);
 
 const App = () => {
   return (
