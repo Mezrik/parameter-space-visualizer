@@ -1,4 +1,4 @@
-export { fetchCSV, getLastTextLine } from './utils';
+export { fetchCSV, csvStreamParser } from './utils';
 export {
   csvToScatterPoints,
   csvToScatterPointsList,
