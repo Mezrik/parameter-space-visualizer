@@ -5,8 +5,8 @@ import * as Comlink from 'comlink';
 
 import Chart from './Chart';
 import { theme } from './constants/styles';
-import ScatterGridController from './controllers/ScatterGridController';
-import ScatterController from './controllers/ScatterController';
+import ScatterGridManager from './managers/ScatterGridManager';
+import ScatterManager from './managers/ScatterManager';
 import {
   applyParamsFixations,
   createVariableTokens,
@@ -26,20 +26,18 @@ import {
   UserOptions,
 } from './types/general';
 import Config from './Config';
-import DataController from './controllers/DataController';
+import DataManager from './managers/DataManager';
 import { DataWorker, SamplingWorker } from './lib/workers';
 import { DataStreamWorker } from './lib/data/dataStreamWorker';
 import { addLoadingOverlay } from './lib/ui/loadingOverlay';
 import { getDOMNode, getNodeXY } from './helpers/general';
 import { csvToScatterPointsList } from './lib/data/parse';
-import { addStyle, applyStyles, rem } from './lib/ui/general';
+import { applyStyles } from './lib/ui/general';
 import { NumberValue, ScaleOrdinal, scaleOrdinal } from 'd3-scale';
 import { DEFAULT_CHART_MARGIN, DEFAUL_COLOR_SCALE } from './constants/common';
 import { MAX_DENSITY, POINT_RADIUS } from './constants/scatter';
-import { appendParamsSelects } from './lib/ui/paramsSelects';
-import { appendParamFixInputs } from './lib/ui/paramFixInputs';
 import ChartUI from './components/ChartUI';
-import { ChartAreaDelaunayController } from './controllers/ChartAreaDataController';
+import { ChartAreaDelaunayManager } from './managers/ChartAreaDataManager';
 import { SimpleSelection } from './types/selection';
 import { SamplingWorkerType } from './lib/data/samplingWorker';
 import Tooltip from './components/Tooltip';
@@ -80,8 +78,8 @@ type Datum<Value> = ScatterDatum<Value> | ProbabilityDatum;
 type Point<Value> = Datum<Value> & { x: number; y: number };
 
 export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
-  private _dataController!: ScatterController<Value> | ScatterGridController;
-  private chartAreaDataController?: ChartAreaDelaunayController<Point<Value>>;
+  private _dataManager!: ScatterManager<Value> | ScatterGridManager;
+  private chartAreaDataManager?: ChartAreaDelaunayManager<Point<Value>>;
 
   private expression?: string;
   private variableTokens?: Token[];
@@ -97,10 +95,10 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
     if (isDataConfig<Value>(config)) this.initWithData(config);
     else if (isExpConfig(config)) this.initWithExpression(config);
 
-    const controller = this._dataController as DataController<Datum<Value>>;
+    const manager = this._dataManager as DataManager<Datum<Value>>;
 
-    this.addAxes(controller);
-    this.addGrid(controller, theme.colors.black);
+    this.addAxes(manager);
+    this.addGrid(manager, theme.colors.black);
 
     this.zoom?.onChange(this.redraw);
 
@@ -116,13 +114,13 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
 
     (this.config.dataTransform as DataTransform<ScatterDatum<Value>>) = applyParamsFixations;
 
-    this._dataController = new ScatterController(this.config);
+    this._dataManager = new ScatterManager(this.config);
   }
 
   private initWithExpression(_config: ExpressionConfig) {
     if (!isExpConfigInstance(this.config)) return;
 
-    this._dataController = new ScatterGridController(this.config);
+    this._dataManager = new ScatterGridManager(this.config);
 
     this.expression = _config.expression;
     this.variableTokens = _config.intervals.map(({ name }) => createVariableTokens(name));
@@ -199,11 +197,11 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
 
   public redraw = async (transform = zoomIdentity) => {
     const {
-      _dataController: { binding, currentScales },
+      _dataManager: { binding, currentScales },
       config,
     } = this;
 
-    const coordsScales = (this._dataController as ScatterGridController).coordsScales;
+    const coordsScales = (this._dataManager as ScatterGridManager).coordsScales;
 
     if (!this.config.params) return;
 
@@ -228,10 +226,10 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
     } = this;
 
     // Re-bind the regions, this will reset scales to current params scales
-    this._dataController.bindCurrentScalesRange(xMax, yMax);
+    this._dataManager.bindCurrentScalesRange(xMax, yMax);
 
     if (isDataConfigInstance(this.config)) {
-      (this._dataController as ScatterController<Value>).bindScatter(
+      (this._dataManager as ScatterManager<Value>).bindScatter(
         this.config.data as ScatterDatum<Value>[],
       );
 
@@ -250,53 +248,53 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
 
     this.config.data = data;
     // @ts-ignore
-    this._dataController.initScales(this.config);
+    this._dataManager.initScales(this.config);
     this.reset();
   };
 
   public bindDataToChartArea = (data = this.config.data) => {
     if (!this.config.options.tooltip) return;
 
-    const { chartArea, _dataController } = this;
+    const { chartArea, _dataManager } = this;
 
     if (!chartArea) return;
 
-    if (!('x' in _dataController && 'y' in _dataController)) return;
+    if (!('x' in _dataManager && 'y' in _dataManager)) return;
 
-    if (!this.chartAreaDataController) {
-      this.initChartAreaDataController();
+    if (!this.chartAreaDataManager) {
+      this.initChartAreaDataManager();
       this.bindMouseMove(true);
     }
 
     const pts = (data as ScatterDatum<Value>[]).map(
-      this.transfromDatumToPoint(_dataController.x, _dataController.y),
+      this.transfromDatumToPoint(_dataManager.x, _dataManager.y),
     );
 
-    this.chartAreaDataController!.bindData(pts);
+    this.chartAreaDataManager!.bindData(pts);
   };
 
   public bindScatterGridToChartArea = () => {
     if (!this.config.options.tooltip) return;
 
-    const { chartArea, _dataController } = this;
-    if (!('coordsScales' in _dataController) || !chartArea) return;
+    const { chartArea, _dataManager } = this;
+    if (!('coordsScales' in _dataManager) || !chartArea) return;
 
-    if (!this.chartAreaDataController) {
-      this.initChartAreaDataController();
+    if (!this.chartAreaDataManager) {
+      this.initChartAreaDataManager();
       this.bindMouseMove();
     }
 
     const pts: Point<Value>[] = [];
 
     const [xParam, yParam] = this.config.params ?? [];
-    const [xScale, yScale] = this.dataController.currentScales;
+    const [xScale, yScale] = this.dataManager.currentScales;
     if (!xParam || !xScale) return;
 
     const transform = this.zoom?.currentTransfrom ?? zoomIdentity;
     const xTCoordScale = transform.rescaleX(xScale.scale);
     const yTCoordScale = yScale ? transform.rescaleY(yScale.scale) : undefined;
 
-    _dataController.binding.each((d, i, nodes) => {
+    _dataManager.binding.each((d, i, nodes) => {
       const [x, y] = getNodeXY(nodes, i);
 
       const params = { [xParam]: xTCoordScale.invert(x) };
@@ -305,11 +303,11 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
       pts.push({ value: select(nodes[i]).datum() as Value, params, x, y });
     });
 
-    this.chartAreaDataController!.bindData(pts);
+    this.chartAreaDataManager!.bindData(pts);
   };
 
-  private initChartAreaDataController = () => {
-    this.chartAreaDataController = new ChartAreaDelaunayController(
+  private initChartAreaDataManager = () => {
+    this.chartAreaDataManager = new ChartAreaDelaunayManager(
       (p: Point<Value>) => p.x,
       (p: Point<Value>) => p.y,
     );
@@ -320,7 +318,7 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
       const p = pointer(ev);
       const finalPointer = this.zoom && zoom ? this.zoom.currentTransfrom.invert(p) : p;
 
-      const point = this.chartAreaDataController?.find(finalPointer);
+      const point = this.chartAreaDataManager?.find(finalPointer);
 
       if (point) {
         this.highlightPoint(zoom ? this.applyZoomTransformToPoint(point) : point);
@@ -341,7 +339,7 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
     if (!this.zoom) return p;
 
     const {
-      _dataController: { currentScales },
+      _dataManager: { currentScales },
     } = this;
 
     const [x, y] = [
@@ -358,7 +356,7 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
   ) => {
     const { config } = this;
 
-    const dataControllerType = this._dataController.type;
+    const dataManagerType = this._dataManager.type;
 
     if (!this.config.params) return;
 
@@ -373,8 +371,8 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
       return [config?.options?.color?.(d) ?? theme.colors.black, undefined];
     };
 
-    if (dataControllerType === 'grid') {
-      const [xScale, yScale] = this._dataController.currentScales;
+    if (dataManagerType === 'grid') {
+      const [xScale, yScale] = this._dataManager.currentScales;
 
       if (!xScale) return;
 
@@ -417,8 +415,7 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
       if (value) node.datum(value);
     });
 
-    if (this.chartAreaDataController && dataControllerType === 'grid')
-      this.bindScatterGridToChartArea();
+    if (this.chartAreaDataManager && dataManagerType === 'grid') this.bindScatterGridToChartArea();
   };
 
   private runSampling = async (pairs: Record<string, string | number>[]) => {
@@ -438,8 +435,8 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
     return sample;
   };
 
-  get dataController() {
-    return this._dataController;
+  get dataManager() {
+    return this._dataManager;
   }
 }
 
@@ -561,21 +558,21 @@ export default class ScatterPlot<Value extends string> {
 
   private initProbabilitySamplingUI(chart: CustomScatterPlot<Value>) {
     const handleDensityChange = (value: number, ev: Event) => {
-      if (chart.dataController.type !== 'grid') return;
+      if (chart.dataManager.type !== 'grid') return;
 
       if (value > MAX_DENSITY) {
         value = MAX_DENSITY;
         (ev.target as HTMLInputElement).value = `${MAX_DENSITY}`;
       }
 
-      chart.dataController.density = value;
+      chart.dataManager.density = value;
       chart.redraw();
       chart.bindScatterGridToChartArea();
     };
 
-    if (chart.dataController.type !== 'grid') return;
+    if (chart.dataManager.type !== 'grid') return;
 
-    this.chartUI.addInput('density', chart.dataController.density, handleDensityChange);
+    this.chartUI.addInput('density', chart.dataManager.density, handleDensityChange);
   }
 
   public remove() {

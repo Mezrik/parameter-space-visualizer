@@ -1,12 +1,10 @@
-import { select } from 'd3-selection';
 import { zoomIdentity, ZoomTransform } from 'd3-zoom';
 import Axes from './components/Axes';
 import ChartArea from './components/ChartArea';
 import Grid from './components/Grid';
 import Config from './Config';
-import { ZERO_MARGIN } from './constants/common';
-import DataController from './controllers/DataController';
-import Zoom from './controllers/Zoom';
+import DataManager from './managers/DataManager';
+import Zoom from './managers/Zoom';
 import { getDOMNodeSelection } from './helpers/general';
 import { rem } from './lib/ui/general';
 import {
@@ -17,7 +15,6 @@ import {
   MountElement,
   ParamsFixation,
 } from './types/general';
-import { DataControllerScaleTuple } from './types/scale';
 import { SimpleSelection } from './types/selection';
 
 abstract class Chart<Datum> {
@@ -77,9 +74,9 @@ abstract class Chart<Datum> {
     }
   }
 
-  protected addAxes(dataController: DataController<Datum>) {
+  protected addAxes(dataManager: DataManager<Datum>) {
     if (this.svg) {
-      const axes = new Axes(this.svg, this.config, dataController);
+      const axes = new Axes(this.svg, this.config, dataManager);
       this.zoom?.onChange(transform => {
         axes.redrawAxes(transform);
       });
@@ -87,7 +84,7 @@ abstract class Chart<Datum> {
     }
   }
 
-  protected addGrid(dataController: DataController<Datum>, color?: string) {
+  protected addGrid(dataManager: DataManager<Datum>, color?: string) {
     const gridOpts = this.config.options.grid;
 
     this.config.gridOptions = {
@@ -97,7 +94,7 @@ abstract class Chart<Datum> {
     };
 
     if (this.chartArea?.svg) {
-      const grid = new Grid(this.chartArea?.svg.append('g'), this.config, dataController);
+      const grid = new Grid(this.chartArea?.svg.append('g'), this.config, dataManager);
 
       this.zoom?.onChange(transform => {
         grid.redrawGrid(transform);

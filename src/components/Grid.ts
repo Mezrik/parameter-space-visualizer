@@ -1,6 +1,6 @@
 import { zoomIdentity, ZoomTransform } from 'd3-zoom';
 import Config from '../Config';
-import DataController from '../controllers/DataController';
+import DataManager from '../managers/DataManager';
 
 import { xGridLinesFactory, yGridLinesFactory } from '../helpers/axis';
 import { AnyD3Scale } from '../types/scale';
@@ -11,16 +11,16 @@ class Grid {
   private gy?: SimpleSelection<SVGGElement>;
 
   private config: Config<any>;
-  private dataController: DataController<any>;
+  private dataManager: DataManager<any>;
 
   constructor(
     el: SimpleSelection<SVGGElement>,
     config: Config<any>,
-    dataController: DataController<any>,
+    dataManager: DataManager<any>,
   ) {
     this.config = config;
-    this.dataController = dataController;
-    const [xScale, yScale] = dataController.currentScales;
+    this.dataManager = dataManager;
+    const [xScale, yScale] = dataManager.currentScales;
 
     this.gx = el.append('g');
     this.gy = el.append('g');
@@ -42,9 +42,9 @@ class Grid {
   public redrawGrid = (transform: ZoomTransform = zoomIdentity) => {
     const {
       config: { xMax, yMax },
-      dataController,
+      dataManager,
     } = this;
-    const [xScale, yScale] = dataController.currentScales;
+    const [xScale, yScale] = dataManager.currentScales;
 
     if (!xScale) return;
 

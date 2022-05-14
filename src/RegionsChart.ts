@@ -11,7 +11,7 @@ import ChartUI from './components/ChartUI';
 import Tooltip from './components/Tooltip';
 import { DEFAULT_CHART_MARGIN } from './constants/common';
 import { theme } from './constants/styles';
-import RegionsController from './controllers/RegionsController';
+import RegionsManager from './managers/RegionsManager';
 import { getDOMNode } from './helpers/general';
 import { applyParamsFixations } from './helpers/regions';
 import { csvToRegionResultsList } from './lib/data/parse';
@@ -25,15 +25,15 @@ import {
 } from './types/general';
 import { SimpleSelection } from './types/selection';
 import { addLoadingOverlay } from './lib/ui/loadingOverlay';
-import { ChartAreaQuadTreeController } from './controllers/ChartAreaDataController';
+import { ChartAreaQuadTreeManager } from './managers/ChartAreaDataManager';
 import { createChartLegend } from './lib/ui/legend';
 import { applyStyles } from './lib/ui/general';
 
 type RegionRect<Value> = Rect & RegionDatum<Value>;
 
 export class CustomRegionsChart<Value> extends Chart<RegionDatum<Value>> {
-  private dataController: RegionsController<Value>;
-  private chartAreaDataController?: ChartAreaQuadTreeController<RegionRect<Value>>;
+  private dataManager: RegionsManager<Value>;
+  private chartAreaDataManager?: ChartAreaQuadTreeManager<RegionRect<Value>>;
 
   private g?: SimpleSelection<SVGGElement>;
   private highlight?: SimpleSelection<SVGRectElement>;
@@ -47,9 +47,9 @@ export class CustomRegionsChart<Value> extends Chart<RegionDatum<Value>> {
 
     const { chartArea } = this;
 
-    this.dataController = new RegionsController(this.config);
+    this.dataManager = new RegionsManager(this.config);
 
-    this.addGrid(this.dataController, theme.colors.white);
+    this.addGrid(this.dataManager, theme.colors.white);
 
     this.g = this.chartArea?.svg?.append('g').attr('width', this.width).attr('height', this.height);
 
@@ -60,7 +60,7 @@ export class CustomRegionsChart<Value> extends Chart<RegionDatum<Value>> {
       this.highlight?.style('display', 'none');
     });
 
-    this.addAxes(this.dataController);
+    this.addAxes(this.dataManager);
 
     this.redraw();
   }
@@ -115,7 +115,7 @@ export class CustomRegionsChart<Value> extends Chart<RegionDatum<Value>> {
   public redraw = (transform: ZoomTransform = zoomIdentity) => {
     const {
       chartArea,
-      dataController: { regionsBinding },
+      dataManager: { regionsBinding },
       config,
       width,
       height,
@@ -155,23 +155,23 @@ export class CustomRegionsChart<Value> extends Chart<RegionDatum<Value>> {
     } = this;
 
     // Re-bind the regions, this will reset scales to current params scales
-    this.dataController.bindCurrentScalesRange(xMax, yMax);
-    this.dataController.bindRegions(data);
+    this.dataManager.bindCurrentScalesRange(xMax, yMax);
+    this.dataManager.bindRegions(data);
 
     this.redraw();
 
     this.axes?.redrawAxes();
     this.grid?.redrawGrid();
 
-    if (this.chartAreaDataController) {
+    if (this.chartAreaDataManager) {
       const rects = this.config.data.map(this.transfromDatumToRect);
-      this.chartAreaDataController.bindData(rects);
+      this.chartAreaDataManager.bindData(rects);
     }
   };
 
   public data = (data: RegionDatum<Value>[]) => {
     this.config.data = data;
-    this.dataController.initScales(this.config);
+    this.dataManager.initScales(this.config);
     this.reset();
   };
 
@@ -185,18 +185,18 @@ export class CustomRegionsChart<Value> extends Chart<RegionDatum<Value>> {
     const { width, height } = chartArea.canvas.node() ?? {};
     if (!width || !height) return;
 
-    if (!this.chartAreaDataController)
-      this.chartAreaDataController = new ChartAreaQuadTreeController(width, height);
+    if (!this.chartAreaDataManager)
+      this.chartAreaDataManager = new ChartAreaQuadTreeManager(width, height);
 
     const rects = this.config.data.map(this.transfromDatumToRect);
 
-    this.chartAreaDataController.bindData(rects);
+    this.chartAreaDataManager.bindData(rects);
 
     chartArea.canvas.on('mousemove', ev => {
       const p = pointer(ev);
       const finalPointer = this.zoom ? this.zoom.currentTransfrom.invert(p) : p;
 
-      const rect = this.chartAreaDataController?.find(finalPointer);
+      const rect = this.chartAreaDataManager?.find(finalPointer);
 
       if (this.showTooltipAndRect && rect)
         this.showTooltipAndRect(this.applyZoomTransformToRect(rect), p);
@@ -204,7 +204,7 @@ export class CustomRegionsChart<Value> extends Chart<RegionDatum<Value>> {
   };
 
   private transfromDatumToRect = (d: RegionDatum<Value>) => {
-    const { x, y, w, h } = this.dataController;
+    const { x, y, w, h } = this.dataManager;
     return { ...d, x: x(d), y: y(d), width: w(d), height: h(d) };
   };
 

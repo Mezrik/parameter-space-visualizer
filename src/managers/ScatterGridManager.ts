@@ -2,11 +2,11 @@ import { select, Selection, BaseType, EnterElement } from 'd3-selection';
 import { ScaleLinear, scaleLinear } from 'd3-scale';
 import Config from '../Config';
 import { ProbabilityDatum } from '../types/expression';
-import DataController from './DataController';
+import DataManager from './DataManager';
 
 export type CoordsScales = [ScaleLinear<number, number>, ScaleLinear<number, number>];
 
-class ScatterGridController extends DataController<ProbabilityDatum> {
+class ScatterGridManager extends DataManager<ProbabilityDatum> {
   private _scatterBinding: Selection<BaseType, any, HTMLElement, []>;
   private _detachedContainer: Selection<HTMLElement, [], null, undefined>;
   private distributionScales: [ScaleLinear<number, number>, ScaleLinear<number, number>];
@@ -91,4 +91,4 @@ class ScatterGridController extends DataController<ProbabilityDatum> {
   }
 }
 
-export default ScatterGridController;
+export default ScatterGridManager;

@@ -2,7 +2,7 @@ import { BaseType, EnterElement, select, Selection } from 'd3-selection';
 import Config from '../Config';
 import { UNDEFINED_CHART_VALUE } from '../constants/common';
 import { RegionDatum, ParamsTuple, Margin } from '../types/general';
-import DataController from './DataController';
+import DataManager from './DataManager';
 
 type RegionNode<Value, Type extends BaseType> = Selection<
   Type,
@@ -10,7 +10,7 @@ type RegionNode<Value, Type extends BaseType> = Selection<
   HTMLElement,
   RegionDatum<Value>[]
 >;
-class RegionsController<Value> extends DataController<RegionDatum<Value>> {
+class RegionsManager<Value> extends DataManager<RegionDatum<Value>> {
   private _regionsBinding: RegionNode<Value, BaseType>;
 
   private _detachedContainer: Selection<HTMLElement, RegionDatum<Value>[], null, undefined>;
@@ -79,4 +79,4 @@ class RegionsController<Value> extends DataController<RegionDatum<Value>> {
   }
 }
 
-export default RegionsController;
+export default RegionsManager;

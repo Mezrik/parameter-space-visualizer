@@ -1,7 +1,7 @@
 import { zoomIdentity, ZoomTransform } from 'd3-zoom';
 import Config from '../Config';
 import { AXIS_LABEL_OFFSET } from '../constants/common';
-import DataController from '../controllers/DataController';
+import DataManager from '../managers/DataManager';
 
 import { styleAxisLabel, xAxisFactory, yAxisFactory } from '../helpers/axis';
 import { AnyD3Scale } from '../types/scale';
@@ -15,16 +15,16 @@ class Axes {
   private labelY?: SimpleSelection<SVGTextElement>;
 
   private config: Config<any>;
-  private dataController: DataController<any>;
+  private dataManager: DataManager<any>;
 
   constructor(
     el: SimpleSelection<SVGGElement>,
     config: Config<any>,
-    dataController: DataController<any>,
+    dataManager: DataManager<any>,
   ) {
     this.config = config;
-    this.dataController = dataController;
-    const [xScale, yScale] = this.dataController.currentScales;
+    this.dataManager = dataManager;
+    const [xScale, yScale] = this.dataManager.currentScales;
 
     this.gx = el.append('g');
     this.gy = el.append('g');
@@ -43,9 +43,9 @@ class Axes {
   public redrawAxes = (transform: ZoomTransform = zoomIdentity) => {
     const {
       config: { yMax },
-      dataController,
+      dataManager,
     } = this;
-    const [xScale, yScale] = dataController.currentScales;
+    const [xScale, yScale] = dataManager.currentScales;
 
     if (!xScale) return;
 

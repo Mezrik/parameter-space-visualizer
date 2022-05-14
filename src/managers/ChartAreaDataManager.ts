@@ -3,7 +3,7 @@ import { Delaunay } from 'd3-delaunay';
 
 import { rectsOverlapping } from '../helpers/canvas';
 
-abstract class ChartAreaDataController<Datum> {
+abstract class ChartAreaDataManager<Datum> {
   constructor() {}
 
   public abstract bindData(data: ArrayLike<Datum>): void;
@@ -13,9 +13,9 @@ abstract class ChartAreaDataController<Datum> {
 
 type GetCoordinate<P> = Delaunay.GetCoordinate<P, ArrayLike<P> | Iterable<P>>;
 
-export class ChartAreaDelaunayController<
+export class ChartAreaDelaunayManager<
   Point extends { x: number; y: number },
-> extends ChartAreaDataController<Point> {
+> extends ChartAreaDataManager<Point> {
   private _delaunay?: Delaunay<Point>;
   private _data?: ArrayLike<Point>;
   private _getX: GetCoordinate<Point>;
@@ -40,9 +40,9 @@ export class ChartAreaDelaunayController<
   };
 }
 
-export class ChartAreaQuadTreeController<
+export class ChartAreaQuadTreeManager<
   RectDatum extends Rect,
-> extends ChartAreaDataController<RectDatum> {
+> extends ChartAreaDataManager<RectDatum> {
   private _w: number;
   private _h: number;
   private _quadTree?: Quadtree;
@@ -74,4 +74,4 @@ export class ChartAreaQuadTreeController<
   };
 }
 
-export default ChartAreaDataController;
+export default ChartAreaDataManager;

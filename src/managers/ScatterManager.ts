@@ -2,7 +2,7 @@ import { BaseType, EnterElement, select, Selection } from 'd3-selection';
 import Config from '../Config';
 import { UNDEFINED_CHART_VALUE } from '../constants/common';
 import { ScatterDatum } from '../types/general';
-import DataController from './DataController';
+import DataManager from './DataManager';
 
 type ScatterNode<Value, Type extends BaseType> = Selection<
   Type,
@@ -10,7 +10,7 @@ type ScatterNode<Value, Type extends BaseType> = Selection<
   HTMLElement,
   ScatterDatum<Value>[]
 >;
-class ScatterController<Value> extends DataController<ScatterDatum<Value>> {
+class ScatterManager<Value> extends DataManager<ScatterDatum<Value>> {
   private _scatterBinding: ScatterNode<Value, BaseType>;
 
   private _detachedContainer: Selection<HTMLElement, ScatterDatum<Value>[], null, undefined>;
@@ -65,4 +65,4 @@ class ScatterController<Value> extends DataController<ScatterDatum<Value>> {
   }
 }
 
-export default ScatterController;
+export default ScatterManager;

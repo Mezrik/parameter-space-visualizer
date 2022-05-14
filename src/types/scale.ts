@@ -41,11 +41,11 @@ export type TickFormatter<T> = (value: T) => string | undefined;
  */
 export declare type AnyD3Scale = ValueOf<AnyD3Scales>;
 
-export type DataControllerScaleType =
+export type DataManagerScaleType =
   | {
       scale: ScaleLinear<number, number>;
       extent: [NumberValue, NumberValue];
     }
   | undefined;
 
-export type DataControllerScaleTuple = [DataControllerScaleType, DataControllerScaleType];
+export type DataManagerScaleTuple = [DataManagerScaleType, DataManagerScaleType];

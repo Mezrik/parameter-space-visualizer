@@ -1,9 +1,9 @@
 import { scaleLinear } from 'd3-scale';
 import Config from '../Config';
 import { ParamsTuple, ParamType } from '../types/general';
-import { DataControllerScaleTuple, DataControllerScaleType } from '../types/scale';
-class DataController<Datum> {
-  private paramScales: Record<ParamType, DataControllerScaleType> = {};
+import { DataManagerScaleTuple, DataManagerScaleType } from '../types/scale';
+class DataManager<Datum> {
+  private paramScales: Record<ParamType, DataManagerScaleType> = {};
   protected config: Config<Datum>;
 
   constructor(config: Config<Datum>) {
@@ -40,7 +40,7 @@ class DataController<Datum> {
     return this.config.params;
   }
 
-  get currentScales(): DataControllerScaleTuple {
+  get currentScales(): DataManagerScaleTuple {
     if (!this.config.params) return [undefined, undefined];
 
     const [x, y] = this.config.params;
@@ -48,4 +48,4 @@ class DataController<Datum> {
   }
 }
 
-export default DataController;
+export default DataManager;
