@@ -13,7 +13,6 @@ const getRandomValue = () => {
 
 const generateScatterCSV = (rowCount, cols) => {
   const rows = Array(rowCount).fill(0);
-  console.log(cols);
 
   const getRandomRow = () =>
     `${Object.values(cols)

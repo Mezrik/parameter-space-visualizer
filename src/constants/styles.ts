@@ -1,12 +1,13 @@
-export const font = "var(--doc-font-family)";
+export const font = 'var(--doc-font-family)';
 
 const colors = {
-  textColor: "#5a5a5a",
-  white: "#ffffff",
-  black: "#000000",
-  primary: "#f68328",
-  lightGrey: "#c7c7c7",
-  grey: "#9b9b9b",
+  textColor: '#5a5a5a',
+  lightText: '#c2c2c2',
+  white: '#ffffff',
+  black: '#000000',
+  primary: '#f68328',
+  lightGrey: '#c7c7c7',
+  grey: '#9b9b9b',
 } as const;
 
 const borderRadius = {

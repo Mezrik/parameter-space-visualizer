@@ -19,7 +19,7 @@ export const styleTickText = (
 
 export const styleAxisLabel = (text: SimpleSelection<SVGTextElement>) =>
   text
-    .attr('fill', theme.colors.textColor)
+    .attr('fill', theme.colors.lightText)
     .style('font-size', '14px')
     .style('font-weight', 'bold')
     .attr('text-anchor', 'center');

@@ -4,4 +4,6 @@ export {
   csvToScatterPointsList,
   csvToRegionResults,
   csvToRegionResultsList,
+  parseFraction,
+  parseParam,
 } from './parse';
