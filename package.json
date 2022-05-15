@@ -1,14 +1,17 @@
 {
   "name": "parameter-space-visualizer",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Web-based module for parameter space visualisation",
-  "main": "es/index.js",
+  "main": "umd/index.js",
+  "module": "es/index.js",
+  "types": "es/index.d.ts",
   "scripts": {
     "clean": "rimraf es && rimraf umd",
-    "build": "rollup -c",
-    "build:dist": "npm run clean && cross-env NODE_ENV=production VISUALIZE_SPACE=true rollup -c",
+    "build:demo": "rollup -c",
+    "build": "npm run clean && cross-env NODE_ENV=production rollup -c && npm run build:es:types",
+    "build:visualize": "cross-env VISUALIZE_SPACE=true npm run build",
+    "build:es:types": "tsc --project tsconfig.json --emitDeclarationOnly --noEmit false --declaration --outDir ./es",
     "dev": "rollup -c --watch",
-    "dev:workers": "rollup -c rollup.config.worker.js --watch",
     "postinstall": "patch-package"
   },
   "author": {

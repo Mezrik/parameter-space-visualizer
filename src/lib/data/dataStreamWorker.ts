@@ -5,8 +5,12 @@ import { csvStreamParser } from './utils';
 type OnLoadCallback = (values: {}[]) => void;
 
 const startStream =
-  (r: Response, parse: (xs: Uint8Array) => {}[], onLoad: OnLoadCallback) =>
-  (manager: ReadableStreamManager<Uint8Array>) => {
+  (
+    r: Response,
+    parse: (xs: Uint8Array) => {}[],
+    onLoad: OnLoadCallback,
+  ): UnderlyingSourceStartCallback<Uint8Array> =>
+  manager => {
     const reader = r.body!.getReader();
 
     const read = async () => {

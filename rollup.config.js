@@ -10,6 +10,8 @@ import webWorkerLoader from 'rollup-plugin-web-worker-loader';
 import alias from '@rollup/plugin-alias';
 import replace from '@rollup/plugin-replace';
 import json from '@rollup/plugin-json';
+import path from 'path';
+import pkg from './package.json';
 
 const isProd = process.env.NODE_ENV === 'production';
 const visualizeSpace = process.env.VISUALIZE_SPACE === 'true';
@@ -17,7 +19,7 @@ const visualizeSpace = process.env.VISUALIZE_SPACE === 'true';
 const prodExtensions = ['.js', '.ts'];
 const demoExtensions = [...prodExtensions, '.jsx', '.tsx'];
 
-const getCommonPlugins = (extensions, babelPlugins = [], workerLoadPath) => [
+const getCommonPlugins = (isUMD, extensions, babelPlugins = [], workerLoadPath) => [
   alias({
     entries: [
       { find: 'react', replacement: 'preact/compat' },
@@ -40,14 +42,14 @@ const getCommonPlugins = (extensions, babelPlugins = [], workerLoadPath) => [
   }),
   webWorkerLoader({
     targetPlatform: 'browser',
-    inline: false,
+    inline: isProd && isUMD,
     loadPath: workerLoadPath,
   }),
   typescript({
     check: false,
-    // typescript: require('typescript'),
-    // cacheRoot: path.resolve(__dirname, '.rts2_cache'),
-  }), // TEMP: Check is off
+    typescript: require('typescript'),
+    cacheRoot: path.resolve(__dirname, '.rts2_cache'),
+  }),
   babel({
     extensions,
     exclude: /node_modules/,
@@ -57,61 +59,82 @@ const getCommonPlugins = (extensions, babelPlugins = [], workerLoadPath) => [
   }),
 ];
 
-export default [
-  isProd
-    ? {
-        input: 'src/index.ts',
-        output: [
-          {
-            file: 'es/index.js',
-            format: 'es',
-            plugins: [terser()],
-            sourcemap: true,
-          },
-          {
-            file: `umd/index.js`,
-            format: 'umd',
-            name: 'paramVis',
-            plugins: [terser()],
-          },
-        ],
-        plugins: [
-          ...getCommonPlugins(prodExtensions, [], ''),
-          visualizeSpace &&
-            visualizer({
-              open: true,
-              template: 'treemap',
-            }),
-        ],
-      }
-    : {
-        input: 'demo/index.tsx',
-        output: {
-          dir: `demo/dist/`,
-          format: 'umd',
-          sourcemap: true,
-        },
+let config;
 
-        plugins: [
-          ...getCommonPlugins(
-            demoExtensions,
-            [
-              [
-                '@babel/plugin-transform-react-jsx',
-                {
-                  pragma: 'h',
-                  pragmaFrag: 'Fragment',
-                },
-              ],
-            ],
-            '/dist',
-          ),
-          serve({
+if (isProd) {
+  config = [
+    {
+      input: 'src/index.ts',
+      output: [
+        {
+          file: 'es/index.js',
+          format: 'es',
+          sourcemap: true,
+          preserveModules: true,
+          preserveModulesRoot: 'src',
+        },
+      ],
+      external: Object.keys(pkg.dependencies),
+      plugins: [
+        ...getCommonPlugins(false, prodExtensions, [], ''),
+        visualizeSpace &&
+          visualizer({
             open: true,
-            contentBase: ['', 'demo'],
-            port: 9000,
+            template: 'treemap',
           }),
-          livereload({ watch: ['src', 'demo'], port: 9000 }),
+      ],
+    },
+    {
+      input: 'src/index.ts',
+      output: [
+        {
+          file: `umd/index.js`,
+          format: 'umd',
+          name: 'paramVis',
+          plugins: [terser()],
+        },
+      ],
+      plugins: [
+        ...getCommonPlugins(true, prodExtensions, [], ''),
+        visualizeSpace &&
+          visualizer({
+            open: true,
+            template: 'treemap',
+          }),
+      ],
+    },
+  ];
+} else {
+  config = {
+    input: 'demo/index.tsx',
+    output: {
+      dir: `demo/dist/`,
+      format: 'umd',
+      sourcemap: true,
+    },
+
+    plugins: [
+      ...getCommonPlugins(
+        demoExtensions,
+        [
+          [
+            '@babel/plugin-transform-react-jsx',
+            {
+              pragma: 'h',
+              pragmaFrag: 'Fragment',
+            },
+          ],
         ],
-      },
-];
+        '/dist',
+      ),
+      serve({
+        open: true,
+        contentBase: ['', 'demo'],
+        port: 9000,
+      }),
+      livereload({ watch: ['src', 'demo'], port: 9000 }),
+    ],
+  };
+}
+
+export default config;
