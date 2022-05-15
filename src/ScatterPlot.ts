@@ -480,13 +480,8 @@ export default class ScatterPlot<Value extends string> {
       maxZoomExtent: 100,
     };
 
-    if ('colors' in rest) {
-      this.color = scaleOrdinal<string>()
-        .domain(Object.keys(rest.colors))
-        .range(Object.values(rest.colors));
-    }
-
     if (expression && intervals) {
+      const colorScale = 'color' in rest && rest.color ? rest.color : DEFAUL_COLOR_SCALE;
       this.chart = new CustomScatterPlot(this.chartRoot, {
         ...commonConfig,
         expression,
@@ -494,15 +489,21 @@ export default class ScatterPlot<Value extends string> {
         options: {
           ...options,
           color: ({ value }) => {
-            return typeof value === 'number' ? DEFAUL_COLOR_SCALE(value) : theme.colors.white;
+            return typeof value === 'number' ? colorScale(value) : theme.colors.white;
           },
         },
       });
 
       this.chart.bindScatterGridToChartArea();
       this.initProbabilitySamplingUI(this.chart);
-      createGradientChartLegend(this.chartRoot);
+      createGradientChartLegend(this.chartRoot, colorScale);
     } else {
+      if ('colors' in rest) {
+        this.color = scaleOrdinal<string>()
+          .domain(Object.keys(rest.colors))
+          .range(Object.values(rest.colors));
+      }
+
       // if not expression, data or url must be defined
       this.chart = new CustomScatterPlot(this.chartRoot, {
         ...commonConfig,

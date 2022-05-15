@@ -1,5 +1,6 @@
 import { Rect } from '@timohausmann/quadtree-js';
-import { NumberValue } from 'd3-scale';
+import { HCLColor } from 'd3-color';
+import { NumberValue, ScaleLinear } from 'd3-scale';
 
 import { ProbabilityDatum, VariableInterval } from './expression';
 import { TickFormatter } from './scale';
@@ -135,7 +136,7 @@ export type SimpleConfigScatter<Value extends string | number | symbol> = (
       expression: string;
       intervals: VariableInterval[];
       url?: never;
-      color?: never;
+      color?: ScaleLinear<HCLColor, string, never>;
       parseCSVValue?: never;
     }
   | {

@@ -1,5 +1,6 @@
+import { HCLColor } from 'd3-color';
+import { ScaleLinear } from 'd3-scale';
 import { BaseType, EnterElement, select, Selection } from 'd3-selection';
-import { DEFAUL_COLOR_SCALE } from '../../constants/common';
 import { theme } from '../../constants/styles';
 import { gradientLegend } from './legendGradient';
 
@@ -73,6 +74,9 @@ export const createChartLegend = (
   return { legend, update };
 };
 
-export const createGradientChartLegend = (el: HTMLElement) => {
-  const legend = select(el).append(() => gradientLegend(DEFAUL_COLOR_SCALE));
+export const createGradientChartLegend = (
+  el: HTMLElement,
+  colorScale: ScaleLinear<HCLColor, string, never>,
+) => {
+  const legend = select(el).append(() => gradientLegend(colorScale));
 };
