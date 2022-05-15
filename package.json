@@ -1,6 +1,6 @@
 {
   "name": "parameter-space-visualizer",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Web-based module for parameter space visualisation",
   "main": "umd/index.js",
   "module": "es/index.js",
