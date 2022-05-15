@@ -105,36 +105,38 @@ if (isProd) {
     },
   ];
 } else {
-  config = {
-    input: 'demo/index.tsx',
-    output: {
-      dir: `demo/dist/`,
-      format: 'umd',
-      sourcemap: true,
-    },
-
-    plugins: [
-      ...getCommonPlugins(
-        demoExtensions,
-        [
+  config = [
+    {
+      input: 'demo/index.tsx',
+      output: {
+        dir: `demo/dist/`,
+        format: 'umd',
+        sourcemap: true,
+      },
+      plugins: [
+        ...getCommonPlugins(
+          true,
+          demoExtensions,
           [
-            '@babel/plugin-transform-react-jsx',
-            {
-              pragma: 'h',
-              pragmaFrag: 'Fragment',
-            },
+            [
+              '@babel/plugin-transform-react-jsx',
+              {
+                pragma: 'h',
+                pragmaFrag: 'Fragment',
+              },
+            ],
           ],
-        ],
-        '/dist',
-      ),
-      serve({
-        open: true,
-        contentBase: ['', 'demo'],
-        port: 9000,
-      }),
-      livereload({ watch: ['src', 'demo'], port: 9000 }),
-    ],
-  };
+          '/dist',
+        ),
+        serve({
+          open: true,
+          contentBase: ['', 'demo'],
+          port: 9000,
+        }),
+        livereload({ watch: ['src', 'demo'], port: 9000 }),
+      ],
+    },
+  ];
 }
 
 export default config;
