@@ -20,5 +20,6 @@
   },
   "transform": {
     "^.+\\.csv$": "./jest-csv-transformer.js"
-  }
+  },
+  "testTimeout": 100000
 }
