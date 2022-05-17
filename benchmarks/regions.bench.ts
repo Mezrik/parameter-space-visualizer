@@ -34,7 +34,7 @@ benchmarkSuite('Regions chart', {
 });
 
 const createRegionsChart = (csv: RawCSVObject) => {
-  return new paramVis.CustomScatterPlot(document.createElement('div'), {
+  return new paramVis.CustomRegionsChart(document.createElement('div'), {
     width: 800,
     height: 800,
     data: csvToRegionResultsList(csv),

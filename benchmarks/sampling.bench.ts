@@ -50,10 +50,22 @@ benchmarkSuite('Expression sampling', {
     calculateSampling(subs, exp, tokens);
   },
   ['Bench simple3DExpressionTest with ScatterPlot redraw']: () => {
-    chart.redraw();
+    chartSimple3DExpressionTest.redraw();
   },
   ['Bench simpleExpression2DTest with ScatterPlot redraw']: () => {
-    chart.redraw();
+    chartSimpleExpression2DTest.redraw();
+  },
+  ['Bench complex2DExpressionTest with ScatterPlot redraw']: () => {
+    chartComplex2DExpressionTest.redraw();
+  },
+  ['Bench scatter plot init with simple3DExpressionTest']: () => {
+    createScatterPlotSampling(simple3DExpressionTest);
+  },
+  ['Bench scatter plot init with simpleExpression2DTest']: () => {
+    createScatterPlotSampling(simpleExpression2DTest);
+  },
+  ['Bench scatter plot init with complex2DExpressionTest']: () => {
+    createScatterPlotSampling(complex2DExpressionTest);
   },
 });
 
@@ -94,6 +106,15 @@ const createParameterInstantiation = (density: number, intervals: VariableInterv
   });
 };
 
+const createScatterPlotSampling = (expVals: ExpTestValues) => {
+  return new paramVis.CustomScatterPlot(document.createElement('div'), {
+    width: 800,
+    height: 800,
+    expression: expVals.exp,
+    intervals: expVals.intervals,
+  });
+};
+
 const simpleExpression2DTest: ExpTestValues = {
   intervals: [
     { name: 'pL', start: 0, end: 1 },
@@ -125,12 +146,11 @@ const complex2DExpressionTest: ExpTestValues = {
   tokens: [],
 };
 
-const chart: CustomScatterPlot<any> = new paramVis.CustomScatterPlot(
-  document.createElement('div'),
-  {
-    width: 800,
-    height: 800,
-    expression: simpleExpression2DTest.exp,
-    intervals: simpleExpression2DTest.intervals,
-  },
-);
+const chartSimpleExpression2DTest: CustomScatterPlot<any> =
+  createScatterPlotSampling(simpleExpression2DTest);
+
+const chartSimple3DExpressionTest: CustomScatterPlot<any> =
+  createScatterPlotSampling(simple3DExpressionTest);
+
+const chartComplex2DExpressionTest: CustomScatterPlot<any> =
+  createScatterPlotSampling(complex2DExpressionTest);
