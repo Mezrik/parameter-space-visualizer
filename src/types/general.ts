@@ -6,7 +6,7 @@ import { ProbabilityDatum, VariableInterval } from './expression';
 import { TickFormatter } from './scale';
 
 export type ParamType = string;
-export type Params = { x: ParamType; y: ParamType } | ParamType;
+export type Params = { x: ParamType; y?: ParamType } | ParamType;
 export type ParamsTuple = [ParamType, ParamType] | [ParamType, undefined];
 export type ParamsFixation = Record<ParamType, number | string>;
 export type ParamsChangeHandler = (p: ParamsTuple | null) => void;
