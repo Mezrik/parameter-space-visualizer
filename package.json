@@ -11,8 +11,7 @@
     "build": "npm run clean && cross-env NODE_ENV=production rollup -c && npm run build:es:types",
     "build:visualize": "cross-env VISUALIZE_SPACE=true npm run build",
     "build:es:types": "tsc --project tsconfig.json --emitDeclarationOnly --noEmit false --declaration --outDir ./es",
-    "benchmark": "cross-env NODE_ENV=production rollup -c ./rollup.benchmark.config.js && node ./benchmarks/result.js",
-    "jest:bench": "cross-env NODE_ENV=production npx jest --projects jest-bench.config.json",
+    "benchmark": "cross-env NODE_ENV=production npx jest --projects jest-bench.config.json",
     "dev": "rollup -c --watch"
   },
   "author": {
