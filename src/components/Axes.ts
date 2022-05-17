@@ -63,7 +63,7 @@ class Axes {
       ?.append('text')
       .attr('x', this.config.xMax / 2)
       .attr('y', AXIS_LABEL_OFFSET)
-      .attr('dy', '0.75rem')
+      .attr('dy', '0.75em')
       .text(this.config.params?.[0] ?? '')
       .call(styleAxisLabel);
 
@@ -71,7 +71,7 @@ class Axes {
       ?.append('text')
       .attr('x', -AXIS_LABEL_OFFSET)
       .attr('y', this.config.yMax / 2)
-      .attr('dx', '-0.75rem')
+      .attr('dx', '-0.75em')
       .attr('transform', `rotate(-90, ${-AXIS_LABEL_OFFSET - 20}, ${this.config.yMax / 2})`)
       .text(this.config.params?.[1] ?? '')
       .call(styleAxisLabel);

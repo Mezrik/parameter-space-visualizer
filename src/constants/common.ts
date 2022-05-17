@@ -18,6 +18,10 @@ export const COLOR_MAPPING: Record<RegionResultValue, string> = {
   center_violated: '#fbe6c2',
 };
 
-export const DEFAUL_COLOR_SCALE = createProabilityColorScale(['#FF0000', '#FFFF00', '#008000']);
+export const DEFAUL_COLOR_SCALE = createProabilityColorScale([
+  COLOR_MAPPING.false,
+  COLOR_MAPPING.unknown,
+  COLOR_MAPPING.true,
+]);
 
 export const AXIS_LABEL_OFFSET = 30;

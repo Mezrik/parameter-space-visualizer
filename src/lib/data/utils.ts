@@ -1,6 +1,7 @@
 import { csv } from 'd3-fetch';
-
+import m from 'math-expression-evaluator';
 import { DSVRowArray, DSVRowString, csvParseRows } from 'd3-dsv';
+import { EvalFunction, Token } from '../../types/expression';
 
 /**
  * Used to retrieve entire CSV from remote location
@@ -65,4 +66,13 @@ export const csvStreamParser = () => {
     },
     lastLine: prevLine,
   };
+};
+
+export const calculateSampling = (
+  pairs: Record<string, string | number>[],
+  expression: string,
+  tokens: Token[],
+) => {
+  const exp: EvalFunction = pair => m.eval(expression, tokens, pair);
+  return pairs.map(pair => exp(pair));
 };

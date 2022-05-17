@@ -19,7 +19,7 @@ const visualizeSpace = process.env.VISUALIZE_SPACE === 'true';
 const prodExtensions = ['.js', '.ts'];
 const demoExtensions = [...prodExtensions, '.jsx', '.tsx'];
 
-const getCommonPlugins = (isUMD, extensions, babelPlugins = [], workerLoadPath) => [
+export const getCommonPlugins = (isUMD, extensions, babelPlugins = [], workerLoadPath) => [
   alias({
     entries: [
       { find: 'react', replacement: 'preact/compat' },

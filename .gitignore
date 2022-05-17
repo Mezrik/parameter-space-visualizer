@@ -13,3 +13,5 @@ stats.html
 **/large-results
 demo/dist
 .rts2_cache
+
+benchmarks/result.txt

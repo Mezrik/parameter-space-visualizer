@@ -1,0 +1,24 @@
+{
+  "testEnvironment": "jest-bench/environment",
+  "testEnvironmentOptions": {
+    "testEnvironment": "jest-environment-jsdom",
+    "testEnvironmentOptions": {}
+  },
+  "reporters": [
+    "default",
+    "jest-bench/reporter"
+  ],
+  "testRegex": "(/__benchmarks__/.*|\\.bench)\\.(ts|tsx|js)$",
+  "preset": "ts-jest/presets/default-esm",
+  "globals": {
+    "ts-jest": {
+      "useESM": true
+    }
+  },
+  "moduleNameMapper": {
+    "^(\\.{1,2}/.*)\\.js$": "$1"
+  },
+  "transform": {
+    "^.+\\.csv$": "./jest-csv-transformer.js"
+  }
+}
