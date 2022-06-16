@@ -27,7 +27,7 @@ import { SimpleSelection } from './types/selection';
 import { addLoadingOverlay } from './lib/ui/loadingOverlay';
 import { ChartAreaQuadTreeManager } from './managers/ChartAreaDataManager';
 import { createChartLegend } from './lib/ui/legend';
-import { applyStyles } from './lib/ui/general';
+import { addStyle, applyStyles } from './lib/ui/general';
 
 type RegionRect<Value> = Rect & RegionDatum<Value>;
 
@@ -44,8 +44,6 @@ export class CustomRegionsChart<Value> extends Chart<RegionDatum<Value>> {
     super(element, config);
 
     this.config.dataTransform = applyParamsFixations;
-
-    const { chartArea } = this;
 
     this.dataManager = new RegionsManager(this.config);
 
@@ -241,6 +239,15 @@ export default class RegionsChart<Value extends string> {
 
     this.chartRoot = document.createElement('div');
     applyStyles(this.chartRoot, { display: 'flex', alignItems: 'center' });
+    addStyle(
+      `
+      .chartRoot > * {
+        flex-shrink: 0;
+      }
+    `,
+      'chart-root-styles',
+    );
+    this.chartRoot.classList.add('chartRoot');
     this.root.appendChild(this.chartRoot);
 
     const options: UserOptions<RegionDatum<Value>, NumberValue, NumberValue> = {

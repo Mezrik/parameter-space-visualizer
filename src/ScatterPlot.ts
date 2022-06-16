@@ -32,7 +32,7 @@ import { DataStreamWorker } from './lib/data/dataStreamWorker';
 import { addLoadingOverlay } from './lib/ui/loadingOverlay';
 import { getDOMNode, getNodeXY } from './helpers/general';
 import { csvToScatterPointsList } from './lib/data/parse';
-import { applyStyles } from './lib/ui/general';
+import { addStyle, applyStyles } from './lib/ui/general';
 import { NumberValue, ScaleOrdinal, scaleOrdinal } from 'd3-scale';
 import { DEFAULT_CHART_MARGIN, DEFAUL_COLOR_SCALE } from './constants/common';
 import { MAX_DENSITY, POINT_RADIUS } from './constants/scatter';
@@ -469,6 +469,15 @@ export default class ScatterPlot<Value extends string> {
 
     this.chartRoot = document.createElement('div');
     applyStyles(this.chartRoot, { display: 'flex', alignItems: 'center' });
+    addStyle(
+      `
+      .chartRoot > * {
+        flex-shrink: 0;
+      }
+    `,
+      'chart-root-styles',
+    );
+    this.chartRoot.classList.add('chartRoot');
     this.root.appendChild(this.chartRoot);
 
     const commonConfig = { width, height };

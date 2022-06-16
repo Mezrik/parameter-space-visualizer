@@ -5,14 +5,16 @@ import { theme } from '../../constants/styles';
 import { gradientLegend } from './legendGradient';
 
 const LEGEND_RECT_SIZE = 20;
+const LEGEND_WIDTH = 300;
 
 export const createChartLegend = (
   el: HTMLElement,
   values: string[],
   color: (v: string) => string,
   rectSize = LEGEND_RECT_SIZE,
+  width = LEGEND_WIDTH,
 ) => {
-  const legend = select(el).append('svg');
+  const legend = select(el).append('svg').attr('width', width);
 
   const enterLabels = (enter: Selection<EnterElement, string, SVGSVGElement, unknown>) => {
     const g = enter.append('g').attr('class', 'legend-label');
