@@ -1,20 +1,19 @@
-import { addStyle, applyStyles } from "./general";
+import { addStyle, applyStyles } from './general';
 
 export const addLoadingOverlay = (el: HTMLElement) => {
-  applyStyles(el, { position: "relative" });
+  applyStyles(el, { position: 'relative' });
 
-  const overlay = document.createElement("div");
-  overlay.classList.add("loading-overlay");
+  const overlay = document.createElement('div');
+  overlay.classList.add('loading-overlay');
 
   addStyle(
-    (theme) => `
+    theme => `
     .loading-overlay {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: #e6e6e6a1;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -24,10 +23,8 @@ export const addLoadingOverlay = (el: HTMLElement) => {
       z-index: 9999;
     }
   `,
-    "styled-loading-overlay"
+    'styled-loading-overlay',
   );
-
-  overlay.innerText = "Loading...";
 
   el.appendChild(overlay);
   return overlay;
