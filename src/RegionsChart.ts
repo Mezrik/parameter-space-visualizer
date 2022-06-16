@@ -12,7 +12,7 @@ import Tooltip from './components/Tooltip';
 import { DEFAULT_CHART_MARGIN } from './constants/common';
 import { theme } from './constants/styles';
 import RegionsManager from './managers/RegionsManager';
-import { getDOMNode } from './helpers/general';
+import { getDOMNode, formatNumberValues } from './helpers/general';
 import { applyParamsFixations } from './helpers/regions';
 import { csvToRegionResultsList } from './lib/data/parse';
 import {
@@ -87,16 +87,21 @@ export class CustomRegionsChart<Value> extends Chart<RegionDatum<Value>> {
 
     let tooltip: Tooltip<RegionDatum<Value>>;
     if (this.g) {
-      tooltip = new Tooltip(this.g, d => {
-        const [xParam, yParam] = this.config.params ?? [];
-        return `
+      tooltip = new Tooltip(
+        this.g,
+        this.config.options.tooltipContent
+          ? this.config.options.tooltipContent
+          : d => {
+              const [xParam, yParam] = this.config.params ?? [];
+              return `
           value: ${d.value}</br>
-          ${xParam ? `x-from: ${d.params[xParam].from}</br>` : ''}
-          ${xParam ? `x-to: ${d.params[xParam].to}</br>` : ''}
-          ${yParam ? `y-from: ${d.params[yParam].from}</br>` : ''}
-          ${yParam ? `y-to: ${d.params[yParam].to}</br>` : ''}
+          ${xParam ? `x-from: ${formatNumberValues(d.params[xParam].from)}</br>` : ''}
+          ${xParam ? `x-to: ${formatNumberValues(d.params[xParam].to)}</br>` : ''}
+          ${yParam ? `y-from: ${formatNumberValues(d.params[yParam].from)}</br>` : ''}
+          ${yParam ? `y-to: ${formatNumberValues(d.params[yParam].to)}</br>` : ''}
         `;
-      });
+            },
+      );
     }
 
     this.chartArea?.canvas.on('mouseout', () => {

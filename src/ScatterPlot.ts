@@ -30,7 +30,7 @@ import DataManager from './managers/DataManager';
 import { DataWorker, SamplingWorker } from './lib/workers';
 import { DataStreamWorker } from './lib/data/dataStreamWorker';
 import { addLoadingOverlay } from './lib/ui/loadingOverlay';
-import { getDOMNode, getNodeXY } from './helpers/general';
+import { getDOMNode, getNodeXY, formatNumberValues } from './helpers/general';
 import { csvToScatterPointsList } from './lib/data/parse';
 import { addStyle, applyStyles } from './lib/ui/general';
 import { NumberValue, ScaleOrdinal, scaleOrdinal } from 'd3-scale';
@@ -146,19 +146,24 @@ export class CustomScatterPlot<Value> extends Chart<Datum<Value>> {
       .style('display', 'none');
 
     if (this.g) {
-      this.tooltip = new Tooltip(this.g, d => {
-        const [xParam, yParam] = this.config.params ?? [];
-        const params =
-          'params' in d
-            ? `${xParam ? `${xParam}: ${d.params?.[xParam]}</br>` : ''}
-              ${yParam ? `${yParam} ${d.params?.[yParam]}</br>` : ''}`
-            : '';
+      this.tooltip = new Tooltip(
+        this.g,
+        this.config.options.tooltipContent
+          ? this.config.options.tooltipContent
+          : d => {
+              const [xParam, yParam] = this.config.params ?? [];
+              const params =
+                'params' in d
+                  ? `${xParam ? `${xParam}: ${formatNumberValues(d.params?.[xParam])}</br>` : ''}
+              ${yParam ? `${yParam} ${formatNumberValues(d.params?.[yParam])}</br>` : ''}`
+                  : '';
 
-        return `
-          value: ${d.value}</br>
+              return `
+          value: ${typeof d.value === 'number' ? formatNumberValues(d.value) : d.value}</br>
           ${params}
         `;
-      });
+            },
+      );
     }
 
     this.chartArea?.canvas.on('mouseout', () => {

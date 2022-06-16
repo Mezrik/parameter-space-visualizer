@@ -1,6 +1,7 @@
 import { Rect } from '@timohausmann/quadtree-js';
 import { HCLColor } from 'd3-color';
 import { NumberValue, ScaleLinear } from 'd3-scale';
+import { TooltipValueAccessor } from '../components/Tooltip';
 
 import { ProbabilityDatum, VariableInterval } from './expression';
 import { TickFormatter } from './scale';
@@ -42,6 +43,7 @@ export type UserOptions<Datum, XScaleInput, YScaleInput> = {
   axes?: { x: UserAxesConfig<XScaleInput>; y?: UserAxesConfig<YScaleInput> };
   grid?: { x?: UserGridConfig; y?: UserGridConfig };
   tooltip?: boolean;
+  tooltipContent?: TooltipValueAccessor<Datum>;
   maxZoomExtent?: number;
 };
 
@@ -76,6 +78,7 @@ export type Options<UOpts> = UOpts extends UserOptions<
       };
       grid?: { x?: UserGridConfig; y?: UserGridConfig };
       tooltip?: boolean;
+      tooltipContent?: TooltipValueAccessor<Datum>;
       maxZoomExtent: number;
     }
   : never;

@@ -16,6 +16,7 @@ import { scaleLinear } from 'd3-scale';
 import { hcl, HCLColor } from 'd3-color';
 import { interpolateHcl } from 'd3-interpolate';
 import { BaseType, select } from 'd3-selection';
+import { format } from 'd3-format';
 
 export const checkIfParamsExist = (existing: string[], p: ParamsTuple) =>
   p[1] ? existing.includes(p[0]) && existing.includes(p[1]) : existing.includes(p[0]);
@@ -163,3 +164,5 @@ export const shuffleArray = (array: any[]) => {
 
   return array;
 };
+
+export const formatNumberValues = format('.4');
