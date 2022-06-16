@@ -53,6 +53,26 @@ class Tooltip<Datum> {
     tooltip.style('opacity', 1);
   }
 
+  public static handleTooltipOverflow(fo: TooltipFO, x: number, y: number) {
+    const foRect = fo.node()!.getBoundingClientRect();
+    const svg = fo.select(function () {
+      return this.closest('svg');
+    });
+    const svgRect = svg.node()!.getBoundingClientRect();
+
+    const rOverflow = foRect.x + foRect.width > svgRect.x + svgRect.width;
+    const bOverflow = foRect.y + foRect.height > svgRect.y + svgRect.height;
+    const brOverflow = rOverflow && bOverflow;
+
+    if (brOverflow) {
+      fo.attr('transform', `translate(${x - foRect.width} ${y - foRect.height})`);
+    } else if (bOverflow) {
+      fo.attr('transform', `translate(${x} ${y - foRect.height})`);
+    } else if (rOverflow) {
+      fo.attr('transform', `translate(${x - foRect.width} ${y})`);
+    }
+  }
+
   public showTooltip({ x, y, ...d }: Datum & { x: number; y: number }) {
     const { fo, tooltip, inner } = this;
     inner.html(this.valueAccessor(d as unknown as Datum));
@@ -60,6 +80,8 @@ class Tooltip<Datum> {
     fo.attr('height', tooltip.node()!.getBoundingClientRect().height);
 
     fo.attr('transform', `translate(${x} ${y})`);
+
+    Tooltip.handleTooltipOverflow(fo, x, y);
 
     Tooltip.showTooltip(fo);
   }
