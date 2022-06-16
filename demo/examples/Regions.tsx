@@ -21,7 +21,7 @@ const FromURL = () => {
     if (container) {
       const chart = new RegionsChart({
         el: container,
-        url: document.location.origin + '/csv/regions/large-results/parametric-die01.csv',
+        url: 'https://parameter-space-visualizer.surge.sh/csv/regions/large-results/parametric-die01.csv',
         parseCSVValue: parseValue,
         colors: COLOR_MAPPING,
         width: 800,
