@@ -1,4 +1,7 @@
+import { ScaleOrdinal } from 'd3-scale';
+import { DISTINCT_COLORS } from '../constants/distinctColors';
 import { AnyD3Scale, ScaleInput, TickFormatter } from '../types/scale';
+import { getChartValues, shuffleArray } from './general';
 
 export const getTicks = <Scale extends AnyD3Scale>(
   scale: Scale,
@@ -24,4 +27,19 @@ export const getTicksFormatter = <Scale extends AnyD3Scale>(
   if ('tickFormat' in anyScale) return anyScale.tickFormat();
 
   return (d: ScaleInput<Scale>) => d.toString();
+};
+
+const distinctColorsShuffled = shuffleArray(DISTINCT_COLORS);
+
+export const extendParamsColorScale = <Datum>(
+  color: ScaleOrdinal<string, string, never>,
+  data: Datum[],
+) => {
+  const values = getChartValues(data);
+  values.forEach(val => {
+    if (!color.domain().includes(val)) {
+      color.domain([...color.domain(), val]);
+      color.range([...color.range(), distinctColorsShuffled[color.domain().length]]);
+    }
+  });
 };

@@ -93,7 +93,7 @@ export const csvToRegionResults = <Value = RegionResultValue>(
 };
 
 export const rowToScatterPoint =
-  <Value = RegionResultValue>(parseVal: (v: string) => Value) =>
+  <Value = RegionResultValue>(parseVal: (v: string) => Value = v => v as unknown as Value) =>
   (rawRow: DSVRowString<string>): ScatterDatum<Value> | undefined => {
     const row = blankChecker(rawRow);
     if (!row) return;
@@ -111,7 +111,7 @@ export const rowToScatterPoint =
 
 export const csvToScatterPointsList = <Value>(
   raw: RawCSVObject,
-  parseVal: (v: string) => Value,
+  parseVal?: (v: string) => Value,
 ): ScatterDatum<Value>[] => {
   const pFn = rowToScatterPoint(parseVal);
   return raw.reduce<ScatterDatum<Value>[]>((acc, row) => {
@@ -123,5 +123,5 @@ export const csvToScatterPointsList = <Value>(
 
 export const csvToScatterPoints = <Value>(
   csv: string,
-  parseVal: (v: string) => Value,
+  parseVal?: (v: string) => Value,
 ): ScatterDatum<Value>[] => csvParse(csv, rowToScatterPoint(parseVal));

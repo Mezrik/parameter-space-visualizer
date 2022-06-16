@@ -157,7 +157,6 @@ const CustomData = () => {
       chart.current = new ScatterPlot({
         el: container,
         data: userData,
-        colors: COLOR_MAPPING,
         width: 800,
         height: 800,
       });
@@ -174,8 +173,10 @@ const CustomData = () => {
   const handleFileUpload = e => {
     const reader = new FileReader();
     reader.onload = evt => {
-      if (typeof evt.target.result === 'string')
-        setUserData(csvToScatterPointsList(csvParse(evt.target.result), parseValue));
+      if (typeof evt.target?.result === 'string')
+        setUserData(csvToScatterPointsList(csvParse(evt.target.result)));
+
+      console.log(userData);
     };
 
     reader.readAsText(e.target.files[0]);

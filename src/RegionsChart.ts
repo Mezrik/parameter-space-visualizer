@@ -28,6 +28,7 @@ import { addLoadingOverlay } from './lib/ui/loadingOverlay';
 import { ChartAreaQuadTreeManager } from './managers/ChartAreaDataManager';
 import { createChartLegend } from './lib/ui/legend';
 import { addStyle, applyStyles } from './lib/ui/general';
+import { extendParamsColorScale } from './helpers/scale';
 
 type RegionRect<Value> = Rect & RegionDatum<Value>;
 
@@ -235,7 +236,11 @@ export default class RegionsChart<Value extends string> {
 
     this.chartUI = new ChartUI(this.root);
 
-    this.color = scaleOrdinal<string>().domain(Object.keys(colors)).range(Object.values(colors));
+    this.color = scaleOrdinal<string>();
+
+    if (colors) this.color.domain(Object.keys(colors)).range(Object.values(colors));
+
+    if (data) extendParamsColorScale(this.color, data);
 
     this.chartRoot = document.createElement('div');
     applyStyles(this.chartRoot, { display: 'flex', alignItems: 'center' });
@@ -286,6 +291,9 @@ export default class RegionsChart<Value extends string> {
       Comlink.proxy(values => {
         const parsed = csvToRegionResultsList<Value>(values, parseValue);
         Array.prototype.push.apply(data, parsed);
+
+        extendParamsColorScale(this.color, parsed);
+
         this.chart.data(data);
         this.chartUI.initChartUI(this.chart);
         this.chartLegend.update(this.chart.chartValues);
@@ -295,7 +303,10 @@ export default class RegionsChart<Value extends string> {
       }),
     );
 
-    this.chart.data(csvToRegionResultsList<Value>(finalData, parseValue));
+    const finalParsed = csvToRegionResultsList<Value>(finalData, parseValue);
+    extendParamsColorScale(this.color, finalParsed);
+
+    this.chart.data(finalParsed);
     this.chartUI.initChartUI(this.chart);
     this.chartLegend.update(this.chart.chartValues);
 

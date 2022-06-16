@@ -128,7 +128,7 @@ export type SimpleConfigScatter<Value extends string | number | symbol> = (
       expression?: never;
       intervals?: never;
       url?: never;
-      colors: Record<Value, string>;
+      colors?: Record<Value, string>;
       parseCSVValue?: never;
     }
   | {
@@ -144,7 +144,7 @@ export type SimpleConfigScatter<Value extends string | number | symbol> = (
       expression?: never;
       intervals?: never;
       url: string;
-      colors: Record<Value, string>;
+      colors?: Record<Value, string>;
       parseCSVValue: (v: string) => Value;
     }
 ) & {} & SimpleConfigCommon;
@@ -156,7 +156,7 @@ export type SimpleConfigRegions<Value extends string | number | symbol> = (
       parseCSVValue?: never;
     }
   | { data?: never; url: string; parseCSVValue: (v?: string) => Value }
-) & { colors: Record<Value, string> } & SimpleConfigCommon;
+) & { colors?: Record<Value, string> } & SimpleConfigCommon;
 
 export type MountElement = string | HTMLElement;
 

@@ -42,6 +42,7 @@ import { SimpleSelection } from './types/selection';
 import { SamplingWorkerType } from './lib/data/samplingWorker';
 import Tooltip from './components/Tooltip';
 import { createChartLegend, createGradientChartLegend } from './lib/ui/legend';
+import { extendParamsColorScale } from './helpers/scale';
 
 const isDataConfigInstance = <Value>(
   config: Config<any>,
@@ -507,11 +508,13 @@ export default class ScatterPlot<Value extends string> {
       this.initProbabilitySamplingUI(this.chart);
       createGradientChartLegend(this.chartRoot, colorScale);
     } else {
-      if ('colors' in rest) {
-        this.color = scaleOrdinal<string>()
-          .domain(Object.keys(rest.colors))
-          .range(Object.values(rest.colors));
+      this.color = scaleOrdinal<string>();
+
+      if ('colors' in rest && rest.colors) {
+        this.color.domain(Object.keys(rest.colors)).range(Object.values(rest.colors));
       }
+
+      if (data) extendParamsColorScale(this.color, data);
 
       // if not expression, data or url must be defined
       this.chart = new CustomScatterPlot(this.chartRoot, {
@@ -546,6 +549,9 @@ export default class ScatterPlot<Value extends string> {
       Comlink.proxy(values => {
         const parsed = csvToScatterPointsList<Value>(values, parseValue);
         Array.prototype.push.apply(data, parsed);
+
+        if (this.color) extendParamsColorScale(this.color, parsed);
+
         this.chart.data(data);
         this.chartUI.initChartUI(this.chart);
         this.chartLegend?.update(this.chart.chartValues);
@@ -555,7 +561,10 @@ export default class ScatterPlot<Value extends string> {
       }),
     );
 
-    this.chart.data(csvToScatterPointsList<Value>(finalData, parseValue));
+    const finalParsed = csvToScatterPointsList<Value>(finalData, parseValue);
+    if (this.color) extendParamsColorScale(this.color, finalParsed);
+
+    this.chart.data(finalParsed);
     this.chartUI.initChartUI(this.chart);
     this.chartLegend?.update(this.chart.chartValues);
 

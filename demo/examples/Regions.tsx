@@ -79,7 +79,6 @@ const CustomData = () => {
       chart.current = new RegionsChart({
         el: container,
         data: userData,
-        colors: COLOR_MAPPING,
         width: 800,
         height: 800,
       });
@@ -96,7 +95,7 @@ const CustomData = () => {
   const handleFileUpload = e => {
     const reader = new FileReader();
     reader.onload = evt => {
-      if (typeof evt.target.result === 'string')
+      if (typeof evt.target?.result === 'string')
         setUserData(csvToRegionResultsList(csvParse(evt.target.result)));
     };
 

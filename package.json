@@ -12,7 +12,8 @@
     "build:visualize": "cross-env VISUALIZE_SPACE=true npm run build",
     "build:es:types": "tsc --project tsconfig.json --emitDeclarationOnly --noEmit false --declaration --outDir ./es",
     "benchmark": "cross-env NODE_ENV=production npx jest --projects jest-bench.config.json",
-    "dev": "rollup -c --watch"
+    "dev": "rollup -c --watch",
+    "deploy:demo": "surge ./demo"
   },
   "author": {
     "name": "Martin Petr",
